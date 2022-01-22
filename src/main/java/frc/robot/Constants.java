@@ -18,6 +18,7 @@ public final class Constants {
     public static final int CAN_ID_BACK_LEFT_DRIVE_MOTOR = 12;
     public static final int CAN_ID_BACK_RIGHT_DRIVE_MOTOR = 10;
     public static final int USB_PORT_DRIVER_CONTROLLER = 0;
+    public static final double DRIVEBASE_DEADBAND = 0.015;
 
 }
 
