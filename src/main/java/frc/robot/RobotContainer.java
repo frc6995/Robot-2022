@@ -6,10 +6,13 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.subsystems.DrivebaseS;
+import frc.robot.subsystems.TurretS;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -23,6 +26,10 @@ public class RobotContainer {
   private XboxController driverController;
   private Command xboxDriveCommand;
   private DrivebaseS drivebaseS;
+  private final TurretS turretS = new TurretS();
+  private RunCommand runTurretC;
+  private InstantCommand stopTurretC;
+
   public RobotContainer() {
     // Configure the button bindings
     createControllers();
@@ -37,7 +44,10 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then passing it to a {@link
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
-  private void configureButtonBindings() {}
+  private void configureButtonBindings() {
+    SmartDashboard.putData(runTurretC);
+    SmartDashboard.putData(stopTurretC);
+  }
 
   private void createControllers() {
     driverController = new XboxController(Constants.USB_PORT_DRIVER_CONTROLLER);
@@ -52,6 +62,8 @@ public class RobotContainer {
       }
     , drivebaseS);
     drivebaseS.setDefaultCommand(xboxDriveCommand);
+    runTurretC = new RunCommand(turretS::maxTurnSpeed, turretS);
+    stopTurretC = new InstantCommand(turretS::stopMotor, turretS);
   }
 
   private void createSubsystems() {
