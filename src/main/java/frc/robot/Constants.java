@@ -12,8 +12,4 @@ package frc.robot;
  * <p>It is advised to statically import this class (or one of its inner classes) wherever the
  * constants are needed, to reduce verbosity.
  */
-public final class Constants {
-    public static final double DEGREE_TO_ENCODER_COUNT_CONVERSION = 4.004;
-    public static final int CAN_ID_TURRET = 30;
-    public static final double TURRET_SPEED = 0.1;
-}
+public final class Constants {}
