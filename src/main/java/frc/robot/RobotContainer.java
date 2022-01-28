@@ -4,11 +4,17 @@
 
 package frc.robot;
 
+import java.time.Instant;
+
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.commands.ExampleCommand;
 import frc.robot.subsystems.ExampleSubsystem;
+import frc.robot.subsystems.TurretS;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -19,11 +25,15 @@ import edu.wpi.first.wpilibj2.command.Command;
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
-
+  private final TurretS turretS = new TurretS();
+  private RunCommand runTurretC;
+  private InstantCommand stopTurretC;
   private final ExampleCommand m_autoCommand = new ExampleCommand(m_exampleSubsystem);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
+    runTurretC = new RunCommand(turretS::maxTurnSpeed, turretS);
+    stopTurretC = new InstantCommand(turretS::stopMotor, turretS);
     // Configure the button bindings
     configureButtonBindings();
   }
@@ -34,7 +44,10 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then passing it to a {@link
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
-  private void configureButtonBindings() {}
+  private void configureButtonBindings() {
+    SmartDashboard.putData(runTurretC);
+    SmartDashboard.putData(stopTurretC);
+  }
 
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
