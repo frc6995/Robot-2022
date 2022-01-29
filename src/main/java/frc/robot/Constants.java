@@ -21,11 +21,13 @@ public final class Constants {
     public static final double DRIVEBASE_DEADBAND = 0.015; // anything under 1.5% of full joystick away from 0 should be considered 0
     public static final double DRIVEBASE_TURN_SLEW_LIMIT = 2.0; // 0 to 200% in one second. 0 to full in 1/2 second.
     public static final double DRIVEBASE_FWD_BACK_SLEW_LIMIT = 1; // 0 to 100% in one second.
-
-    public static final double ENCODER_COUNTS_PER_NEO_REVOLUTION = 1;
+    
+    /*Turret Constants*/
+    public static final double ENCODER_COUNTS_PER_TURRET_NEO_REVOLUTION = 1;
     public static final double NEO_REVOLUTIONS_PER_TURRET_REVOLUTION = 5.23 * 150/16;//2.89 * 190 / 16;
-    public static final double ENCODER_COUNTS_PER_TURRET_DEGREE = ENCODER_COUNTS_PER_NEO_REVOLUTION * NEO_REVOLUTIONS_PER_TURRET_REVOLUTION / 360;
+    public static final double ENCODER_COUNTS_PER_TURRET_DEGREE = ENCODER_COUNTS_PER_TURRET_NEO_REVOLUTION * NEO_REVOLUTIONS_PER_TURRET_REVOLUTION / 360;
     public static final int CAN_ID_TURRET = 30;
     public static final double TURRET_SPEED = 0.1;
+    public static final double TURRET_REVERSE_SOFT_LIMIT_DEGREES = 45;
 }
 
