@@ -14,33 +14,41 @@ import frc.robot.Constants;
 
 public class TurretS extends SubsystemBase {
   private CANSparkMax sparkMax = new CANSparkMax(Constants.CAN_ID_TURRET, MotorType.kBrushless);
+  private RelativeEncoder sparkMaxEncoder = sparkMax.getEncoder();
   /** Creates a new TurretS. */
   public TurretS() {
     sparkMax.restoreFactoryDefaults();
   }
-    public double getEncoderCounts(){
-      RelativeEncoder gettingEncoderCounts = sparkMax.getEncoder();
-      double encoderCounts = gettingEncoderCounts.getPosition();
-      return encoderCounts;
-    } 
-    public double degreesToEnconderCounts(double limeLightDegrees){
-      double encoderCounts = limeLightDegrees * Constants.DEGREE_TO_ENCODER_COUNT_CONVERSION;
-      return encoderCounts;
-    }
-    public double encoderCountsToDegrees(double encoderCounts){
-      double degrees = encoderCounts / Constants.DEGREE_TO_ENCODER_COUNT_CONVERSION;
-      return degrees;
-    }
-    public void maxTurnSpeed(){
-      sparkMax.set(Constants.TURRET_SPEED);
-    }
-    public void stopMotor(){
-      sparkMax.set(0);
-    }
+
+  public double getEncoderCounts(){
+    return sparkMaxEncoder.getPosition();
+  }
+
+  public double degreesToEncoderCounts(double degrees){
+    double encoderCounts = degrees * Constants.ENCODER_COUNTS_PER_TURRET_DEGREE;
+    return encoderCounts;
+  }
+
+  public double encoderCountsToDegrees(double encoderCounts){
+    double degrees = encoderCounts / Constants.ENCODER_COUNTS_PER_TURRET_DEGREE;
+    return degrees;
+  }
+
+  public void turnMaxSpeed(){
+    sparkMax.set(Constants.TURRET_SPEED);
+  }
+  public void stopMotor(){
+    sparkMax.set(0);
+  }
+
+  public void resetEncoder() {
+    sparkMaxEncoder.setPosition(0);
+  }
 
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
     SmartDashboard.putNumber("turret degrees", encoderCountsToDegrees(getEncoderCounts()));
+    SmartDashboard.putNumber("turret counts", getEncoderCounts());
   }
 }
