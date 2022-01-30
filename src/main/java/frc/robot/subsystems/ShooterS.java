@@ -9,6 +9,7 @@ import com.revrobotics.RelativeEncoder;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 
 public class ShooterS extends SubsystemBase {
   private final CANSparkMax frontSparkMax = new CANSparkMax(40, MotorType.kBrushless);
@@ -23,6 +24,14 @@ public class ShooterS extends SubsystemBase {
 
     frontEncoder = frontSparkMax.getEncoder();
     backEncoder = backSparkMax.getEncoder();
+  }
+
+  public double deadbandJoystick(double value) {
+    if (Math.abs(value) < Constants.DRIVEBASE_DEADBAND) {
+      value = 0;
+    }
+    
+    return value;
   }
 
   /**
@@ -49,6 +58,7 @@ public class ShooterS extends SubsystemBase {
    * @param speed Speed value for front motor
    */
   public void setFrontSpeed(double speed) {
+    speed = deadbandJoystick(speed);
     frontSparkMax.set(speed);
   }
 
@@ -58,6 +68,7 @@ public class ShooterS extends SubsystemBase {
    * @param speed Speed value for the back motor
    */
   public void setBackSpeed(double speed) {
+    speed = deadbandJoystick(speed);
     backSparkMax.set(speed);
   }
 

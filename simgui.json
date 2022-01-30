@@ -3,8 +3,10 @@
     "types": {
       "/FMSInfo": "FMSInfo",
       "/LiveWindow/DrivebaseS": "Subsystem",
+      "/LiveWindow/ShooterS": "Subsystem",
       "/LiveWindow/Ungrouped/DifferentialDrive[1]": "DifferentialDrive",
-      "/LiveWindow/Ungrouped/Scheduler": "Scheduler"
+      "/LiveWindow/Ungrouped/Scheduler": "Scheduler",
+      "/LiveWindow/Ungrouped/navX-Sensor[1]": "Gyro"
     },
     "windows": {
       "/LiveWindow/DrivebaseS": {
