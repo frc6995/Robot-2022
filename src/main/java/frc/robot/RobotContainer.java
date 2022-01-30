@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.commands.TurretManualC;
 import frc.robot.subsystems.DrivebaseS;
 import frc.robot.subsystems.TurretS;
 
@@ -25,12 +26,12 @@ import frc.robot.subsystems.TurretS;
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
-  private XboxController driverController;
+  private XboxController turretController;
   private Command xboxDriveCommand;
   private DrivebaseS drivebaseS;
-  private final TurretS turretS = new TurretS();
-  private FunctionalCommand runTurretC;
-  private InstantCommand stopTurretC;
+  private TurretS turretS;
+  private Command runTurretC;
+
 
   // Trigger definitions
   private Trigger spinTurretTrigger;
@@ -50,35 +51,34 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
-    spinTurretTrigger = new Trigger(driverController::getAButton);
+    spinTurretTrigger = new Trigger(turretController::getAButton);
     spinTurretTrigger.whileActiveOnce(runTurretC);
   }
 
   private void createControllers() {
-    driverController = new XboxController(Constants.USB_PORT_DRIVER_CONTROLLER);
+    turretController = new XboxController(Constants.USB_PORT_DRIVER_CONTROLLER);
   }
 
   private void createCommands() {
     xboxDriveCommand = new RunCommand(()
      -> {drivebaseS.curvatureDrive(
-       driverController.getRightTriggerAxis() - driverController.getLeftTriggerAxis(), 
-       driverController.getLeftX()
+       turretController.getRightTriggerAxis() - turretController.getLeftTriggerAxis(), 
+       turretController.getLeftX()
        );
       }
     , drivebaseS);
     drivebaseS.setDefaultCommand(xboxDriveCommand);
-    runTurretC = new FunctionalCommand(
-      ()->{},
-      turretS::turnMaxSpeed,
-      (interrupted)->turretS.stopMotor(),
-      ()->false,
-      turretS);
-    stopTurretC = new InstantCommand(turretS::stopMotor, turretS);
+    runTurretC = new TurretManualC(turretController, turretS);
+    turretS.setDefaultCommand(runTurretC);
+    
+
+
     SmartDashboard.putData(new InstantCommand(turretS::resetEncoder));
   }
 
   private void createSubsystems() {
     drivebaseS = new DrivebaseS();
+    turretS = new TurretS();
   }
 
   /**
