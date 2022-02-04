@@ -15,7 +15,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import io.github.oblarg.oblog.Loggable;
-import io.github.oblarg.oblog.annotations.Log;
 
 /**
  * The turret subsystem. It contains methods to get encoder counts and converts
@@ -39,6 +38,19 @@ public class TurretS extends SubsystemBase implements Loggable {
     sparkMax.enableSoftLimit(SoftLimitDirection.kReverse, true);
     sparkMax.setSoftLimit(SoftLimitDirection.kForward, Constants.SOFT_LIMIT_FORWARD_DEGREE);
     sparkMax.setSoftLimit(SoftLimitDirection.kReverse, Constants.SOFT_LIMIT_REVERSE_DEGREE);
+  }
+
+    /**
+     * Sets the speed of the turret to 0 if the joystick is less than 1.5% away from 0
+     * 
+     * @param value The speed of the turret
+     * @return The speed of the turret
+     */
+  public double deadbandJoysticks(double value) {
+    if (Math.abs(value) < Constants.TURRET_DEADBAND) {
+      value = 0;
+    }
+    return value;
   }
 
   /**
@@ -77,6 +89,15 @@ public class TurretS extends SubsystemBase implements Loggable {
    */
   public void turnMaxSpeed(){
     sparkMax.set(Constants.TURRET_SPEED);
+  }
+  /**
+   * Sets the turn speed of the turret
+   * 
+   * @param speed The turn speed of the turret
+   */
+  public void turnSpeed(double speed) {
+    speed = deadbandJoysticks(speed);
+    sparkMax.set(speed);
   }
 
   /**
