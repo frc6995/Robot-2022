@@ -115,7 +115,11 @@ public class TurretS extends SubsystemBase implements Loggable {
   }
 
   public boolean getIsHomed() {
-    return limitSwitch.get();
+    return !limitSwitch.get();
+  }
+
+  public double getVelocity() {
+    return sparkMaxEncoder.getVelocity();
   }
 
   @Override
@@ -124,5 +128,6 @@ public class TurretS extends SubsystemBase implements Loggable {
     SmartDashboard.putNumber("turret degrees", /*encoderCountsToDegrees*/(getEncoderCounts()));
     SmartDashboard.putNumber("turret counts", getEncoderCounts());
     SmartDashboard.putBoolean("limit switch true or false", getIsHomed());
+    SmartDashboard.putNumber("velocity", getVelocity());
   }
 }

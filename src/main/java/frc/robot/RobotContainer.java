@@ -13,7 +13,9 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.commands.TurretHomingC;
 import frc.robot.commands.TurretManualC;
+import frc.robot.commands.TurretTurnC;
 import frc.robot.subsystems.DrivebaseS;
 import frc.robot.subsystems.TurretS;
 
@@ -31,10 +33,14 @@ public class RobotContainer {
   private DrivebaseS drivebaseS;
   private TurretS turretS;
   private Command runTurretC;
+  private Command turretHomingC;
+  private Command turretTurningC;
 
 
   // Trigger definitions
   private Trigger spinTurretTrigger;
+  private Trigger turretHomeTrigger;
+  private Trigger turretTurnTrigger;
 
   public RobotContainer() {
     // Configure the button bindings
@@ -53,6 +59,11 @@ public class RobotContainer {
   private void configureButtonBindings() {
     spinTurretTrigger = new Trigger(turretController::getAButton);
     spinTurretTrigger.whileActiveOnce(runTurretC);
+    turretHomeTrigger = new Trigger(turretController::getXButton);
+    turretHomeTrigger.whenActive(turretHomingC);
+    turretTurnTrigger = new Trigger(turretController::getYButton);
+    turretTurnTrigger.whenActive(turretTurningC);
+    
   }
 
   private void createControllers() {
@@ -60,7 +71,8 @@ public class RobotContainer {
   }
 
   private void createCommands() {
-    xboxDriveCommand = new RunCommand(()
+    xboxDriveCommand = new RunCommand(
+      ()
      -> {drivebaseS.curvatureDrive(
        turretController.getRightTriggerAxis() - turretController.getLeftTriggerAxis(), 
        turretController.getLeftX()
@@ -70,6 +82,10 @@ public class RobotContainer {
     drivebaseS.setDefaultCommand(xboxDriveCommand);
     runTurretC = new TurretManualC(turretController, turretS);
     turretS.setDefaultCommand(runTurretC);
+    
+    turretHomingC = new TurretHomingC(turretS);
+
+    turretTurningC = new TurretTurnC(turretS);
     
 
 
