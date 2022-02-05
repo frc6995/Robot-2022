@@ -10,8 +10,11 @@ import frc.robot.subsystems.TurretS;
 
 public class TurretTurnC extends CommandBase {
   private TurretS turret;
+  private double angle;
+  
   /** Creates a new TurretTurnC. */
-  public TurretTurnC(TurretS turret) {
+  public TurretTurnC(TurretS turret, double angle) {
+    this.angle = angle;
     this.turret = turret;
     addRequirements(this.turret);
     // Use addRequirements() here to declare subsystem dependencies.
@@ -24,9 +27,11 @@ public class TurretTurnC extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    double difference = 40 - turret.getEncoderCounts(); 
-    SmartDashboard.putNumber("turret error", difference);
-    turret.turnSpeed((difference * 0.0025) + (0.02 * Math.signum(difference)));
+    //double difference = 40 - turret.getEncoderCounts(); 
+    //SmartDashboard.putNumber("turret error", difference);
+    //turret.turnSpeed((difference * 0.0025) + (0.02 * Math.signum(difference)));
+    turret.setTurretAngle(angle);
+
   }
 
   // Called once the command ends or is interrupted.
@@ -38,8 +43,9 @@ public class TurretTurnC extends CommandBase {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    boolean stuff = 39 < turret.getEncoderCounts();
-    boolean otherStuff = turret.getEncoderCounts() < 41;
-    return stuff && otherStuff;
+    //boolean stuff = 39 < turret.getEncoderCounts();
+    //boolean otherStuff = turret.getEncoderCounts() < 41;
+    //return stuff && otherStuff;
+    return turret.atTarget();
   }
 }

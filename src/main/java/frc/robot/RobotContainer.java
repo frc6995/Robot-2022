@@ -85,7 +85,7 @@ public class RobotContainer {
     
     turretHomingC = new TurretHomingC(turretS);
 
-    turretTurningC = new TurretTurnC(turretS);
+    turretTurningC = new TurretTurnC(turretS, 40);
     
 
 

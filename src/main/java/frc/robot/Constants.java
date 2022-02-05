@@ -33,5 +33,6 @@ public final class Constants {
     public static final int LIMIT_SWITCH_PORT_NUMBER = 0;
     public static final float SOFT_LIMIT_FORWARD_DEGREE = 80.0f;
     public static final float SOFT_LIMIT_REVERSE_DEGREE = 0.0f;
+    public static final int TURRET_PID_ERROR = 1;
 }
 
