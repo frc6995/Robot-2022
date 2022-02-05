@@ -121,14 +121,30 @@ public class TurretS extends SubsystemBase implements Loggable {
     sparkMaxEncoder.setPosition(0);
   }
 
+  /**
+   * determines whether the turret is homed
+   * 
+   * @return True if turret is homed
+   */
   public boolean getIsHomed() {
     return !limitSwitch.get();
   }
 
+  /**
+   * gets the velocity of the NEO motor
+   * 
+   * @return The velocity of the motor
+   */
   public double getVelocity() {
     return sparkMaxEncoder.getVelocity();
   }
 
+  /**
+   * sets the speed of the turret from -1 to 1, ensures the position of the turret is 
+   * within the soft limit, calculates the power to give to the motor
+   * 
+   * @param target The desired angle
+   */
   public void setTurretAngle(double target) {
     if (target > Constants.SOFT_LIMIT_FORWARD_DEGREE) {
       target = Constants.SOFT_LIMIT_FORWARD_DEGREE;
@@ -140,10 +156,20 @@ public class TurretS extends SubsystemBase implements Loggable {
     
   }
 
+  /**
+   * gets the position error
+   * 
+   * @return The position error
+   */
   public double error() {
     return pid.getPositionError();
   }
 
+  /**
+   * determines whether the turret is at the target angle
+   * 
+   * @return True if the turret is at the target angle
+   */
   public boolean atTarget() {
     return pid.atSetpoint();
   }
