@@ -64,7 +64,7 @@ public class RobotContainer {
     }, drivebaseS);
     drivebaseS.setDefaultCommand(xboxDriveCommand);
 
-    xboxShooterCommand = new ShooterC(driverController, shooterS);
+    xboxShooterCommand = new ShooterC(driverController, shooterS, 3000, 3000);
     shooterS.setDefaultCommand(xboxShooterCommand);
     
     }

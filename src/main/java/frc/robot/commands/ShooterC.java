@@ -12,10 +12,14 @@ public class ShooterC extends CommandBase {
   /** Creates a new ShooterC. */
   private XboxController xboxController;
   private ShooterS shooter;
+  private double frontTargetRPM;
+  private double backTargetRPM;
   
-  public ShooterC(XboxController xboxController, ShooterS shooter) {
+  public ShooterC(XboxController xboxController, ShooterS shooter, double frontTargetRPM, double backTargetRPM) {
     this.xboxController = xboxController;  
     this.shooter = shooter;
+    this.frontTargetRPM = frontTargetRPM;
+    this.backTargetRPM = backTargetRPM;
     this.addRequirements(this.shooter);
     // Use addRequirements() here to declare subsystem dependencies.
   }
@@ -28,8 +32,10 @@ public class ShooterC extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    this.shooter.setFrontSpeed(this.xboxController.getRightY()); 
-    this.shooter.setBackSpeed(this.xboxController.getRightY());
+    //this.shooter.setFrontSpeed(this.xboxController.getRightY()); 
+    //this.shooter.setBackSpeed(this.xboxController.getRightY());
+    shooter.pidFrontSpeed(frontTargetRPM);
+    shooter.pidBackSpeed(backTargetRPM);
   }
 
   // Called once the command ends or is interrupted.
@@ -42,6 +48,6 @@ public class ShooterC extends CommandBase {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return false;
+    return shooter.frontAtTarget() && shooter.backAtTarget();
   }
 }
