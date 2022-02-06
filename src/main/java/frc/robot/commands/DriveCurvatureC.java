@@ -27,7 +27,8 @@ public class DriveCurvatureC extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    this.drivebase.curvatureDrive(xboxController.getRightTriggerAxis() - xboxController.getLeftTriggerAxis(), 
+    this.drivebase.curvatureDrive(
+      xboxController.getRightTriggerAxis() - xboxController.getLeftTriggerAxis(), 
     xboxController.getLeftX());
   }
   // Curvature Drive using the Triggers and the Left Joystick

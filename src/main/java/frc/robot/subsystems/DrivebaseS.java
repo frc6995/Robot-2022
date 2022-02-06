@@ -17,8 +17,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
 public class DrivebaseS extends SubsystemBase {
-  private final CANSparkMax frontRight = new CANSparkMax(Constants.CAN_ID_FRONT_RIGHT_DRIVE_MOTOR,
-      MotorType.kBrushless);
+  private final CANSparkMax frontRight = new CANSparkMax(Constants.CAN_ID_FRONT_RIGHT_DRIVE_MOTOR, MotorType.kBrushless);
   private final CANSparkMax frontLeft = new CANSparkMax(Constants.CAN_ID_FRONT_LEFT_DRIVE_MOTOR, MotorType.kBrushless);
   private final CANSparkMax backRight = new CANSparkMax(Constants.CAN_ID_BACK_RIGHT_DRIVE_MOTOR, MotorType.kBrushless);
   private final CANSparkMax backLeft = new CANSparkMax(Constants.CAN_ID_BACK_LEFT_DRIVE_MOTOR, MotorType.kBrushless);
