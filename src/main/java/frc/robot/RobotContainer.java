@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.subsystems.DrivebaseS;
+import frc.robot.subsystems.LimelightS;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -23,6 +24,8 @@ public class RobotContainer {
   private XboxController driverController;
   private Command xboxDriveCommand;
   private DrivebaseS drivebaseS;
+  private LimelightS limelightS;
+  
   public RobotContainer() {
     // Configure the button bindings
     createControllers();
@@ -56,6 +59,7 @@ public class RobotContainer {
 
   private void createSubsystems() {
     drivebaseS = new DrivebaseS();
+    limelightS = new LimelightS();
   }
 
   /**

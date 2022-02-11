@@ -7,14 +7,19 @@ package frc.robot.subsystems;
 import org.photonvision.PhotonCamera;
 import org.photonvision.common.hardware.VisionLEDMode;
 import org.photonvision.targeting.PhotonTrackedTarget;
+import org.photonvision.targeting.TargetCorner;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import edu.wpi.first.math.filter.LinearFilter;
+import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
 public class LimelightS extends SubsystemBase {
-  PhotonCamera limelight = new PhotonCamera("photonvision");
-
+  PhotonCamera limelight = new PhotonCamera("gloworm");
 
   private FilterValues filterValues;
 
@@ -44,14 +49,16 @@ public class LimelightS extends SubsystemBase {
     }
   }
 
-
-
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    PhotonTrackedTarget target = limelight.getLatestResult().getBestTarget();
+    PhotonTrackedTarget target = (limelight.getLatestResult().hasTargets() == false)
+        ? new PhotonTrackedTarget(0, 0, 0, 0, new Transform2d(), new ArrayList<TargetCorner>())
+        : limelight.getLatestResult().getBestTarget();
     this.filterValues = new FilterValues(xOffsetFilter.calculate(target.getYaw()),
         yOffsetFilter.calculate(target.getPitch()));
+    SmartDashboard.putNumber("x offset", this.filterValues.getFilteredXOffset());
+    SmartDashboard.putNumber("y offset", this.filterValues.getFilteredYOffset());
   }
 
   public FilterValues getFilterValues() {
