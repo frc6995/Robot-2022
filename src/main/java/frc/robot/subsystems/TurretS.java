@@ -21,7 +21,7 @@ import io.github.oblarg.oblog.Loggable;
  * them to degrees.
  * 
  * @author Benjamin Su
- * @author Noah Kim
+ * @author Noah Kim 
  */
 public class TurretS extends SubsystemBase implements Loggable {
   private CANSparkMax sparkMax = new CANSparkMax(Constants.CAN_ID_TURRET, MotorType.kBrushless);

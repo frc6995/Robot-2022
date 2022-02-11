@@ -4,12 +4,10 @@
 
 package frc.robot.subsystems;
 
-import com.kauailabs.navx.frc.AHRS;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.math.filter.SlewRateLimiter;
-import edu.wpi.first.wpilibj.SerialPort.Port;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive.WheelSpeeds;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -24,7 +22,7 @@ public class DrivebaseS extends SubsystemBase {
   private final CANSparkMax backLeft = new CANSparkMax(Constants.CAN_ID_BACK_LEFT_DRIVE_MOTOR, MotorType.kBrushless);
   private final SlewRateLimiter fwdBackLimiter = new SlewRateLimiter(Constants.DRIVEBASE_FWD_BACK_SLEW_LIMIT);
   private final SlewRateLimiter turnLimiter = new SlewRateLimiter(Constants.DRIVEBASE_TURN_SLEW_LIMIT);
-  private final AHRS navX = new AHRS(Port.kMXP);
+
 
   /** Creates a new DrivebaseS. */
   public DrivebaseS() {
