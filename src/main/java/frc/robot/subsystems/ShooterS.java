@@ -10,6 +10,7 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
@@ -140,6 +141,8 @@ public class ShooterS extends SubsystemBase {
 
   @Override
   public void periodic() {
+    SmartDashboard.putNumber("Front Speed", getFrontEncoderSpeed());
+    SmartDashboard.putNumber("Back Speed", getBackEncoderSpeed());
     // This method will be called once per scheduler run
   }
 }

@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.commands.ShooterC;
 import frc.robot.subsystems.DrivebaseS;
 import frc.robot.subsystems.ShooterS;
@@ -50,6 +51,7 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
+    new JoystickButton(driverController, XboxController.Button.kA.value).whileHeld(xboxShooterCommand);
   }
 
   private void createControllers() {
@@ -64,8 +66,8 @@ public class RobotContainer {
     }, drivebaseS);
     drivebaseS.setDefaultCommand(xboxDriveCommand);
 
-    xboxShooterCommand = new ShooterC(driverController, shooterS, 3000, 3000);
-    shooterS.setDefaultCommand(xboxShooterCommand);
+    xboxShooterCommand = new ShooterC(driverController, shooterS, 5000, 4000);
+    //shooterS.setDefaultCommand(xboxShooterCommand);
     
     }
   
