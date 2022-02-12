@@ -16,8 +16,8 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
 public class ShooterS extends SubsystemBase {
-  private final CANSparkMax frontSparkMax = new CANSparkMax(41, MotorType.kBrushless);
-  private final CANSparkMax backSparkMax = new CANSparkMax(40, MotorType.kBrushless);
+  private final CANSparkMax frontSparkMax = new CANSparkMax(Constants.CAN_ID_FRONT_SHOOTER_MOTOR, MotorType.kBrushless);
+  private final CANSparkMax backSparkMax = new CANSparkMax(Constants.CAN_ID_BACK_SHOOTER_MOTOR, MotorType.kBrushless);
   private RelativeEncoder frontEncoder;
   private RelativeEncoder backEncoder;
   private PIDController frontPID = new PIDController(Constants.SHOOTER_FRONT_P, 0, 0);
