@@ -27,6 +27,7 @@ public final class Constants {
     public static final int CAN_ID_MIDTAKE_BACK = 22;
     public static final int BEAM_BREAK_TOP_PORT_NUMBER = 1;
     public static final int BEAM_BREAK_BOTTOM_PORT_NUMBER = 2;
+    public static final double COLOR_SENSOR_PROXIMITY_THRESHOLD = 250;
     public static final double MIDTAKE_FRONT_MOTOR_SPEED = 0.6995;
     public static final double MIDTAKE_BACK_MOTOR_SPEED = 0.6995;
 }
