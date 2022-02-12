@@ -25,14 +25,14 @@ public final class Constants {
     
     /*Turret Constants*/
     public static final double ENCODER_COUNTS_PER_TURRET_NEO_REVOLUTION = 1;
-    public static final double NEO_REVOLUTIONS_PER_TURRET_REVOLUTION = 5.23 * 150/16;//2.89 * 190 / 16;
+    public static final double NEO_REVOLUTIONS_PER_TURRET_REVOLUTION = 2.89 * 188 / 16;
     public static final double ENCODER_COUNTS_PER_TURRET_DEGREE = ENCODER_COUNTS_PER_TURRET_NEO_REVOLUTION * NEO_REVOLUTIONS_PER_TURRET_REVOLUTION / 360;
     public static final int CAN_ID_TURRET = 30;
-    public static final double TURRET_SPEED = -0.1;
     public static final double TURRET_REVERSE_SOFT_LIMIT_DEGREES = 45;
-    public static final int LIMIT_SWITCH_PORT_NUMBER = 0;
+    public static final int TURRET_LIMIT_SWITCH_PORT = 0;
     public static final float SOFT_LIMIT_FORWARD_DEGREE = 80.0f;
     public static final float SOFT_LIMIT_REVERSE_DEGREE = 0.0f;
     public static final int TURRET_PID_ERROR = 1;
+    public static final double TURRET_HOMING_SPEED = -0.1;
 }
 

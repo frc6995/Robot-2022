@@ -8,14 +8,11 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.commands.TurretHomingC;
-import frc.robot.commands.TurretManualC;
-import frc.robot.commands.TurretTurnC;
+import frc.robot.commands.turret.TurretCommandFactory;
 import frc.robot.subsystems.DrivebaseS;
 import frc.robot.subsystems.TurretS;
 
@@ -28,7 +25,7 @@ import frc.robot.subsystems.TurretS;
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
-  private XboxController turretController;
+  private XboxController driverController;
   private Command xboxDriveCommand;
   private DrivebaseS drivebaseS;
   private TurretS turretS;
@@ -57,38 +54,39 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
-    spinTurretTrigger = new Trigger(turretController::getAButton);
+    spinTurretTrigger = new Trigger(driverController::getBButton);
     spinTurretTrigger.whileActiveOnce(runTurretC);
-    turretHomeTrigger = new Trigger(turretController::getXButton);
+    turretHomeTrigger = new Trigger(driverController::getXButton);
     turretHomeTrigger.whenActive(turretHomingC);
-    turretTurnTrigger = new Trigger(turretController::getYButton);
+    turretTurnTrigger = new Trigger(driverController::getYButton);
     turretTurnTrigger.whenActive(turretTurningC);
     
   }
 
   private void createControllers() {
-    turretController = new XboxController(Constants.USB_PORT_DRIVER_CONTROLLER);
+    driverController = new XboxController(Constants.USB_PORT_DRIVER_CONTROLLER);
   }
 
   private void createCommands() {
     xboxDriveCommand = new RunCommand(
       ()
      -> {drivebaseS.curvatureDrive(
-       turretController.getRightTriggerAxis() - turretController.getLeftTriggerAxis(), 
-       turretController.getLeftX()
+       driverController.getRightTriggerAxis() - driverController.getLeftTriggerAxis(), 
+       driverController.getLeftX()
        );
       }
     , drivebaseS);
     drivebaseS.setDefaultCommand(xboxDriveCommand);
-    runTurretC = new TurretManualC(turretController, turretS);
+
+    runTurretC = TurretCommandFactory.createTurretManualC(
+      driverController::getRightX, turretS);
+
     turretS.setDefaultCommand(runTurretC);
     
-    turretHomingC = new TurretHomingC(turretS);
+    turretHomingC = TurretCommandFactory.createTurretHomingC(turretS);
 
-    turretTurningC = new TurretTurnC(turretS, 40);
+    turretTurningC = TurretCommandFactory.createTurretTurnC(40, turretS);
     
-
-
     SmartDashboard.putData(new InstantCommand(turretS::resetEncoder));
   }
 

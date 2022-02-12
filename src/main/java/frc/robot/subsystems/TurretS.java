@@ -13,14 +13,14 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.DigitalInput;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import io.github.oblarg.oblog.Loggable;
+import io.github.oblarg.oblog.annotations.Log;
 
 /**
  * The turret subsystem. It contains methods to get encoder counts and converts
- * them to degrees.
+ * them to degrees. It uses a PID controller to control the turret position.
  * 
  * @author Benjamin Su
  * @author Noah Kim
@@ -28,8 +28,8 @@ import io.github.oblarg.oblog.Loggable;
 public class TurretS extends SubsystemBase implements Loggable {
   private CANSparkMax sparkMax = new CANSparkMax(Constants.CAN_ID_TURRET, MotorType.kBrushless);
   private RelativeEncoder sparkMaxEncoder = sparkMax.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42);
-  private DigitalInput limitSwitch = new DigitalInput(Constants.LIMIT_SWITCH_PORT_NUMBER);
-  private PIDController pid = new PIDController(0.0025, 0, 0);
+  private DigitalInput limitSwitch = new DigitalInput(Constants.TURRET_LIMIT_SWITCH_PORT);
+  private PIDController turretPID = new PIDController(0.0025, 0, 0);
 
   /** Creates a new TurretS. */
   public TurretS() {
@@ -41,8 +41,8 @@ public class TurretS extends SubsystemBase implements Loggable {
     sparkMax.enableSoftLimit(SoftLimitDirection.kReverse, true);
     sparkMax.setSoftLimit(SoftLimitDirection.kForward, Constants.SOFT_LIMIT_FORWARD_DEGREE);
     sparkMax.setSoftLimit(SoftLimitDirection.kReverse, Constants.SOFT_LIMIT_REVERSE_DEGREE);
-    pid.setTolerance(Constants.TURRET_PID_ERROR, 0);
-    pid.setIntegratorRange(0, 0);
+    turretPID.setTolerance(Constants.TURRET_PID_ERROR, 0);
+    turretPID.setIntegratorRange(0, 0);
   }
 
   /**
@@ -64,6 +64,7 @@ public class TurretS extends SubsystemBase implements Loggable {
    * 
    * @return the encoder counts
    */
+  @Log(name="turretPosition")
   public double getEncoderCounts() {
     return sparkMaxEncoder.getPosition();
   }
@@ -91,13 +92,6 @@ public class TurretS extends SubsystemBase implements Loggable {
   }
 
   /**
-   * Max speed of turret
-   */
-  public void turnMaxSpeed() {
-    sparkMax.set(Constants.TURRET_SPEED);
-  }
-
-  /**
    * Sets the turn speed of the turret
    * 
    * @param speed The turn speed of the turret
@@ -106,6 +100,13 @@ public class TurretS extends SubsystemBase implements Loggable {
     speed = deadbandJoysticks(speed);
     sparkMax.set(speed);
   }
+
+  /**
+   * Turns the turret towards the homing switch at a safe speed.
+   */
+   public void turnHoming() {
+     sparkMax.set(Constants.TURRET_HOMING_SPEED);
+   }
 
   /**
    * Stops the motor
@@ -126,6 +127,7 @@ public class TurretS extends SubsystemBase implements Loggable {
    * 
    * @return True if turret is homed
    */
+  @Log(name="turretHomed")
   public boolean getIsHomed() {
     return !limitSwitch.get();
   }
@@ -135,6 +137,7 @@ public class TurretS extends SubsystemBase implements Loggable {
    * 
    * @return The velocity of the motor
    */
+  @Log(name="turretVelocity")
   public double getVelocity() {
     return sparkMaxEncoder.getVelocity();
   }
@@ -152,7 +155,7 @@ public class TurretS extends SubsystemBase implements Loggable {
     if (target < Constants.SOFT_LIMIT_REVERSE_DEGREE) {
       target = Constants.SOFT_LIMIT_REVERSE_DEGREE;
     }
-    sparkMax.set(MathUtil.clamp(pid.calculate(this.getEncoderCounts(), target), -1, 1));
+    sparkMax.set(MathUtil.clamp(turretPID.calculate(this.getEncoderCounts(), target), -1, 1));
     
   }
 
@@ -162,7 +165,7 @@ public class TurretS extends SubsystemBase implements Loggable {
    * @return The position error
    */
   public double error() {
-    return pid.getPositionError();
+    return turretPID.getPositionError();
   }
 
   /**
@@ -171,16 +174,13 @@ public class TurretS extends SubsystemBase implements Loggable {
    * @return True if the turret is at the target angle
    */
   public boolean atTarget() {
-    return pid.atSetpoint();
+    return turretPID.atSetpoint();
   }
 
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    SmartDashboard.putNumber("turret degrees", /* encoderCountsToDegrees */(getEncoderCounts()));
-    SmartDashboard.putNumber("turret counts", getEncoderCounts());
-    SmartDashboard.putBoolean("limit switch true or false", getIsHomed());
-    SmartDashboard.putNumber("velocity", getVelocity());
+
   }
 
 }
