@@ -22,6 +22,10 @@ public final class Constants {
     public static final double DRIVEBASE_TURN_SLEW_LIMIT = 2.0; // 0 to 200% in one second. 0 to full in 1/2 second.
     public static final double DRIVEBASE_FWD_BACK_SLEW_LIMIT = 1; // 0 to 100% in one second.
 
+    //Limelight Constants
+    public static final double LIMELIGHT_FILTER_TIME_CONSTANT = 0.1; 
+    public static final double LIMELIGHT_FILTER_PERIOD_CONSTANT = 0.02;
+  
     //Intake Constants
     public static final int CAN_ID_INTAKE_LEAD_MOTOR = 20;
     public static final int CAN_ID_INTAKE_FOLLOWER_MOTOR = 21;
