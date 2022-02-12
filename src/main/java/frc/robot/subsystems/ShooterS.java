@@ -15,17 +15,19 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
 public class ShooterS extends SubsystemBase {
-  private final CANSparkMax frontSparkMax = new CANSparkMax(40, MotorType.kBrushless);
-  private final CANSparkMax backSparkMax = new CANSparkMax(41, MotorType.kBrushless);
+  private final CANSparkMax frontSparkMax = new CANSparkMax(41, MotorType.kBrushless);
+  private final CANSparkMax backSparkMax = new CANSparkMax(40, MotorType.kBrushless);
   private RelativeEncoder frontEncoder;
   private RelativeEncoder backEncoder;
-  private PIDController frontPID = new PIDController(Constants.PROPORTIONAL_CONSTANT, 0, 0);
-  private PIDController backPID = new PIDController(Constants.PROPORTIONAL_CONSTANT, 0, 0);
+  private PIDController frontPID = new PIDController(Constants.PROPORTIONAL_CONSTANT, 0, 0.0000);
+  private PIDController backPID = new PIDController(Constants.PROPORTIONAL_CONSTANT, 0, 0.0000);
 
   /** Creates a new ShooterS. */
   public ShooterS() {
     frontSparkMax.restoreFactoryDefaults();
     backSparkMax.restoreFactoryDefaults();
+    frontSparkMax.setClosedLoopRampRate(6);
+    backSparkMax.setClosedLoopRampRate(6);
 
     frontEncoder = frontSparkMax.getEncoder();
     backEncoder = backSparkMax.getEncoder();
@@ -137,6 +139,33 @@ public class ShooterS extends SubsystemBase {
    */
   public boolean backAtTarget() {
     return backPID.atSetpoint();
+  }
+
+  public double getIndex(double distance) {
+    int index = Math.max(Math.min(Constants.DISTANCES.length-2, getUnderId(distance, Constants.DISTANCES)), 0);
+    double rpm = calcSpeed(index, index+1, distance, Constants.DISTANCES, Constants.SPEEDS);
+    return rpm; 
+  }
+
+  public static int getUnderId(double distance, double[] DISTANCES_FEET) {
+    int index = 0;
+    for (int i = 0; i < DISTANCES_FEET.length; i++) {
+        if (distance > DISTANCES_FEET[i]) {
+            index = i;
+        }
+    }
+    
+    return index;
+  }
+
+  public static double calcSpeed(int smallerIndex, int biggerIndex, double distance, double[] DISTANCES_FEET, double[] RPMS) {
+    double smallerRPM = RPMS[Math.max(smallerIndex, 0)];
+    double biggerRPM = RPMS[Math.min(biggerIndex, RPMS.length-1)] + 0.0001; //add a tiny amount to avoid NaN if distance is out of range
+    double smallerDistance = DISTANCES_FEET[Math.max(smallerIndex, 0)];
+    double biggerDistance = DISTANCES_FEET[Math.min(biggerIndex, DISTANCES_FEET.length-1)] + 0.0001;
+    double newRPM = ((biggerRPM - smallerRPM) / (biggerDistance - smallerDistance) * (distance - smallerDistance)) + smallerRPM;
+
+    return newRPM;
   }
 
   @Override

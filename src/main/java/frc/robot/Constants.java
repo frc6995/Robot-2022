@@ -18,11 +18,13 @@ public final class Constants {
     public static final int CAN_ID_BACK_LEFT_DRIVE_MOTOR = 12;
     public static final int CAN_ID_BACK_RIGHT_DRIVE_MOTOR = 10;
     public static final int USB_PORT_DRIVER_CONTROLLER = 0;
-    public static final double DRIVEBASE_DEADBAND = 0.015; // anything under 1.5% of full joystick away from 0 should be considered 0
+    public static final double DRIVEBASE_DEADBAND = 0.02; // anything under 1.5% of full joystick away from 0 should be considered 0
     public static final double DRIVEBASE_TURN_SLEW_LIMIT = 2.0; // 0 to 200% in one second. 0 to full in 1/2 second.
     public static final double DRIVEBASE_FWD_BACK_SLEW_LIMIT = 1; // 0 to 100% in one second.
     
-    public static final double PROPORTIONAL_CONSTANT = 0.000267;
+    public static final double PROPORTIONAL_CONSTANT = 0.00023;
     public static final int SHOOTER_PID_ERROR = 100;
+    public static final double[] SPEEDS = {2900, 2650, 2600, 2600, 2550, 2600, 3200, 4400};
+    public static final double[] DISTANCES = {-25, -18, -15, -13, -9, -4, 6, 20};
 }
 
