@@ -64,9 +64,9 @@ public class RobotContainer {
           driverController.getRightTriggerAxis() - driverController.getLeftTriggerAxis(),
           driverController.getLeftX());
     }, drivebaseS);
-    drivebaseS.setDefaultCommand(xboxDriveCommand);
+    //drivebaseS.setDefaultCommand(xboxDriveCommand);
 
-    xboxShooterCommand = new ShooterC(driverController, shooterS, 0000, 5000);
+    xboxShooterCommand = new ShooterC(shooterS, 0000, 1000);
     //shooterS.setDefaultCommand(xboxShooterCommand);
     
     }

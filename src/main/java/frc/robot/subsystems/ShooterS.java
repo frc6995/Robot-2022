@@ -10,6 +10,7 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -19,8 +20,16 @@ public class ShooterS extends SubsystemBase {
   private final CANSparkMax backSparkMax = new CANSparkMax(40, MotorType.kBrushless);
   private RelativeEncoder frontEncoder;
   private RelativeEncoder backEncoder;
-  private PIDController frontPID = new PIDController(Constants.PROPORTIONAL_CONSTANT, 0, 0.0000);
-  private PIDController backPID = new PIDController(Constants.PROPORTIONAL_CONSTANT, 0, 0.0000);
+  private PIDController frontPID = new PIDController(Constants.SHOOTER_FRONT_P, 0, 0);
+  private PIDController backPID = new PIDController(Constants.SHOOTER_BACK_P, 0, 0);
+  private SimpleMotorFeedforward frontFF = new SimpleMotorFeedforward(
+    Constants.SHOOTER_FRONT_FF[0],
+    Constants.SHOOTER_FRONT_FF[1],
+    Constants.SHOOTER_FRONT_FF[2]);
+  private SimpleMotorFeedforward backFF = new SimpleMotorFeedforward(
+    Constants.SHOOTER_BACK_FF[0],
+    Constants.SHOOTER_BACK_FF[1],
+    Constants.SHOOTER_BACK_FF[2]);
 
   /** Creates a new ShooterS. */
   public ShooterS() {
@@ -92,7 +101,9 @@ public class ShooterS extends SubsystemBase {
    * @param frontTargetRPM The target RPM of the front motor
    */
   public void pidFrontSpeed(double frontTargetRPM) {
-    frontSparkMax.set(MathUtil.clamp(frontPID.calculate(getFrontEncoderSpeed(), frontTargetRPM), -1.0, 1.0));
+    frontSparkMax.setVoltage(
+        frontPID.calculate(getFrontEncoderSpeed()/60.0, frontTargetRPM/60.0) + frontFF.calculate(frontTargetRPM/60.0)
+        );
         
   }
 
@@ -102,7 +113,9 @@ public class ShooterS extends SubsystemBase {
    * @param backTargetRPM The target RPM of the front motor
    */
   public void pidBackSpeed(double backTargetRPM) {
-    backSparkMax.set(MathUtil.clamp(backPID.calculate(getBackEncoderSpeed(), backTargetRPM), -1.0, 1.0));
+    backSparkMax.setVoltage(
+      backPID.calculate(getBackEncoderSpeed()/60.0, backTargetRPM/60.0) + backFF.calculate(backTargetRPM / 60.0)
+    );
   }
 
   /**
