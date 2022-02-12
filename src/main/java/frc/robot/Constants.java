@@ -23,9 +23,9 @@ public final class Constants {
     public static final double DRIVEBASE_FWD_BACK_SLEW_LIMIT = 1; // 0 to 100% in one second.
     
     public static final double[] SHOOTER_FRONT_FF = {0.16382, 0.12618, 0.0038694};
-    public static final double SHOOTER_FRONT_P = 0.0013623;
+    public static final double SHOOTER_FRONT_P = 0.13714;
     public static final double[] SHOOTER_BACK_FF = {0.29066, 0.12829, 0.0050724};
-    public static final double SHOOTER_BACK_P = 0.0016944;
+    public static final double SHOOTER_BACK_P = 0.19475;
     public static final int SHOOTER_PID_ERROR = 100;
     public static final double[] SPEEDS = {2900, 2650, 2600, 2600, 2550, 2600, 3200, 4400};
     public static final double[] DISTANCES = {-25, -18, -15, -13, -9, -4, 6, 20};
