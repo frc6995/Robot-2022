@@ -25,5 +25,13 @@ public final class Constants {
     //Limelight Constants
     public static final double LIMELIGHT_FILTER_TIME_CONSTANT = 0.1; 
     public static final double LIMELIGHT_FILTER_PERIOD_CONSTANT = 0.02;
+  
+    //Intake Constants
+    public static final int CAN_ID_INTAKE_LEAD_MOTOR = 20;
+    public static final int CAN_ID_INTAKE_FOLLOWER_MOTOR = 21;
+    public static final int DOUBLE_SOLENOID_INTAKE_EXTEND = 2;
+    public static final int DOUBLE_SOLENOID_INTAKE_RETRACT = 3;
+    public static final double INTAKE_SPEED = 0.25;
+    public static final double INTAKE_EJECT_SPEED = -0.5;
 }
 
