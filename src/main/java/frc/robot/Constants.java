@@ -21,5 +21,13 @@ public final class Constants {
     public static final double DRIVEBASE_DEADBAND = 0.015; // anything under 1.5% of full joystick away from 0 should be considered 0
     public static final double DRIVEBASE_TURN_SLEW_LIMIT = 2.0; // 0 to 200% in one second. 0 to full in 1/2 second.
     public static final double DRIVEBASE_FWD_BACK_SLEW_LIMIT = 1; // 0 to 100% in one second.
+
+    //Intake Constants
+    public static final int CAN_ID_INTAKE_LEAD_MOTOR = 20;
+    public static final int CAN_ID_INTAKE_FOLLOWER_MOTOR = 21;
+    public static final int DOUBLE_SOLENOID_INTAKE_EXTEND = 2;
+    public static final int DOUBLE_SOLENOID_INTAKE_RETRACT = 3;
+    public static final double INTAKE_SPEED = 0.25;
+    public static final double INTAKE_EJECT_SPEED = -0.5;
 }
 
