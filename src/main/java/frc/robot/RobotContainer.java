@@ -45,7 +45,8 @@ public class RobotContainer {
   }
 
   private void createCommands() {
-    xboxDriveCommand = new RunCommand(()
+    xboxDriveCommand = new RunCommand(
+      ()
      -> {drivebaseS.curvatureDrive(
        driverController.getRightTriggerAxis() - driverController.getLeftTriggerAxis(), 
        driverController.getLeftX()

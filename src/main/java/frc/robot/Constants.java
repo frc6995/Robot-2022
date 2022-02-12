@@ -21,6 +21,15 @@ public final class Constants {
     public static final double DRIVEBASE_DEADBAND = 0.015; // anything under 1.5% of full joystick away from 0 should be considered 0
     public static final double DRIVEBASE_TURN_SLEW_LIMIT = 2.0; // 0 to 200% in one second. 0 to full in 1/2 second.
     public static final double DRIVEBASE_FWD_BACK_SLEW_LIMIT = 1; // 0 to 100% in one second.
+    
+    //Midtake Constants
+    public static final int CAN_ID_MIDTAKE_FRONT = 21;
+    public static final int CAN_ID_MIDTAKE_BACK = 22;
+    public static final int BEAM_BREAK_TOP_PORT_NUMBER = 1;
+    public static final int BEAM_BREAK_BOTTOM_PORT_NUMBER = 2;
+    public static final double COLOR_SENSOR_PROXIMITY_THRESHOLD = 250;
+    public static final double MIDTAKE_FRONT_MOTOR_SPEED = 0.6995;
+    public static final double MIDTAKE_BACK_MOTOR_SPEED = 0.6995;
 
     //Limelight Constants
     public static final double LIMELIGHT_FILTER_TIME_CONSTANT = 0.1; 
