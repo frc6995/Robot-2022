@@ -11,23 +11,33 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.commands.turret.TurretCommandFactory;
+import frc.robot.commands.ShooterC;
 import frc.robot.subsystems.DrivebaseS;
-import frc.robot.subsystems.TurretS;
+import frc.robot.subsystems.ShooterS;
+import frc.robot.commands.turret.TurretCommandFactory;
+
 
 /**
- * This class is where the bulk of the robot should be declared. Since Command-based is a
- * "declarative" paradigm, very little robot logic should actually be handled in the {@link Robot}
- * periodic methods (other than the scheduler calls). Instead, the structure of the robot (including
+ * This class is where the bulk of the robot should be declared. Since
+ * Command-based is a
+ * "declarative" paradigm, very little robot logic should actually be handled in
+ * the {@link Robot}
+ * periodic methods (other than the scheduler calls). Instead, the structure of
+ * the robot (including
  * subsystems, commands, and button mappings) should be declared here.
  */
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
-  /** The container for the robot. Contains subsystems, OI devices, and commands. */
+  /**
+   * The container for the robot. Contains subsystems, OI devices, and commands.
+   */
   private XboxController driverController;
   private Command xboxDriveCommand;
+  private Command xboxShooterCommand;
   private DrivebaseS drivebaseS;
+  private ShooterS shooterS;
   private TurretS turretS;
   private Command runTurretC;
   private Command turretHomingC;
@@ -48,19 +58,22 @@ public class RobotContainer {
   }
 
   /**
-   * Use this method to define your button->command mappings. Buttons can be created by
+   * Use this method to define your button->command mappings. Buttons can be
+   * created by
    * instantiating a {@link GenericHID} or one of its subclasses ({@link
-   * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then passing it to a {@link
+   * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then passing
+   * it to a {@link
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
+
+    new Trigger(driverController::getAButton).whileActiveOnce(xboxShooterCommand);
     spinTurretTrigger = new Trigger(driverController::getBButton);
     spinTurretTrigger.whileActiveOnce(runTurretC);
     turretHomeTrigger = new Trigger(driverController::getXButton);
     turretHomeTrigger.whenActive(turretHomingC);
     turretTurnTrigger = new Trigger(driverController::getYButton);
     turretTurnTrigger.whenActive(turretTurningC);
-    
   }
 
   private void createControllers() {
