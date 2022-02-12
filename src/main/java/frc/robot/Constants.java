@@ -44,6 +44,7 @@ public final class Constants {
     public static final float SOFT_LIMIT_REVERSE_DEGREE = 0.0f;
     public static final int TURRET_PID_ERROR = 1;
     public static final double TURRET_HOMING_SPEED = -0.1;
+    public static final double TURRET_DEADBAND = 0.02;
 
     //Midtake Constants
     public static final int CAN_ID_MIDTAKE_FRONT = 21;
