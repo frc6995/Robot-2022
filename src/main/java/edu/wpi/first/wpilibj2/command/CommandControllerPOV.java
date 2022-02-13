@@ -2,25 +2,49 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.robot.oi;
+package edu.wpi.first.wpilibj2.command;
 
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import java.util.EnumMap;
 
 /** Provides Triggers for binding commands to any GenericHID inherited class. */
 public class CommandControllerPOV {
   private final GenericHID m_hid;
   private final int m_povNumber;
 
-  private Trigger m_upButton; // 0 degrees
-  private Trigger m_upRightButton; // 45 degrees
-  private Trigger m_rightButton; // 90 degrees
-  private Trigger m_downRightButton; // 135 degrees
-  private Trigger m_downButton; // 180 degrees
-  private Trigger m_downLeftButton; // 225 degrees
-  private Trigger m_leftButton; // 270 degrees
-  private Trigger m_upLeftButton; // 315 degrees
-  private Trigger m_centerButton; // Center, which returns -1
+  private enum POVAngle {
+    kCenter(-1),
+    kUp(0),
+    kUpRight(45),
+    kRight(90),
+    kDownRight(135),
+    kDown(180),
+    kDownLeft(225),
+    kLeft(270),
+    kUpLeft(315);
+
+    @SuppressWarnings("MemberName")
+    public final int value;
+
+    POVAngle(int value) {
+      this.value = value;
+    }
+
+    /**
+     * Get the human-friendly name of the POV angle. This is done by stripping the leading `k`.
+     *
+     * <p>Primarily used for automated unit tests.
+     *
+     * @return the human-friendly name of the angle.
+     */
+    @Override
+    public String toString() {
+      return this.name().substring(1); // Remove leading `k`
+    }
+  }
+
+  private final EnumMap<POVAngle, Trigger> m_povs = new EnumMap<>(POVAngle.class);
 
   /**
    * Constructs a ControllerPOV.
@@ -43,16 +67,31 @@ public class CommandControllerPOV {
   }
 
   /**
+   * Builds a {@link Trigger} for this POV from the provided {@link POVAngle}.
+   *
+   * @param button the POVAngle to build for
+   * @return Built Trigger
+   */
+  private Trigger build(POVAngle angle) {
+    return new Trigger(()->{return m_hid.getPOV(m_povNumber) == angle.value;});
+  }
+
+  /**
+   * Returns the centered (not pressed) Trigger object.
+   *
+   * <p>To get its value, use {@link Trigger#get()}.
+   */
+  public Trigger center() {
+    return m_povs.computeIfAbsent(POVAngle.kCenter, this::build);
+  }
+
+  /**
    * Returns the upper (0 degrees) Trigger object.
    *
    * <p>To get its value, use {@link Trigger#get()}.
    */
   public Trigger up() {
-    if (m_upButton == null) {
-      m_upButton = new Trigger(()->m_hid.getPOV(m_povNumber) == 0);
-    }
-
-    return m_upButton;
+    return m_povs.computeIfAbsent(POVAngle.kUp, this::build);
   }
 
   /**
@@ -61,11 +100,7 @@ public class CommandControllerPOV {
    * <p>To get its value, use {@link Trigger#get()}.
    */
   public Trigger upRight() {
-    if (m_upRightButton == null) {
-      m_upRightButton = new Trigger(()->m_hid.getPOV(m_povNumber) == 45);
-    }
-
-    return m_upRightButton;
+    return m_povs.computeIfAbsent(POVAngle.kUpRight, this::build);
   }
 
   /**
@@ -74,11 +109,7 @@ public class CommandControllerPOV {
    * <p>To get its value, use {@link Trigger#get()}.
    */
   public Trigger right() {
-    if (m_rightButton == null) {
-      m_rightButton = new Trigger(()->m_hid.getPOV(m_povNumber) == 90);
-    }
-
-    return m_rightButton;
+    return m_povs.computeIfAbsent(POVAngle.kRight, this::build);
   }
 
   /**
@@ -87,11 +118,7 @@ public class CommandControllerPOV {
    * <p>To get its value, use {@link Trigger#get()}.
    */
   public Trigger downRight() {
-    if (m_downRightButton == null) {
-      m_downRightButton = new Trigger(()->m_hid.getPOV(m_povNumber) == 135);
-    }
-
-    return m_downRightButton;
+    return m_povs.computeIfAbsent(POVAngle.kDownRight, this::build);
   }
 
   /**
@@ -100,11 +127,7 @@ public class CommandControllerPOV {
    * <p>To get its value, use {@link Trigger#get()}.
    */
   public Trigger down() {
-    if (m_downButton == null) {
-      m_downButton = new Trigger(()->m_hid.getPOV(m_povNumber) == 180);
-    }
-
-    return m_downButton;
+    return m_povs.computeIfAbsent(POVAngle.kDown, this::build);
   }
 
   /**
@@ -113,11 +136,7 @@ public class CommandControllerPOV {
    * <p>To get its value, use {@link Trigger#get()}.
    */
   public Trigger downLeft() {
-    if (m_downLeftButton == null) {
-      m_downLeftButton = new Trigger(()->m_hid.getPOV(m_povNumber) == 225);
-    }
-
-    return m_downLeftButton;
+    return m_povs.computeIfAbsent(POVAngle.kDownLeft, this::build);
   }
 
   /**
@@ -126,11 +145,7 @@ public class CommandControllerPOV {
    * <p>To get its value, use {@link Trigger#get()}.
    */
   public Trigger left() {
-    if (m_leftButton == null) {
-      m_leftButton = new Trigger(()->m_hid.getPOV(m_povNumber) == 270);
-    }
-
-    return m_leftButton;
+    return m_povs.computeIfAbsent(POVAngle.kLeft, this::build);
   }
 
   /**
@@ -139,23 +154,6 @@ public class CommandControllerPOV {
    * <p>To get its value, use {@link Trigger#get()}.
    */
   public Trigger upLeft() {
-    if (m_upLeftButton == null) {
-      m_upLeftButton = new Trigger(()->m_hid.getPOV(m_povNumber) == 315);
-    }
-
-    return m_upLeftButton;
-  }
-
-  /**
-   * Returns the center (-1) Trigger object.
-   * 
-   * <p>To get its value, use {@link Trigger#get()}.
-   */
-  public Trigger center() {
-    if (m_centerButton == null) {
-      m_centerButton = new Trigger(()->m_hid.getPOV(m_povNumber) == -1);
-    }
-
-    return m_centerButton;
+    return m_povs.computeIfAbsent(POVAngle.kUpLeft, this::build);
   }
 }

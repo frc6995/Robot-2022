@@ -49,7 +49,7 @@ public class TurretCommandFactory {
             interrupted -> {
                 turretS.stopMotor();
             },
-            turretS::atTarget,
+            turretS::isAtTarget,
             turretS
         )
         .withName("TurretTurnC");

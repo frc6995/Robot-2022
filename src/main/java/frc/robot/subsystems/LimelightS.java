@@ -18,6 +18,8 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import io.github.oblarg.oblog.Loggable;
+import io.github.oblarg.oblog.annotations.Log;
 
 /**
  * The Limelight camera, running PhotonVision.
@@ -25,9 +27,11 @@ import frc.robot.Constants;
  * @author Valentine King
  */
 
-public class LimelightS extends SubsystemBase {
+public class LimelightS extends SubsystemBase implements Loggable {
   PhotonCamera limelight;
 
+  @Log(methodName="getFilteredXOffset")
+  @Log(methodName="getFilteredDistance")
   private FilterValues filterValues;
 
   private LinearFilter xOffsetFilter;
@@ -109,7 +113,7 @@ public class LimelightS extends SubsystemBase {
   /**
    * A data class to store filtered X offset and distance.
    */
-  public class FilterValues {
+  public class FilterValues  {
     private double filteredXOffset;
     private double filteredDistance;
 

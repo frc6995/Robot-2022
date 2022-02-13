@@ -8,11 +8,11 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
+import frc.robot.commands.auto.AutoCommandFactory;
 import frc.robot.commands.drivebase.DrivebaseCommandFactory;
 import frc.robot.commands.turret.TurretCommandFactory;
-import frc.robot.oi.CommandXboxController;
 import frc.robot.subsystems.DrivebaseS;
 import frc.robot.subsystems.IntakeS;
 import frc.robot.subsystems.LimelightS;
@@ -42,6 +42,7 @@ public class RobotContainer {
   private MidtakeS midtakeS;
   private ShooterS shooterS;
   private TurretS turretS;
+  @SuppressWarnings("unused")
   private LimelightS limelightS;
 
   // Command
@@ -100,8 +101,8 @@ public class RobotContainer {
 
   private void createSubsystems() {
     drivebaseS = new DrivebaseS();
-    // intakeS = new IntakeS();
-    // midtakeS = new MidtakeS();
+    intakeS = new IntakeS();
+    midtakeS = new MidtakeS();
     turretS = new TurretS();
     shooterS = new ShooterS();
     limelightS = new LimelightS();
@@ -114,6 +115,15 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     // An ExampleCommand will run in autonomous
-    return new WaitCommand(0);
+    return AutoCommandFactory.createTwoBallAutoCG(
+      3800,
+      1900,
+      0,
+      shooterS,
+      intakeS,
+      midtakeS,
+      turretS,
+      drivebaseS
+    );
   }
 }

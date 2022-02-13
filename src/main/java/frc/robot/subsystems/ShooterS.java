@@ -13,8 +13,10 @@ import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import io.github.oblarg.oblog.Loggable;
+import io.github.oblarg.oblog.annotations.Log;
 
-public class ShooterS extends SubsystemBase {
+public class ShooterS extends SubsystemBase implements Loggable{
   private final CANSparkMax frontSparkMax = new CANSparkMax(Constants.CAN_ID_FRONT_SHOOTER_MOTOR, MotorType.kBrushless);
   private final CANSparkMax backSparkMax = new CANSparkMax(Constants.CAN_ID_BACK_SHOOTER_MOTOR, MotorType.kBrushless);
   private RelativeEncoder frontEncoder;
@@ -61,6 +63,7 @@ public class ShooterS extends SubsystemBase {
    * 
    * @return The velocity of the front motor
    */
+  @Log
   public double getFrontEncoderSpeed() {
     return frontEncoder.getVelocity();
   }
@@ -70,6 +73,7 @@ public class ShooterS extends SubsystemBase {
    * 
    * @return The velocity of the back motor
    */
+  @Log
   public double getBackEncoderSpeed() {
     return backEncoder.getVelocity();
   }
@@ -100,6 +104,7 @@ public class ShooterS extends SubsystemBase {
    * @param frontTargetRPM The target RPM of the front motor
    */
   public void pidFrontSpeed(double frontTargetRPM) {
+    SmartDashboard.putNumber("frontTargetRPM", frontTargetRPM);
     frontSparkMax.setVoltage(
         frontPID.calculate(getFrontEncoderSpeed()/60.0, frontTargetRPM/60.0) + frontFF.calculate(frontTargetRPM/60.0)
         );
@@ -112,9 +117,18 @@ public class ShooterS extends SubsystemBase {
    * @param backTargetRPM The target RPM of the front motor
    */
   public void pidBackSpeed(double backTargetRPM) {
+    SmartDashboard.putNumber("backTargetRPM", backTargetRPM);
     backSparkMax.setVoltage(
       backPID.calculate(getBackEncoderSpeed()/60.0, backTargetRPM/60.0) + backFF.calculate(backTargetRPM / 60.0)
     );
+  }
+
+  /**
+   * stops both motors
+   */
+  public void stop() {
+    setFrontSpeed(0);
+    setBackSpeed(0);
   }
 
   /**
@@ -122,7 +136,8 @@ public class ShooterS extends SubsystemBase {
    * 
    * @return The velocity error of the front motor
    */
-  public double frontError() {
+  @Log
+  public double getFrontError() {
     return frontPID.getVelocityError();
   }
 
@@ -131,7 +146,8 @@ public class ShooterS extends SubsystemBase {
    * 
    * @return The velocity error of teh back motor
    */
-  public double backError() {
+  @Log
+  public double getBackError() {
     return backPID.getVelocityError();
   }
 
@@ -140,7 +156,8 @@ public class ShooterS extends SubsystemBase {
    * 
    * @return True if the front motor is at the target RPM
    */
-  public boolean frontAtTarget() {
+  @Log
+  public boolean isFrontAtTarget() {
     return frontPID.atSetpoint();
   }
 
@@ -149,24 +166,47 @@ public class ShooterS extends SubsystemBase {
    * 
    * @return True if the back motor is at the target RPM
    */
-  public boolean backAtTarget() {
+  @Log
+  public boolean isBackAtTarget() {
     return backPID.atSetpoint();
   }
 
+  /**
+   * determines whether both motors are at the target RPMs.
+   * 
+   * @return True if both motors are at the target RPMs
+   */
+  @Log
+  public boolean isAtTarget() {
+    return isBackAtTarget() && isFrontAtTarget();
+  }
+
+  /**
+   * Converts a distance in feet into the proper shooter RPM
+   * @param distance the distance to the target in feet (measured horizontally from the Limelight to the vision ring)
+   * @return the shooter RPM
+   */
+
   public static double getSpeedForDistance(double distance) {
-    int index = Math.max(Math.min(Constants.DISTANCES.length-2, getUnderId(distance, Constants.DISTANCES)), 0);
+    int index = Math.max(Math.min(Constants.DISTANCES.length-2, getIndexForDistance(distance, Constants.DISTANCES)), 0);
     double rpm = calcSpeed(index, index+1, distance, Constants.DISTANCES, Constants.SPEEDS);
     return rpm; 
   }
 
-  public static int getUnderId(double distance, double[] DISTANCES_FEET) {
+  /**
+   * Finds the index of the highest distance in the provided array that is less than the provided distance.
+   * @param distance the distance
+   * @param DISTANCES_FEET the distance array
+   * @return the index
+   */
+
+  public static int getIndexForDistance(double distance, double[] DISTANCES_FEET) {
     int index = 0;
     for (int i = 0; i < DISTANCES_FEET.length; i++) {
         if (distance > DISTANCES_FEET[i]) {
             index = i;
         }
     }
-    
     return index;
   }
 
@@ -182,8 +222,5 @@ public class ShooterS extends SubsystemBase {
 
   @Override
   public void periodic() {
-    SmartDashboard.putNumber("Front Speed", getFrontEncoderSpeed());
-    SmartDashboard.putNumber("Back Speed", getBackEncoderSpeed());
-    // This method will be called once per scheduler run
   }
 }

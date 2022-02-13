@@ -5,13 +5,13 @@
 package frc.robot.subsystems;
 
 import com.revrobotics.CANSparkMax;
-import com.revrobotics.ColorSensorV3;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+import com.revrobotics.ColorSensorV3;
 
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.I2C;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.I2C;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -30,7 +30,6 @@ public class MidtakeS extends SubsystemBase {
   private DigitalInput beamBreakBottom = new DigitalInput(Constants.BEAM_BREAK_BOTTOM_PORT_NUMBER);
   private final ColorSensorV3 colorSensor = new ColorSensorV3(I2C.Port.kOnboard);
 
-
   public MidtakeS() {
     frontSparkMax.restoreFactoryDefaults();
     backSparkMax.restoreFactoryDefaults();
@@ -41,7 +40,7 @@ public class MidtakeS extends SubsystemBase {
    * 
    * @param frontSpeed the front speed
    */
-  public void setFrontSparkMaxSpeed(double frontSpeed) {
+  public void setFrontSpeed(double frontSpeed) {
     frontSparkMax.set(frontSpeed);
   }
 
@@ -50,7 +49,7 @@ public class MidtakeS extends SubsystemBase {
    * 
    * @param backSpeed the back speed
    */
-  public void setBackSparkMaxSpeed(double backSpeed) {
+  public void setBackSpeed(double backSpeed) {
     backSparkMax.set(backSpeed);
   }
 
@@ -58,8 +57,15 @@ public class MidtakeS extends SubsystemBase {
    * Spins both midtake motors at set speed.
    */
   public void spin() {
-    setFrontSparkMaxSpeed(Constants.MIDTAKE_FRONT_MOTOR_SPEED);
-    setBackSparkMaxSpeed(Constants.MIDTAKE_BACK_MOTOR_SPEED);
+    spin(Constants.MIDTAKE_FRONT_MOTOR_SPEED);
+  }
+
+    /**
+   * Spins both midtake motors at set speed.
+   */
+  public void spin(double speed) {
+    setFrontSpeed(speed);
+    setBackSpeed(speed);
   }
 
   /**
@@ -95,6 +101,14 @@ public class MidtakeS extends SubsystemBase {
    */
   public boolean getColorSensorDetectsBall() {
     return colorSensor.getProximity() > Constants.COLOR_SENSOR_PROXIMITY_THRESHOLD;
+  }
+
+  /**
+   * Stops the midtake.
+   */
+
+  public void stop() {
+    spin(0);
   }
 
   @Override

@@ -74,6 +74,13 @@ public class IntakeS extends SubsystemBase {
         spin(Constants.INTAKE_EJECT_SPEED);
     }
 
+    /**
+     * Stops the intake.
+     */
+    public void stop() {
+        spin(0);
+    }
+
     @Override
     public void periodic() {
     }
