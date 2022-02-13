@@ -56,6 +56,27 @@ public class TurretCommandFactory {
     }
 
     /**
+     * Creates a TurretFollowC, which uses PID to point the turret to the given angle, where the homing switch is 0.
+     * @param angle a DoubleSupplier for the desired angle
+     * @param turretS the turret subsystem
+     * @return the TurretTurnC
+     */
+    public static Command createTurretFollowC(DoubleSupplier angle, TurretS turretS) {
+        return new FunctionalCommand(
+            ()->{}, 
+            ()->{
+                turretS.setTurretAngle(angle.getAsDouble());
+            },
+            interrupted -> {
+                turretS.stopMotor();
+            },
+            () -> false,
+            turretS
+        )
+        .withName("TurretTurnC");
+    }
+
+    /**
      * Creates a TurretManualC, which turns the turret at a speed given by `speedSupplier` [-1..1].
      * @param speedSupplier The Supplier for the turret speed
      * @param turretS the turret subsystem
@@ -70,7 +91,8 @@ public class TurretCommandFactory {
             interrupted -> {
                 turretS.stopMotor();
             },
-            () -> false
+            () -> false,
+            turretS
         )
         .withName("TurretManualC");
     }

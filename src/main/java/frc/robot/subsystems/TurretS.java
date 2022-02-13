@@ -12,6 +12,7 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -29,7 +30,12 @@ public class TurretS extends SubsystemBase implements Loggable {
   private CANSparkMax sparkMax = new CANSparkMax(Constants.CAN_ID_TURRET, MotorType.kBrushless);
   private RelativeEncoder sparkMaxEncoder = sparkMax.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42);
   private DigitalInput limitSwitch = new DigitalInput(Constants.TURRET_LIMIT_SWITCH_PORT);
-  private PIDController turretPID = new PIDController(0.0025, 0, 0);
+  private PIDController turretPID = new PIDController(Constants.TURRET_P, 0, 0);
+  // Open-loop drive in turret rotations per second
+  private SimpleMotorFeedforward turretFF = new SimpleMotorFeedforward(
+    Constants.TURRET_FF[0],
+    Constants.TURRET_FF[1],
+    Constants.TURRET_FF[2]);
 
   /** Creates a new TurretS. */
   public TurretS() {
@@ -155,7 +161,13 @@ public class TurretS extends SubsystemBase implements Loggable {
     if (target < Constants.SOFT_LIMIT_REVERSE_DEGREE) {
       target = Constants.SOFT_LIMIT_REVERSE_DEGREE;
     }
-    sparkMax.set(MathUtil.clamp(turretPID.calculate(this.getEncoderCounts(), target), -1, 1));
+    sparkMax.setVoltage(
+      MathUtil.clamp(
+        turretFF.calculate(
+          turretPID.calculate(this.getEncoderCounts(), target)
+        ),
+         -3, 3)
+    );
     
   }
 

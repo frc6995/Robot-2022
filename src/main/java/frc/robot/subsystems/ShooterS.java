@@ -5,10 +5,9 @@
 package frc.robot.subsystems;
 
 import com.revrobotics.CANSparkMax;
-import com.revrobotics.RelativeEncoder;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+import com.revrobotics.RelativeEncoder;
 
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -154,7 +153,7 @@ public class ShooterS extends SubsystemBase {
     return backPID.atSetpoint();
   }
 
-  public double getIndex(double distance) {
+  public static double getSpeedForDistance(double distance) {
     int index = Math.max(Math.min(Constants.DISTANCES.length-2, getUnderId(distance, Constants.DISTANCES)), 0);
     double rpm = calcSpeed(index, index+1, distance, Constants.DISTANCES, Constants.SPEEDS);
     return rpm; 

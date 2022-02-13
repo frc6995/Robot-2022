@@ -9,15 +9,16 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
-import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.commands.ShooterC;
+import frc.robot.commands.drivebase.DrivebaseCommandFactory;
+import frc.robot.commands.turret.TurretCommandFactory;
+import frc.robot.oi.CommandXboxController;
 import frc.robot.subsystems.DrivebaseS;
+import frc.robot.subsystems.IntakeS;
+import frc.robot.subsystems.LimelightS;
+import frc.robot.subsystems.MidtakeS;
 import frc.robot.subsystems.ShooterS;
 import frc.robot.subsystems.TurretS;
-import frc.robot.commands.turret.TurretCommandFactory;
 
 
 /**
@@ -34,23 +35,20 @@ public class RobotContainer {
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
-  private XboxController driverController;
-  private Command xboxDriveCommand;
-  private Command xboxShooterCommand;
+  private CommandXboxController driverController;
+  // Subsystems
   private DrivebaseS drivebaseS;
+  private IntakeS intakeS;
+  private MidtakeS midtakeS;
   private ShooterS shooterS;
   private TurretS turretS;
+  private LimelightS limelightS;
 
-  
+  // Command
+  private Command xboxDriveCommand;
   private Command runTurretC;
   private Command turretHomingC;
   private Command turretTurningC;
-
-
-  // Trigger definitions
-  private Trigger spinTurretTrigger;
-  private Trigger turretHomeTrigger;
-  private Trigger turretTurnTrigger;
 
   public RobotContainer() {
     // Configure the button bindings
@@ -69,46 +67,44 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
-
-    new Trigger(driverController::getAButton).whileActiveOnce(xboxShooterCommand);
-    spinTurretTrigger = new Trigger(driverController::getBButton);
-    spinTurretTrigger.whileActiveOnce(runTurretC);
-    turretHomeTrigger = new Trigger(driverController::getXButton);
-    turretHomeTrigger.whenActive(turretHomingC);
-    turretTurnTrigger = new Trigger(driverController::getYButton);
-    turretTurnTrigger.whenActive(turretTurningC);
+    driverController.b().whileActiveOnce(runTurretC);
+    driverController.x().whenActive(turretHomingC);
+    driverController.y().whenActive(turretTurningC);
   }
 
   private void createControllers() {
-    driverController = new XboxController(Constants.USB_PORT_DRIVER_CONTROLLER);
+    driverController = new CommandXboxController(Constants.USB_PORT_DRIVER_CONTROLLER);
   }
 
   private void createCommands() {
-    xboxDriveCommand = new RunCommand(
-      ()
-     -> {drivebaseS.curvatureDrive(
-       driverController.getRightTriggerAxis() - driverController.getLeftTriggerAxis(), 
-       driverController.getLeftX()
-       );
-      }
-    , drivebaseS);
+    xboxDriveCommand = DrivebaseCommandFactory.createCurvatureDriveC(
+      () -> {
+        return driverController.getRightTriggerAxis() - driverController.getLeftTriggerAxis();
+      },
+      driverController::getLeftX,
+      drivebaseS);
     drivebaseS.setDefaultCommand(xboxDriveCommand);
 
     runTurretC = TurretCommandFactory.createTurretManualC(
       driverController::getRightX, turretS);
-
-    turretS.setDefaultCommand(runTurretC);
     
+    turretS.setDefaultCommand(runTurretC);
     turretHomingC = TurretCommandFactory.createTurretHomingC(turretS);
 
     turretTurningC = TurretCommandFactory.createTurretTurnC(40, turretS);
+
+
     
     SmartDashboard.putData(new InstantCommand(turretS::resetEncoder));
   }
 
   private void createSubsystems() {
     drivebaseS = new DrivebaseS();
+    // intakeS = new IntakeS();
+    // midtakeS = new MidtakeS();
     turretS = new TurretS();
+    shooterS = new ShooterS();
+    limelightS = new LimelightS();
   }
 
   /**
