@@ -73,7 +73,7 @@ public class TurretCommandFactory {
             () -> false,
             turretS
         )
-        .withName("TurretTurnC");
+        .withName("TurretFollowC");
     }
 
     /**

@@ -13,10 +13,11 @@ import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 /** Add your docs here. */
 public class ShooterCommandFactory {
     /**
-     * Creates a TurretFollowC, which uses PID to point the turret to the given angle, where the homing switch is 0.
-     * @param angle a DoubleSupplier for the desired angle
-     * @param turretS the turret subsystem
-     * @return the TurretTurnC
+     * Creates a ShooterFollowC, which uses PID to run the front and back wheels to the given speeds.
+     * @param frontSpeed a DoubleSupplier for the desired front wheel speed
+     * @param backSpeed a DoubleSupplier for the desired back wheel speed
+     * @param shooterS the shooter subsystem
+     * @return the ShooterFollowC
      */
     public static Command createShooterFollowC(DoubleSupplier frontSpeed, DoubleSupplier backSpeed, ShooterS shooterS) {
         return new FunctionalCommand(
@@ -32,7 +33,7 @@ public class ShooterCommandFactory {
             () -> false,
             shooterS
         )
-        .withName("TurretTurnC");
+        .withName("ShooterFollowC");
     }
 
 
