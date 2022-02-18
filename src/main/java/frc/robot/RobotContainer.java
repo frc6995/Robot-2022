@@ -7,8 +7,8 @@ package frc.robot;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
-import frc.robot.commands.DriveCurvatureC;
 import frc.robot.subsystems.DrivebaseS;
 
 /**
@@ -23,6 +23,7 @@ public class RobotContainer {
   private XboxController driverController;
   private Command xboxDriveCommand;
   private DrivebaseS drivebaseS;
+  
   public RobotContainer() {
     // Configure the button bindings
     createControllers();
@@ -44,7 +45,14 @@ public class RobotContainer {
   }
 
   private void createCommands() {
-    xboxDriveCommand = new DriveCurvatureC(drivebaseS, driverController);
+    xboxDriveCommand = new RunCommand(
+      ()
+     -> {drivebaseS.curvatureDrive(
+       driverController.getRightTriggerAxis() - driverController.getLeftTriggerAxis(), 
+       driverController.getLeftX()
+       );
+      }
+    , drivebaseS);
     drivebaseS.setDefaultCommand(xboxDriveCommand);
   }
 

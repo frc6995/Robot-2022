@@ -16,7 +16,7 @@ import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 /**
- * Takes balls from the intake and holds it and sends it to the shooter
+ * Takes balls from the intake and holds it and sends it to the shooter.
  * 
  * @authors Jonas An and Ben Su
  */
@@ -36,39 +36,45 @@ public class MidtakeS extends SubsystemBase {
     backSparkMax.restoreFactoryDefaults();
   }
 
-/**
- * Sets the speed of the front motor
- * 
- * @param frontSpeed
- */
-  public void frontSparkMaxSpeed(double frontSpeed) {
+  /**
+   * Sets the speed of the front motor
+   * 
+   * @param frontSpeed the front speed
+   */
+  public void setFrontSparkMaxSpeed(double frontSpeed) {
     frontSparkMax.set(frontSpeed);
   }
 
-/**
- * Sets the speed of the back motor
- * 
- * @param backSpeed
- */
-  public void backSparkMaxSpeed(double backSpeed) {
+  /**
+   * Sets the speed of the back motor
+   * 
+   * @param backSpeed the back speed
+   */
+  public void setBackSparkMaxSpeed(double backSpeed) {
     backSparkMax.set(backSpeed);
   }
 
-/**
- * Returns whether the top Beam Break sensor is triggered
- * 
- * @return
- */
-  public boolean topBeamBroken() {
+  /**
+   * Spins both midtake motors at set speed.
+   */
+  public void spin() {
+    setFrontSparkMaxSpeed(Constants.MIDTAKE_FRONT_MOTOR_SPEED);
+    setBackSparkMaxSpeed(Constants.MIDTAKE_BACK_MOTOR_SPEED);
+  }
+
+  /**
+   * Returns whether the top Beam Break sensor is triggered
+   *
+   */
+  public boolean getIsTopBeamBroken() {
     return beamBreakTop.get();
   }
 
   /**
    * Returns whether the bottom Beam Break sensor is triggered
    * 
-   * @return
    */
-  public boolean bottomBeamBroken() {
+  public boolean getIsBottomBeamBroken() {
     return beamBreakBottom.get();
   }
 
@@ -77,12 +83,18 @@ public class MidtakeS extends SubsystemBase {
    * 
    * @return
    */
-  public boolean colorSensorValue() {
+  public boolean getIsBallColorCorrect() {
     Color detectedColor = colorSensor.getColor();
     boolean isBallRed = detectedColor.red > detectedColor.blue;
     boolean areWeRed = DriverStation.getAlliance() == Alliance.Red;
-    boolean sameColor = !(isBallRed ^ areWeRed);
-    return sameColor;
+    return isBallRed == areWeRed;
+  }
+
+  /**
+   * Returns whether the color sensor's proximity sensor detects a ball.
+   */
+  public boolean getColorSensorDetectsBall() {
+    return colorSensor.getProximity() > Constants.COLOR_SENSOR_PROXIMITY_THRESHOLD;
   }
 
   @Override
