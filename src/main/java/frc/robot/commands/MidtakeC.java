@@ -23,7 +23,7 @@ public class MidtakeC extends CommandBase {
     midtake.backSparkMaxSpeed(Constants.MIDTAKE_BACK_MOTOR_SPEED);
   }
 /**
- * 
+ * Starts the midtake motors when the command is called (button pressed)
  */
 
   @Override
@@ -34,6 +34,9 @@ public class MidtakeC extends CommandBase {
     midtake.frontSparkMaxSpeed(0);
     midtake.backSparkMaxSpeed(0);
   }
+  /**
+   * Stops the midtake motors when the command ends (button released)
+   */
 
   @Override
   public boolean isFinished() {
@@ -49,8 +52,7 @@ public class MidtakeC extends CommandBase {
     return isBottomBeamBroken || isTopBeamBroken;
   }
 }
-/** Stops midtake motors when either bottom beam break sensor is cleared or top beam break sensor is triggered
- * 
+/** Stops midtake motors if bottom beam break sensor is cleared or top beam break sensor is triggered
  * 
  * @author Jonas An
  * @author Ben Su

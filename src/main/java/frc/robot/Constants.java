@@ -13,6 +13,7 @@ package frc.robot;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
+    //Drivebase Constants
     public static final int CAN_ID_FRONT_LEFT_DRIVE_MOTOR = 13;
     public static final int CAN_ID_FRONT_RIGHT_DRIVE_MOTOR = 14;
     public static final int CAN_ID_BACK_LEFT_DRIVE_MOTOR = 12;
