@@ -1,7 +1,3 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
 package frc.robot.subsystems;
 
 import com.kauailabs.navx.frc.AHRS;
@@ -16,8 +12,13 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
+/**
+ * The drivebase subsystem. This controls the position of the robot on the
+ * field.
+ */
 public class DrivebaseS extends SubsystemBase {
-  private final CANSparkMax frontRight = new CANSparkMax(Constants.CAN_ID_FRONT_RIGHT_DRIVE_MOTOR, MotorType.kBrushless);
+  private final CANSparkMax frontRight = new CANSparkMax(Constants.CAN_ID_FRONT_RIGHT_DRIVE_MOTOR,
+      MotorType.kBrushless);
   private final CANSparkMax frontLeft = new CANSparkMax(Constants.CAN_ID_FRONT_LEFT_DRIVE_MOTOR, MotorType.kBrushless);
   private final CANSparkMax backRight = new CANSparkMax(Constants.CAN_ID_BACK_RIGHT_DRIVE_MOTOR, MotorType.kBrushless);
   private final CANSparkMax backLeft = new CANSparkMax(Constants.CAN_ID_BACK_LEFT_DRIVE_MOTOR, MotorType.kBrushless);
@@ -36,9 +37,10 @@ public class DrivebaseS extends SubsystemBase {
     backLeft.follow(frontLeft, false);
 
   }
-/**
- * Creates a deadband for the drivebase joystick
- */
+
+  /**
+   * Creates a deadband for the drivebase joystick
+   */
   public double deadbandJoysticks(double value) {
     if (Math.abs(value) < Constants.DRIVEBASE_DEADBAND) {
       value = 0;
@@ -46,8 +48,10 @@ public class DrivebaseS extends SubsystemBase {
     return value;
   }
 
-  // Curvature drive method
-  // Forward back is from 1 to -1, turn is from 1 to -1
+  /**
+   * Curvature drive method
+   * Forward back is from 1 to -1, turn is from 1 to -1
+   */
   public void curvatureDrive(double fwdBack, double turn) {
     fwdBack = deadbandJoysticks(fwdBack);
     turn = deadbandJoysticks(turn);
@@ -64,6 +68,7 @@ public class DrivebaseS extends SubsystemBase {
 
   /**
    * makes robot drive with both wheels going in the same direction
+   * 
    * @param left
    * @param right
    */
@@ -72,15 +77,15 @@ public class DrivebaseS extends SubsystemBase {
     frontRight.set(right);
   }
 
-  @Override
-  public void periodic() {
-    // This method will be called once per scheduler run
-  }
-
   /**
    * Sets motor speed to 0 when subsystem ends
    */
   public void stopAll() {
     tankDrive(0, 0);
+  }
+
+  @Override
+  public void periodic() {
+    // This method will be called once per scheduler run
   }
 }

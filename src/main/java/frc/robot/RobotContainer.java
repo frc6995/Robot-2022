@@ -1,7 +1,3 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
 package frc.robot;
 
 import edu.wpi.first.wpilibj.GenericHID;
@@ -19,7 +15,6 @@ import frc.robot.subsystems.LimelightS;
 import frc.robot.subsystems.MidtakeS;
 import frc.robot.subsystems.ShooterS;
 import frc.robot.subsystems.TurretS;
-
 
 /**
  * This class is where the bulk of the robot should be declared. Since
@@ -52,7 +47,6 @@ public class RobotContainer {
   private Command turretTurningC;
 
   public RobotContainer() {
-    // Configure the button bindings
     createControllers();
     createSubsystems();
     createCommands();
@@ -73,32 +67,39 @@ public class RobotContainer {
     driverController.y().whenActive(turretTurningC);
   }
 
+  /**
+   * Instantiate the driver and operator controllers
+   */
   private void createControllers() {
     driverController = new CommandXboxController(Constants.USB_PORT_DRIVER_CONTROLLER);
   }
 
+  /**
+   * Instantiate the commands
+   */
   private void createCommands() {
     xboxDriveCommand = DrivebaseCommandFactory.createCurvatureDriveC(
-      () -> {
-        return driverController.getRightTriggerAxis() - driverController.getLeftTriggerAxis();
-      },
-      driverController::getLeftX,
-      drivebaseS);
+        () -> {
+          return driverController.getRightTriggerAxis() - driverController.getLeftTriggerAxis();
+        },
+        driverController::getLeftX,
+        drivebaseS);
     drivebaseS.setDefaultCommand(xboxDriveCommand);
 
     runTurretC = TurretCommandFactory.createTurretManualC(
-      driverController::getRightX, turretS);
-    
+        driverController::getRightX, turretS);
+
     turretS.setDefaultCommand(runTurretC);
     turretHomingC = TurretCommandFactory.createTurretHomingC(turretS);
 
     turretTurningC = TurretCommandFactory.createTurretTurnC(40, turretS);
 
-
-    
     SmartDashboard.putData(new InstantCommand(turretS::resetEncoder));
   }
 
+  /**
+   * Instantiate the subsystems
+   */
   private void createSubsystems() {
     drivebaseS = new DrivebaseS();
     intakeS = new IntakeS();
@@ -116,14 +117,13 @@ public class RobotContainer {
   public Command getAutonomousCommand() {
     // An ExampleCommand will run in autonomous
     return AutoCommandFactory.createTwoBallAutoCG(
-      3800,
-      1900,
-      0,
-      shooterS,
-      intakeS,
-      midtakeS,
-      turretS,
-      drivebaseS
-    );
+        3800,
+        1900,
+        0,
+        shooterS,
+        intakeS,
+        midtakeS,
+        turretS,
+        drivebaseS);
   }
 }

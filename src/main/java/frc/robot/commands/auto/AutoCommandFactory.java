@@ -38,26 +38,22 @@ public class AutoCommandFactory {
         return new ParallelCommandGroup(
                 // Spins up the front and back shooter motors to the set target speeds
                 new InstantCommand(
-                    () -> {
-                        shooterS.pidFrontSpeed(targetFrontSpeed);
-                        shooterS.pidBackSpeed(targetBackSpeed);
-                    },
-                    shooterS
-                )
-                .andThen(
-                    new WaitUntilCommand(shooterS::isAtTarget)
-                ),
+                        () -> {
+                            shooterS.pidFrontSpeed(targetFrontSpeed);
+                            shooterS.pidBackSpeed(targetBackSpeed);
+                        },
+                        shooterS)
+                                .andThen(
+                                        new WaitUntilCommand(shooterS::isAtTarget)),
                 // Homes the turret
                 TurretCommandFactory.createTurretHomingC(turretS)
-                .andThen(
-                    TurretCommandFactory.createTurretTurnC(
-                        Constants.SOFT_LIMIT_FORWARD_DEGREE / 2.0, // halfway between 0 and the forward
+                        .andThen(
+                                TurretCommandFactory.createTurretTurnC(
+                                        Constants.SOFT_LIMIT_FORWARD_DEGREE / 2.0, // halfway between 0 and the forward
                                                                                    // limit.
-                        turretS)
-                )
-                .andThen(
-                    new WaitUntilCommand(turretS::isAtTarget)
-                ),
+                                        turretS))
+                        .andThen(
+                                new WaitUntilCommand(turretS::isAtTarget)),
                 // Drives at 25% speed for 7 seconds or until the color sensor detects a ball
                 // present
                 DrivebaseCommandFactory.createTimedDriveC(.25, 7, drivebaseS)
@@ -65,20 +61,18 @@ public class AutoCommandFactory {
                 // Intakes one ball, stores or rejects based on whether the color is correct
                 MainCommandFactory.createIntakeIndexCG(intakeS, midtakeS)
                         // Retracts intake
-                .andThen(intakeS::retract, intakeS)
-            )
-            // Spins the midtake to feed the shooter
-            .andThen(
-                new RunCommand(midtakeS::spin, midtakeS)
-                .withTimeout(10))
-            .andThen(new InstantCommand(
-                () -> {
-                    midtakeS.stop();
-                    shooterS.stop();
-                },
-                midtakeS, shooterS)
-            )
-            .withName("Two Ball Auto");
+                        .andThen(intakeS::retract, intakeS))
+                                // Spins the midtake to feed the shooter
+                                .andThen(
+                                        new RunCommand(midtakeS::spin, midtakeS)
+                                                .withTimeout(10))
+                                .andThen(new InstantCommand(
+                                        () -> {
+                                            midtakeS.stop();
+                                            shooterS.stop();
+                                        },
+                                        midtakeS, shooterS))
+                                .withName("Two Ball Auto");
     }
 
 }
