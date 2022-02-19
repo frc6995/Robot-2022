@@ -73,5 +73,11 @@ public final class Constants {
     public static final double INTAKE_SPEED = 0.25;
     public static final double INTAKE_EJECT_SPEED = -0.5;
 
+    //LED Constants
+    public static final double LED_SOLID_GREEN = 0.77;
+    public static final double LED_PATTERN_GREEN = 0.01;
+    public static final double LED_PATTERN_RED = -0.11;
+    public static final double LED_PARTY_MODE = -0.97;
+
 }
 
