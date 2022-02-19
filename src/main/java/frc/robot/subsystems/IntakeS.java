@@ -20,7 +20,7 @@ public class IntakeS extends SubsystemBase {
     private final CANSparkMax intakeLeadMotor = new CANSparkMax(Constants.CAN_ID_INTAKE_LEAD_MOTOR, MotorType.kBrushless);
     private final CANSparkMax intakeFollowerMotor = new CANSparkMax(Constants.CAN_ID_INTAKE_FOLLOWER_MOTOR, MotorType.kBrushless);
     private DoubleSolenoid doubleSolenoid = new DoubleSolenoid(PneumaticsModuleType.CTREPCM,
-        Constants.DOUBLE_SOLENOID_INTAKE_EXTEND, Constants.DOUBLE_SOLENOID_INTAKE_RETRACT);
+        Constants.DOUBLE_SOLENOID_INTAKE_PORT_EXTEND, Constants.DOUBLE_SOLENOID_INTAKE_PORT_RETRACT);
 
     /**
      * Constructs a new IntakeS.

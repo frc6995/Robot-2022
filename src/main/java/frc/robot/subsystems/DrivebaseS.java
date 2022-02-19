@@ -36,7 +36,9 @@ public class DrivebaseS extends SubsystemBase {
     backLeft.follow(frontLeft, false);
 
   }
-
+/**
+ * Creates a deadband for the drivebase joystick
+ */
   public double deadbandJoysticks(double value) {
     if (Math.abs(value) < Constants.DRIVEBASE_DEADBAND) {
       value = 0;
@@ -60,6 +62,11 @@ public class DrivebaseS extends SubsystemBase {
     tankDrive(speeds.left, speeds.right);
   }
 
+  /**
+   * makes robot drive with both wheels going in the same direction
+   * @param left
+   * @param right
+   */
   public void tankDrive(double left, double right) {
     frontLeft.set(left);
     frontRight.set(right);
@@ -70,6 +77,9 @@ public class DrivebaseS extends SubsystemBase {
     // This method will be called once per scheduler run
   }
 
+  /**
+   * Sets motor speed to 0 when subsystem ends
+   */
   public void stopAll() {
     tankDrive(0, 0);
   }
