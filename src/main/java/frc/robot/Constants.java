@@ -18,6 +18,7 @@ public final class Constants {
     public static final int CAN_ID_BACK_LEFT_DRIVE_MOTOR = 12;
     public static final int CAN_ID_BACK_RIGHT_DRIVE_MOTOR = 10;
     public static final int USB_PORT_DRIVER_CONTROLLER = 0;
+    public static final int USB_PORT_OPERATOR_CONTROLLER = 1;
     public static final double DRIVEBASE_DEADBAND = 0.02; // anything under 1.5% of full joystick away from 0 should be considered 0
     public static final double DRIVEBASE_TURN_SLEW_LIMIT = 2.0; // 0 to 200% in one second. 0 to full in 1/2 second.
     public static final double DRIVEBASE_FWD_BACK_SLEW_LIMIT = 1; // 0 to 100% in one second.
@@ -67,5 +68,58 @@ public final class Constants {
     public static final double INTAKE_SPEED = 0.25;
     public static final double INTAKE_EJECT_SPEED = -0.5;
 
+    //Climber Constants
+    /**
+     * The proportional constant for the climber
+     */
+    public static final double CLIMBER_P_CONSTANT = 0;
+    /**
+     * The integral constant for the climber
+     */
+    public static final double CLIMBER_I_CONSTANT = 0;
+    /**
+     * The derivative constant for the climber
+     */
+    public static final double CLIMBER_D_CONSTANT = 0;
+    /**
+     * The CAN ID of the climber motor
+     */
+    public static final int CAN_ID_CLIMBER_MOTOR = 0;
+    /**
+     * The PID error of the climber
+     */
+    public static final int CLIMBER_PID_ERROR = 10;
+    /**
+     * The max amount of rotations extending the climber
+     */
+    public static final int CLIMBER_SOFT_LIMIT_FORWARD = 20;
+    /**
+     * The maximum a mount of rotations retracting the climber
+     */
+    public static final int CLIMBER_SOFT_LIMIT_BACK = -1;
+    /**
+     * The port number of the double solenoid when it folds the climber up
+     */
+    public static final int DOUBLE_SOLENOID_CLIMBER_UP = 4;
+    /**
+     * The port number of the double solenoid when it folds the climber down
+     */
+    public static final int DOUBLE_SOLENOID_CLIMBER_DOWN = 5;
+    /**
+     * The CAN ID of the back climb motor
+     */
+    public static final int CAN_ID_BACK_CLIMB_MOTOR = 0;
+    /**
+     * The proportional constant for the back climber
+     */
+    public static final int BACK_CLIMBER_P_CONSTANT = 0;
+    /**
+     * The integral constant for the back climber
+     */
+    public static final int BACK_CLIMBER_I_CONSTANT = 0;
+    /**
+     * The derivative constant for the back climber
+     */
+    public static final int BACK_CLIMBER_D_CONSTANT = 0;
 }
 

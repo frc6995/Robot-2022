@@ -13,7 +13,10 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.commands.ClimberExtendsC;
+import frc.robot.commands.ClimberRetractsC;
 import frc.robot.commands.ShooterC;
+import frc.robot.subsystems.ClimberS;
 import frc.robot.subsystems.DrivebaseS;
 import frc.robot.subsystems.ShooterS;
 import frc.robot.subsystems.TurretS;
@@ -35,22 +38,25 @@ public class RobotContainer {
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
   private XboxController driverController;
+  private XboxController operatorController;
   private Command xboxDriveCommand;
   private Command xboxShooterCommand;
   private DrivebaseS drivebaseS;
   private ShooterS shooterS;
   private TurretS turretS;
+  private ClimberS climberS;
 
   
   private Command runTurretC;
   private Command turretHomingC;
   private Command turretTurningC;
 
-
   // Trigger definitions
   private Trigger spinTurretTrigger;
   private Trigger turretHomeTrigger;
   private Trigger turretTurnTrigger;
+  private Trigger extendsClimber;
+  private Trigger retractClimber;
 
   public RobotContainer() {
     // Configure the button bindings
@@ -77,10 +83,15 @@ public class RobotContainer {
     turretHomeTrigger.whenActive(turretHomingC);
     turretTurnTrigger = new Trigger(driverController::getYButton);
     turretTurnTrigger.whenActive(turretTurningC);
+    extendsClimber = new Trigger(operatorController::getAButton);
+    extendsClimber.whenActive(new ClimberExtendsC(climberS));
+    retractClimber = new Trigger(operatorController::getBButton);
+    retractClimber.whenActive(new ClimberRetractsC(climberS));
   }
 
   private void createControllers() {
     driverController = new XboxController(Constants.USB_PORT_DRIVER_CONTROLLER);
+    operatorController = new XboxController(Constants.USB_PORT_OPERATOR_CONTROLLER);
   }
 
   private void createCommands() {
