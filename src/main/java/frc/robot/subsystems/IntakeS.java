@@ -14,13 +14,16 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
 /**
- * The intake subsystem, which extends and spins to pull balls over the bumper into the midtake.
+ * The intake subsystem, which extends and spins to pull balls over the bumper
+ * into the midtake.
  */
 public class IntakeS extends SubsystemBase {
-    private final CANSparkMax intakeLeadMotor = new CANSparkMax(Constants.CAN_ID_INTAKE_LEAD_MOTOR, MotorType.kBrushless);
-    private final CANSparkMax intakeFollowerMotor = new CANSparkMax(Constants.CAN_ID_INTAKE_FOLLOWER_MOTOR, MotorType.kBrushless);
+    private final CANSparkMax intakeLeadMotor = new CANSparkMax(Constants.CAN_ID_INTAKE_LEAD_MOTOR,
+            MotorType.kBrushless);
+    private final CANSparkMax intakeFollowerMotor = new CANSparkMax(Constants.CAN_ID_INTAKE_FOLLOWER_MOTOR,
+            MotorType.kBrushless);
     private DoubleSolenoid doubleSolenoid = new DoubleSolenoid(PneumaticsModuleType.CTREPCM,
-        Constants.DOUBLE_SOLENOID_INTAKE_EXTEND, Constants.DOUBLE_SOLENOID_INTAKE_RETRACT);
+            Constants.DOUBLE_SOLENOID_INTAKE_EXTEND, Constants.DOUBLE_SOLENOID_INTAKE_RETRACT);
 
     /**
      * Constructs a new IntakeS.
@@ -28,7 +31,8 @@ public class IntakeS extends SubsystemBase {
     public IntakeS() {
         intakeLeadMotor.restoreFactoryDefaults();
         intakeFollowerMotor.restoreFactoryDefaults();
-        intakeFollowerMotor.follow(intakeLeadMotor, true);
+        intakeFollowerMotor.setInverted(true);
+        // intakeFollowerMotor.follow(intakeLeadMotor, true);
     }
 
     /**
@@ -54,10 +58,12 @@ public class IntakeS extends SubsystemBase {
 
     /**
      * Spins the intake at the given speed.
+     * 
      * @param speed the speed
      */
     public void spin(double speed) {
         intakeLeadMotor.set(speed);
+        intakeFollowerMotor.set(speed);
     }
 
     /**

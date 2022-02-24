@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj.I2C;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+
 /**
  * Takes balls from the intake and holds it and sends it to the shooter.
  * 
@@ -32,6 +33,7 @@ public class MidtakeS extends SubsystemBase {
 
   public MidtakeS() {
     frontSparkMax.restoreFactoryDefaults();
+    frontSparkMax.setInverted(true);
     backSparkMax.restoreFactoryDefaults();
   }
 
@@ -60,7 +62,7 @@ public class MidtakeS extends SubsystemBase {
     spin(Constants.MIDTAKE_FRONT_MOTOR_SPEED);
   }
 
-    /**
+  /**
    * Spins both midtake motors at set speed.
    */
   public void spin(double speed) {
