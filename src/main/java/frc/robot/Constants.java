@@ -6,6 +6,8 @@ package frc.robot;
 
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.Vector;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
 import edu.wpi.first.math.numbers.N2;
 import edu.wpi.first.math.numbers.N7;
@@ -92,8 +94,9 @@ public final class Constants {
     //Limelight Constants
     public static final double LIMELIGHT_FILTER_TIME_CONSTANT = 0.1; 
     public static final double LIMELIGHT_FILTER_PERIOD_CONSTANT = 0.02;
+    public static final double CAMERA_DIAG_FOV_DEGREES = 45; // TODO real numbers
     public static final double CAMERA_HEIGHT_METERS = 0.9398; //37 inches
-    public static final double TARGET_HEIGHT_METERS = 2.6416; //8ft 8 inches
+    public static final double CAMERA_CENTER_OFFSET = Units.inchesToMeters(7); // TODO real numbers
     public static final double CAMERA_PITCH_RADIANS = Units.degreesToRadians(30); // 30 degrees above horizontal
   
     //Intake Constants
@@ -103,6 +106,15 @@ public final class Constants {
     public static final int DOUBLE_SOLENOID_INTAKE_RETRACT = 3;
     public static final double INTAKE_SPEED = 0.25;
     public static final double INTAKE_EJECT_SPEED = -0.5;
+
+    //Field Constants
+    public static final Pose2d HUB_CENTER_POSE = new Pose2d(
+        Units.feetToMeters(54.0/2),
+        Units.feetToMeters(27.0/2),
+        Rotation2d.fromDegrees(0));
+    public static final double HUB_RADIUS_METERS = Units.feetToMeters(2);
+    public static final double TARGET_HEIGHT_METERS = Units.inchesToMeters(104); //8ft 8 inches
+    public static final double TAPE_STRIP_COUNT = 24.0; // TODO real numbers
 
 }
 

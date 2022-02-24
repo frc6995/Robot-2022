@@ -48,6 +48,10 @@ public class OdometryManager implements Loggable {
         updateTargetOffset(m_currPoseMeters);
     }
 
+    public Pose2d getCurrentRobotPose() {
+        return m_currPoseMeters;
+    }
+
     /**
      * Update the robot-relative target offset. 
      * @param newPose the new robot pose to update against.
@@ -64,8 +68,8 @@ public class OdometryManager implements Loggable {
      * @param distanceToTapeMeters
      * @param rotationOffsetRadians
      */
-    public void addVisionMeasurement(double distanceToTapeMeters, double rotationOffsetRadians) {
-        m_transformToHub = new Translation2d(distanceToTapeMeters, new Rotation2d(rotationOffsetRadians).plus(m_currPoseMeters.getRotation()));
+    public void addVisionMeasurement(double distanceToTapeMeters, Rotation2d rotationOffsetRadians) {
+        m_transformToHub = new Translation2d(distanceToTapeMeters, rotationOffsetRadians.plus(m_currPoseMeters.getRotation()));
         System.out.println("added");
     }
 

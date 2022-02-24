@@ -14,6 +14,7 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.filter.Debouncer;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N2;
 import edu.wpi.first.math.system.plant.LinearSystemId;
@@ -98,7 +99,10 @@ public class TurretS extends SubsystemBase implements Loggable {
     else {
       return turretSimEncoder.getPosition();
     }
-    
+  }
+
+  public Rotation2d getRotation2d() {
+    return Rotation2d.fromDegrees(getEncoderCounts());
   }
 
   /**

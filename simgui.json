@@ -43,15 +43,22 @@
       "ShooterS": {
         "open": true
       },
-      "open": true
+      "Ungrouped": {
+        "open": true
+      }
     },
     "Shuffleboard": {
       "ShooterS": {
         "open": true
-      },
-      "open": true
+      }
     },
     "SmartDashboard": {
+      "open": true
+    },
+    "photonvision": {
+      "gloworm": {
+        "open": true
+      },
       "open": true
     }
   },

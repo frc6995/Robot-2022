@@ -4,6 +4,9 @@
 
 package frc.robot;
 
+import java.util.List;
+
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -72,7 +75,6 @@ public class RobotContainer {
     // Configure the button bindings
     createControllers();
     createSubsystems();
-    odometryManager = new OdometryManager(drivebaseS::getRobotPose);
     createCommands();
     configureButtonBindings();
   }
@@ -122,11 +124,13 @@ public class RobotContainer {
 
   private void createSubsystems() {
     drivebaseS = new DrivebaseS();
+    odometryManager = new OdometryManager(drivebaseS::getRobotPose);
     intakeS = new IntakeS();
     midtakeS = new MidtakeS();
     turretS = new TurretS();
     shooterS = new ShooterS();
-    limelightS = new LimelightS();
+    limelightS = new LimelightS(odometryManager, turretS::getRotation2d,
+    (List<Pose2d> list)->{field.getObject("targetRing").setPoses(list);});
   }
 
   /**
@@ -149,6 +153,9 @@ public class RobotContainer {
   }
 
   public void robotPeriodic() {
+
+
+    /*Field2d setup */
     field.setRobotPose(drivebaseS.getRobotPose());
     odometryManager.periodic();
     field.getObject("target").setPose(
