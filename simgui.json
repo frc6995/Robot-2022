@@ -1,23 +1,4 @@
 {
-  "HALProvider": {
-    "Other Devices": {
-      "SPARK MAX [13]": {
-        "header": {
-          "open": true
-        }
-      },
-      "SPARK MAX [14]": {
-        "header": {
-          "open": true
-        }
-      },
-      "SPARK MAX [30]": {
-        "header": {
-          "open": true
-        }
-      }
-    }
-  },
   "NTProvider": {
     "types": {
       "/FMSInfo": "FMSInfo",
@@ -27,7 +8,6 @@
       "/LiveWindow/MidtakeS": "Subsystem",
       "/LiveWindow/ShooterS": "Subsystem",
       "/LiveWindow/TurretS": "Subsystem",
-      "/LiveWindow/Ungrouped/DifferentialDrive[1]": "DifferentialDrive",
       "/LiveWindow/Ungrouped/DigitalInput[0]": "Digital Input",
       "/LiveWindow/Ungrouped/DigitalInput[1]": "Digital Input",
       "/LiveWindow/Ungrouped/DigitalInput[2]": "Digital Input",
@@ -40,17 +20,13 @@
       "/SmartDashboard/InstantCommand": "Command"
     },
     "windows": {
-      "/LiveWindow/DrivebaseS": {
-        "window": {
-          "visible": true
-        }
-      },
       "/Shuffleboard/RobotContainer/field": {
         "Turret": {
+          "arrows": false,
           "color": [
-            0.6033755540847778,
-            0.3793373703956604,
-            0.3793373703956604,
+            0.47257381677627563,
+            0.2651996612548828,
+            0.2651996612548828,
             255.0
           ],
           "length": 0.4000000059604645,
@@ -63,23 +39,14 @@
     }
   },
   "NetworkTables": {
+    "LiveWindow": {
+      "ShooterS": {
+        "open": true
+      },
+      "open": true
+    },
     "Shuffleboard": {
-      "DrivebaseS": {
-        "SimEncoder": {
-          "open": true
-        },
-        "open": true
-      },
-      "OdometryManager": {
-        "open": true
-      },
-      "RobotContainer": {
-        "field": {
-          "open": true
-        },
-        "open": true
-      },
-      "TurretS": {
+      "ShooterS": {
         "open": true
       },
       "open": true
@@ -94,7 +61,8 @@
         {
           "axis": [
             {
-              "autoFit": true
+              "autoFit": true,
+              "lockMin": true
             }
           ],
           "height": 332,
@@ -106,39 +74,7 @@
                 0.6901960968971252,
                 1.0
               ],
-              "id": "NT:/Shuffleboard/OdometryManager/getRotationOffset"
-            },
-            {
-              "color": [
-                0.3333333432674408,
-                0.658823549747467,
-                0.4078431725502014,
-                1.0
-              ],
-              "id": "SPARK MAX [30]-Applied Output"
-            }
-          ]
-        }
-      ]
-    },
-    "Plot <1>": {
-      "plots": [
-        {
-          "axis": [
-            {
-              "autoFit": true
-            }
-          ],
-          "height": 332,
-          "series": [
-            {
-              "color": [
-                0.2980392277240753,
-                0.44705885648727417,
-                0.6901960968971252,
-                1.0
-              ],
-              "id": "NT:/Shuffleboard/TurretS/turretPosition"
+              "id": "NT:/Shuffleboard/ShooterS/frontEncoderVelocityRPM"
             },
             {
               "color": [
@@ -147,7 +83,7 @@
                 0.32156863808631897,
                 1.0
               ],
-              "id": "NT:/Shuffleboard/TurretS/getError"
+              "id": "NT:/Shuffleboard/ShooterS/backEncoderVelocityRPM"
             }
           ]
         }

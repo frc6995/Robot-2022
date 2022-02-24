@@ -10,9 +10,17 @@ import com.revrobotics.RelativeEncoder;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.math.system.plant.LinearSystemId;
+import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.simulation.FlywheelSim;
+import edu.wpi.first.wpilibj.simulation.LinearSystemSim;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.Robot;
+import frc.robot.util.SimEncoder;
 import io.github.oblarg.oblog.Loggable;
 import io.github.oblarg.oblog.annotations.Log;
 
@@ -20,17 +28,36 @@ public class ShooterS extends SubsystemBase implements Loggable{
   private final CANSparkMax frontSparkMax = new CANSparkMax(Constants.CAN_ID_FRONT_SHOOTER_MOTOR, MotorType.kBrushless);
   private final CANSparkMax backSparkMax = new CANSparkMax(Constants.CAN_ID_BACK_SHOOTER_MOTOR, MotorType.kBrushless);
   private RelativeEncoder frontEncoder;
+  private SimEncoder frontSimEncoder = new SimEncoder();
+  private double lastFrontEncoderPosition = 0;
+  @Log
+  private double frontEncoderVelocityRPM = 0;
   private RelativeEncoder backEncoder;
+  private SimEncoder backSimEncoder = new SimEncoder();
+  private double lastBackEncoderPosition = 0;
+  @Log
+  private double backEncoderVelocityRPM = 0;
+
   private PIDController frontPID = new PIDController(Constants.SHOOTER_FRONT_P, 0, 0);
   private PIDController backPID = new PIDController(Constants.SHOOTER_BACK_P, 0, 0);
   private SimpleMotorFeedforward frontFF = new SimpleMotorFeedforward(
     Constants.SHOOTER_FRONT_FF[0],
     Constants.SHOOTER_FRONT_FF[1],
     Constants.SHOOTER_FRONT_FF[2]);
+  private FlywheelSim frontSim = new FlywheelSim(
+    LinearSystemId.identifyVelocitySystem(
+      Constants.SHOOTER_FRONT_FF[1], 
+      Constants.SHOOTER_FRONT_FF[2]), 
+      DCMotor.getNEO(1), 1);
   private SimpleMotorFeedforward backFF = new SimpleMotorFeedforward(
     Constants.SHOOTER_BACK_FF[0],
     Constants.SHOOTER_BACK_FF[1],
     Constants.SHOOTER_BACK_FF[2]);
+    private FlywheelSim backSim = new FlywheelSim(
+      LinearSystemId.identifyVelocitySystem(
+        Constants.SHOOTER_BACK_FF[1], 
+        Constants.SHOOTER_BACK_FF[2]), 
+        DCMotor.getNEO(1), 1);
 
   /** Creates a new ShooterS. */
   public ShooterS() {
@@ -41,6 +68,7 @@ public class ShooterS extends SubsystemBase implements Loggable{
 
     frontEncoder = frontSparkMax.getEncoder();
     backEncoder = backSparkMax.getEncoder();
+
 
     frontPID.setTolerance(Constants.SHOOTER_PID_ERROR, 0);
     backPID.setTolerance(Constants.SHOOTER_PID_ERROR, 0);
@@ -65,7 +93,8 @@ public class ShooterS extends SubsystemBase implements Loggable{
    */
   @Log
   public double getFrontEncoderSpeed() {
-    return frontEncoder.getVelocity();
+    return frontEncoderVelocityRPM;
+
   }
 
   /**
@@ -75,7 +104,7 @@ public class ShooterS extends SubsystemBase implements Loggable{
    */
   @Log
   public double getBackEncoderSpeed() {
-    return backEncoder.getVelocity();
+    return backEncoderVelocityRPM;
   }
 
   /**
@@ -85,7 +114,7 @@ public class ShooterS extends SubsystemBase implements Loggable{
    */
   public void setFrontSpeed(double speed) {
     speed = deadbandJoystick(speed);
-    frontSparkMax.set(speed);
+    frontSparkMax.setVoltage(speed * RobotController.getInputVoltage());
   }
 
   /**
@@ -95,7 +124,7 @@ public class ShooterS extends SubsystemBase implements Loggable{
    */
   public void setBackSpeed(double speed) {
     speed = deadbandJoystick(speed);
-    backSparkMax.set(speed);
+    backSparkMax.setVoltage(speed * RobotController.getInputVoltage());
   }
 
   /**
@@ -222,5 +251,31 @@ public class ShooterS extends SubsystemBase implements Loggable{
 
   @Override
   public void periodic() {
+    double frontEncoderPosition = 0;
+    double backEncoderPosition = 0;
+    if(Robot.isReal()) {
+      frontEncoderPosition = frontEncoder.getPosition();
+      backEncoderPosition = backEncoder.getPosition();
+      frontEncoderVelocityRPM = (frontEncoderPosition - lastFrontEncoderPosition) * 60.0 /*seconds/minute*/ / 0.02 /*seconds dt*/;
+      backEncoderVelocityRPM = (backEncoderPosition - lastBackEncoderPosition) * 60.0 /*seconds/minute*/ / 0.02 /*seconds dt*/;
+      lastFrontEncoderPosition = frontEncoderPosition;
+      lastBackEncoderPosition = backEncoderPosition;
+    }
+    else {
+      simulationPeriodic();
+    }
+  }
+
+  public void simulationPeriodic() {
+    frontSim.setInput(frontSparkMax.getAppliedOutput() - 
+      (Math.signum(frontSparkMax.getAppliedOutput()) * Constants.SHOOTER_FRONT_FF[0]));
+    backSim.setInput(backSparkMax.getAppliedOutput() - 
+      (Math.signum(backSparkMax.getAppliedOutput()) * Constants.SHOOTER_BACK_FF[0]));
+    
+    frontSim.update(0.02);
+    backSim.update(0.02);
+
+    frontEncoderVelocityRPM = frontSim.getAngularVelocityRPM();
+    backEncoderVelocityRPM = backSim.getAngularVelocityRPM();
   }
 }

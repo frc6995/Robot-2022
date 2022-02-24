@@ -27,7 +27,7 @@ public class MainCommandFactory {
         .alongWith(
             ShooterCommandFactory.createShooterFollowC(
                 ()->{return ShooterS.getSpeedForDistance(odometryManager.getDistanceToCenter());},
-                ()->{return ShooterS.getSpeedForDistance(odometryManager.getDistanceToCenter());},
+                ()->{return 1.3 * ShooterS.getSpeedForDistance(odometryManager.getDistanceToCenter());},
                 shooterS)
         );
     }
