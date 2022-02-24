@@ -4,7 +4,16 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.Vector;
+import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
+import edu.wpi.first.math.numbers.N2;
+import edu.wpi.first.math.numbers.N7;
+import edu.wpi.first.math.system.LinearSystem;
+import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.simulation.DifferentialDrivetrainSim;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -20,9 +29,30 @@ public final class Constants {
     public static final int CAN_ID_BACK_LEFT_DRIVE_MOTOR = 12;
     public static final int CAN_ID_BACK_RIGHT_DRIVE_MOTOR = 10;
     public static final int USB_PORT_DRIVER_CONTROLLER = 0;
-    public static final double DRIVEBASE_DEADBAND = 0.02; // anything under 1.5% of full joystick away from 0 should be considered 0
+    public static final double DRIVEBASE_DEADBAND = 0.03; // anything under 1.5% of full joystick away from 0 should be considered 0
     public static final double DRIVEBASE_TURN_SLEW_LIMIT = 2.0; // 0 to 200% in one second. 0 to full in 1/2 second.
     public static final double DRIVEBASE_FWD_BACK_SLEW_LIMIT = 1; // 0 to 100% in one second.
+    public static final double DRIVEBASE_ENCODER_ROTATIONS_PER_WHEEL_ROTATION = 10.71; //TODO get real number
+    public static final double DRIVEBASE_WHEEL_DIAMETER = Units.inchesToMeters(6);
+
+    public static final double DRIVEBASE_METERS_PER_WHEEL_ROTATION = Math.PI * DRIVEBASE_WHEEL_DIAMETER;
+    public static final double drivbaseEncoderRotationsToMeters(double rotations) {
+        return rotations
+        * DRIVEBASE_METERS_PER_WHEEL_ROTATION 
+        / DRIVEBASE_ENCODER_ROTATIONS_PER_WHEEL_ROTATION;
+    }
+    public static final double[] DRIVEBASE_LINEAR_FF = {0.22, 1.98, 0.2}; // TODO real numbers
+    public static final double[] DRIVEBASE_ANGULAR_FF = {0.22, 1.5, 0.3}; // TODO real numbers
+    public static final double DRIVEBASE_TRACKWIDTH = 0.69; // TODO real numbers
+    public static final LinearSystem<N2, N2, N2> DRIVEBASE_PLANT = LinearSystemId.identifyDrivetrainSystem(
+        DRIVEBASE_LINEAR_FF[1],
+        DRIVEBASE_LINEAR_FF[2],
+        DRIVEBASE_ANGULAR_FF[1],
+        DRIVEBASE_ANGULAR_FF[2]
+        );
+    public static final DifferentialDriveKinematics DRIVEBASE_KINEMATICS = new DifferentialDriveKinematics(DRIVEBASE_TRACKWIDTH);
+    public static final DCMotor DRIVEBASE_GEARBOX = DCMotor.getNEO(2);
+    public static final Vector<N7> DRIVEBASE_SIM_ENCODER_STD_DEV = VecBuilder.fill(0, 0, 0, 0, 0, 0, 0);
     
     //Shooter Constants
     public static final int CAN_ID_FRONT_SHOOTER_MOTOR = 41;
@@ -41,13 +71,14 @@ public final class Constants {
     public static final double ENCODER_COUNTS_PER_TURRET_DEGREE = ENCODER_COUNTS_PER_TURRET_NEO_REVOLUTION * NEO_REVOLUTIONS_PER_TURRET_REVOLUTION / 360;
     public static final int CAN_ID_TURRET = 30;
     public static final int TURRET_LIMIT_SWITCH_PORT = 0;
-    public static final float SOFT_LIMIT_FORWARD_DEGREE = 720.0f;
-    public static final float SOFT_LIMIT_REVERSE_DEGREE = 0.0f;
+    public static final float SOFT_LIMIT_FORWARD_DEGREE = 110f;
+    public static final float SOFT_LIMIT_REVERSE_DEGREE = -110f;
     public static final int TURRET_PID_ERROR = 1;
     public static final double TURRET_HOMING_SPEED = -0.1;
     public static final double TURRET_DEADBAND = 0.02;
     public static final double[] TURRET_FF = {0.39475, 3.5435, 0.19223}; // for velocity in turret rotations per second
     public static final double TURRET_P = 1.0/90.0;
+    public static final double TURRET_MAX_SPEED = 1.0;
 
     //Midtake Constants
     public static final int CAN_ID_MIDTAKE_FRONT = 23;

@@ -1,12 +1,43 @@
 {
+  "HALProvider": {
+    "Other Devices": {
+      "SPARK MAX [13]": {
+        "header": {
+          "open": true
+        }
+      },
+      "SPARK MAX [14]": {
+        "header": {
+          "open": true
+        }
+      },
+      "SPARK MAX [30]": {
+        "header": {
+          "open": true
+        }
+      }
+    }
+  },
   "NTProvider": {
     "types": {
       "/FMSInfo": "FMSInfo",
       "/LiveWindow/DrivebaseS": "Subsystem",
+      "/LiveWindow/IntakeS": "Subsystem",
+      "/LiveWindow/LimelightS": "Subsystem",
+      "/LiveWindow/MidtakeS": "Subsystem",
       "/LiveWindow/ShooterS": "Subsystem",
+      "/LiveWindow/TurretS": "Subsystem",
       "/LiveWindow/Ungrouped/DifferentialDrive[1]": "DifferentialDrive",
+      "/LiveWindow/Ungrouped/DigitalInput[0]": "Digital Input",
+      "/LiveWindow/Ungrouped/DigitalInput[1]": "Digital Input",
+      "/LiveWindow/Ungrouped/DigitalInput[2]": "Digital Input",
+      "/LiveWindow/Ungrouped/PIDController[1]": "PIDController",
+      "/LiveWindow/Ungrouped/PIDController[2]": "PIDController",
+      "/LiveWindow/Ungrouped/PIDController[3]": "PIDController",
       "/LiveWindow/Ungrouped/Scheduler": "Scheduler",
-      "/LiveWindow/Ungrouped/navX-Sensor[1]": "Gyro"
+      "/LiveWindow/Ungrouped/navX-Sensor[1]": "Gyro",
+      "/Shuffleboard/RobotContainer/field": "Field2d",
+      "/SmartDashboard/InstantCommand": "Command"
     },
     "windows": {
       "/LiveWindow/DrivebaseS": {
@@ -14,11 +45,113 @@
           "visible": true
         }
       },
-      "/LiveWindow/Ungrouped/DifferentialDrive[1]": {
+      "/Shuffleboard/RobotContainer/field": {
+        "Turret": {
+          "color": [
+            0.6033755540847778,
+            0.3793373703956604,
+            0.3793373703956604,
+            255.0
+          ],
+          "length": 0.4000000059604645,
+          "width": 0.30000001192092896
+        },
         "window": {
           "visible": true
         }
       }
+    }
+  },
+  "NetworkTables": {
+    "Shuffleboard": {
+      "DrivebaseS": {
+        "SimEncoder": {
+          "open": true
+        },
+        "open": true
+      },
+      "OdometryManager": {
+        "open": true
+      },
+      "RobotContainer": {
+        "field": {
+          "open": true
+        },
+        "open": true
+      },
+      "TurretS": {
+        "open": true
+      },
+      "open": true
+    },
+    "SmartDashboard": {
+      "open": true
+    }
+  },
+  "Plot": {
+    "Plot <0>": {
+      "plots": [
+        {
+          "axis": [
+            {
+              "autoFit": true
+            }
+          ],
+          "height": 332,
+          "series": [
+            {
+              "color": [
+                0.2980392277240753,
+                0.44705885648727417,
+                0.6901960968971252,
+                1.0
+              ],
+              "id": "NT:/Shuffleboard/OdometryManager/getRotationOffset"
+            },
+            {
+              "color": [
+                0.3333333432674408,
+                0.658823549747467,
+                0.4078431725502014,
+                1.0
+              ],
+              "id": "SPARK MAX [30]-Applied Output"
+            }
+          ]
+        }
+      ]
+    },
+    "Plot <1>": {
+      "plots": [
+        {
+          "axis": [
+            {
+              "autoFit": true
+            }
+          ],
+          "height": 332,
+          "series": [
+            {
+              "color": [
+                0.2980392277240753,
+                0.44705885648727417,
+                0.6901960968971252,
+                1.0
+              ],
+              "id": "NT:/Shuffleboard/TurretS/turretPosition"
+            },
+            {
+              "color": [
+                0.8666667342185974,
+                0.5176470875740051,
+                0.32156863808631897,
+                1.0
+              ],
+              "id": "NT:/Shuffleboard/TurretS/getError"
+            }
+          ]
+        }
+      ]
     }
   }
 }

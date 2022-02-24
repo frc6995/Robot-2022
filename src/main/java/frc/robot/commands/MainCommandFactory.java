@@ -17,16 +17,17 @@ import frc.robot.subsystems.LimelightS;
 import frc.robot.subsystems.MidtakeS;
 import frc.robot.subsystems.ShooterS;
 import frc.robot.subsystems.TurretS;
+import frc.robot.util.OdometryManager;
 
 /** Add your docs here. */
 public class MainCommandFactory {
 
-    public static Command createAimBotC(LimelightS limelight, TurretS turretS, ShooterS shooterS) {
-        return TurretCommandFactory.createTurretFollowC(limelight::getFilteredXOffset, turretS)
+    public static Command createAimBotC(OdometryManager odometryManager, TurretS turretS, ShooterS shooterS) {
+        return TurretCommandFactory.createTurretFollowC(odometryManager::getRotationOffset, turretS)
         .alongWith(
             ShooterCommandFactory.createShooterFollowC(
-                ()->{return ShooterS.getSpeedForDistance(limelight.getFilteredDistance());},
-                ()->{return ShooterS.getSpeedForDistance(limelight.getFilteredDistance());},
+                ()->{return ShooterS.getSpeedForDistance(odometryManager.getDistanceToCenter());},
+                ()->{return ShooterS.getSpeedForDistance(odometryManager.getDistanceToCenter());},
                 shooterS)
         );
     }

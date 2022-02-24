@@ -5,7 +5,9 @@
 package frc.robot.commands.turret;
 
 import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import frc.robot.Constants;
@@ -62,11 +64,11 @@ public class TurretCommandFactory {
      * @param turretS the turret subsystem
      * @return the TurretTurnC
      */
-    public static Command createTurretFollowC(DoubleSupplier angle, TurretS turretS) {
+    public static Command createTurretFollowC(Supplier<Rotation2d> angle, TurretS turretS) {
         return new FunctionalCommand(
             ()->{}, 
             ()->{
-                turretS.setTurretAngle(angle.getAsDouble());
+                turretS.setTurretAngle(angle.get().getDegrees());
             },
             interrupted -> {
                 turretS.stopMotor();
