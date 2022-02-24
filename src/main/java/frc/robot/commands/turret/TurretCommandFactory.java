@@ -8,6 +8,7 @@ import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
+import frc.robot.Constants;
 import frc.robot.subsystems.TurretS;
 
 /** 
@@ -27,7 +28,7 @@ public class TurretCommandFactory {
             interrupted -> {
                 turretS.stopMotor();
                 if(!interrupted) {
-                    turretS.resetEncoder();
+                    turretS.resetEncoder(Constants.SOFT_LIMIT_REVERSE_DEGREE);
                 }
             }, turretS::getIsHomed, turretS
         )

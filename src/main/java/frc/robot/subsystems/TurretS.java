@@ -23,6 +23,8 @@ import io.github.oblarg.oblog.annotations.Log;
  * The turret subsystem. It contains methods to get encoder counts and converts
  * them to degrees. It uses a PID controller to control the turret position.
  * 
+ * CCW POSITIVE
+ * 
  * @author Benjamin Su
  * @author Noah Kim
  */
@@ -104,6 +106,13 @@ public class TurretS extends SubsystemBase implements Loggable {
    */
   public void resetEncoder() {
     sparkMaxEncoder.setPosition(0);
+  }
+
+    /**
+   * Resets encoder count.
+   */
+  public void resetEncoder(double degrees) {
+    sparkMaxEncoder.setPosition(degrees);
   }
 
   /**
