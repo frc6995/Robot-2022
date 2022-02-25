@@ -1,7 +1,3 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
 package frc.robot;
 
 import edu.wpi.first.wpilibj.GenericHID;
@@ -53,7 +49,6 @@ public class RobotContainer {
   private Command turretTurningC;
 
   public RobotContainer() {
-    // Configure the button bindings
     createControllers();
     createSubsystems();
     createCommands();
@@ -96,10 +91,16 @@ public class RobotContainer {
     driverController.a().whileActiveOnce(runIntake);
   }
 
+  /**
+   * Instantiate the driver and operator controllers
+   */
   private void createControllers() {
     driverController = new CommandXboxController(Constants.USB_PORT_DRIVER_CONTROLLER);
   }
 
+  /**
+   * Instantiate the commands
+   */
   private void createCommands() {
     xboxDriveCommand = DrivebaseCommandFactory.createCurvatureDriveC(
         () -> {
@@ -120,6 +121,9 @@ public class RobotContainer {
     SmartDashboard.putData(new InstantCommand(turretS::resetEncoder));
   }
 
+  /**
+   * Instantiate the subsystems
+   */
   private void createSubsystems() {
     drivebaseS = new DrivebaseS();
     intakeS = new IntakeS();

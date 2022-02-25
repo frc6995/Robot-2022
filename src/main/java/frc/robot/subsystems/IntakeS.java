@@ -1,7 +1,3 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
 package frc.robot.subsystems;
 
 import com.revrobotics.CANSparkMax;
@@ -16,6 +12,8 @@ import frc.robot.Constants;
 /**
  * The intake subsystem, which extends and spins to pull balls over the bumper
  * into the midtake.
+ * 
+ * @author Ben Su, Jeremiah Shue
  */
 public class IntakeS extends SubsystemBase {
     private final CANSparkMax intakeLeadMotor = new CANSparkMax(Constants.CAN_ID_INTAKE_LEAD_MOTOR,
@@ -23,7 +21,7 @@ public class IntakeS extends SubsystemBase {
     private final CANSparkMax intakeFollowerMotor = new CANSparkMax(Constants.CAN_ID_INTAKE_FOLLOWER_MOTOR,
             MotorType.kBrushless);
     private DoubleSolenoid doubleSolenoid = new DoubleSolenoid(PneumaticsModuleType.CTREPCM,
-            Constants.DOUBLE_SOLENOID_INTAKE_EXTEND, Constants.DOUBLE_SOLENOID_INTAKE_RETRACT);
+            Constants.DOUBLE_SOLENOID_INTAKE_PORT_EXTEND, Constants.DOUBLE_SOLENOID_INTAKE_PORT_RETRACT);
 
     /**
      * Constructs a new IntakeS.

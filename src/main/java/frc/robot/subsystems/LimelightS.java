@@ -1,7 +1,3 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
 package frc.robot.subsystems;
 
 import org.photonvision.PhotonCamera;
@@ -30,8 +26,8 @@ import io.github.oblarg.oblog.annotations.Log;
 public class LimelightS extends SubsystemBase implements Loggable {
   PhotonCamera limelight;
 
-  @Log(methodName="getFilteredXOffset")
-  @Log(methodName="getFilteredDistance")
+  @Log(methodName = "getFilteredXOffset")
+  @Log(methodName = "getFilteredDistance")
   private FilterValues filterValues;
 
   private LinearFilter xOffsetFilter;
@@ -50,6 +46,7 @@ public class LimelightS extends SubsystemBase implements Loggable {
 
   /**
    * Sets the driver mode on the camera.
+   * 
    * @param driverMode True to enable driver mode, false to disable driver mode.
    */
   public void setDriverMode(boolean driverMode) {
@@ -58,10 +55,11 @@ public class LimelightS extends SubsystemBase implements Loggable {
 
   /**
    * Turns on or off the LEDs.
+   * 
    * @param LED True for on, false for off.
    */
   public void setLED(boolean LED) {
-      limelight.setLED(LED ? VisionLEDMode.kOn : VisionLEDMode.kOff);
+    limelight.setLED(LED ? VisionLEDMode.kOn : VisionLEDMode.kOff);
   }
 
   /**
@@ -74,52 +72,51 @@ public class LimelightS extends SubsystemBase implements Loggable {
         ? limelight.getLatestResult().getBestTarget()
         : new PhotonTrackedTarget(0, 0, 0, 0, new Transform2d(), new ArrayList<TargetCorner>());
     this.filterValues = new FilterValues(
-      xOffsetFilter.calculate(target.getYaw()),
+        xOffsetFilter.calculate(target.getYaw()),
         distanceFilter.calculate(
-          PhotonUtils.calculateDistanceToTargetMeters(
-            Constants.CAMERA_HEIGHT_METERS,
-            Constants.TARGET_HEIGHT_METERS,
-            Constants.CAMERA_PITCH_RADIANS,
-            Units.degreesToRadians(target.getPitch())
-          )
-        )
-      );
+            PhotonUtils.calculateDistanceToTargetMeters(
+                Constants.CAMERA_HEIGHT_METERS,
+                Constants.TARGET_HEIGHT_METERS,
+                Constants.CAMERA_PITCH_RADIANS,
+                Units.degreesToRadians(target.getPitch()))));
     SmartDashboard.putNumber("x offset", this.filterValues.getFilteredXOffset()); // TODO Oblog
     SmartDashboard.putNumber("y offset", this.filterValues.getFilteredDistance());
   }
 
   /**
    * Returns the current FilterValues.
+   * 
    * @return
    */
   public FilterValues getFilterValues() {
     return this.filterValues;
   }
 
-  
-    /**
-     * Returns the filtered X offset.
-     */
-    public double getFilteredXOffset() {
-      return this.filterValues.filteredXOffset;
-    }
+  /**
+   * Returns the filtered X offset.
+   */
+  public double getFilteredXOffset() {
+    return this.filterValues.filteredXOffset;
+  }
 
-    /**
-     * Returns the filtered distance.
-     */
-    public double getFilteredDistance() {
-      return this.filterValues.filteredDistance;
-    }
+  /**
+   * Returns the filtered distance.
+   */
+  public double getFilteredDistance() {
+    return this.filterValues.filteredDistance;
+  }
+
   /**
    * A data class to store filtered X offset and distance.
    */
-  public class FilterValues  {
+  public class FilterValues {
     private double filteredXOffset;
     private double filteredDistance;
 
     /**
      * Constructs a new FilterValues class.
-     * @param filteredXOffset the X offset
+     * 
+     * @param filteredXOffset  the X offset
      * @param filteredDistance the distance
      */
     public FilterValues(double filteredXOffset, double filteredDistance) {
