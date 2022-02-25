@@ -17,7 +17,13 @@ import frc.robot.Robot;
 import io.github.oblarg.oblog.Loggable;
 import io.github.oblarg.oblog.annotations.Log;
 
-public class ShooterS extends SubsystemBase implements Loggable{
+/**
+ * The shooter subsystem.
+ * This handles the two sets of wheels that shoot the cargo into the hub
+ * 
+ * @author Noah Kim
+ */
+public class ShooterS extends SubsystemBase implements Loggable {
   private final CANSparkMax frontSparkMax = new CANSparkMax(Constants.CAN_ID_FRONT_SHOOTER_MOTOR, MotorType.kBrushless);
   private final CANSparkMax backSparkMax = new CANSparkMax(Constants.CAN_ID_BACK_SHOOTER_MOTOR, MotorType.kBrushless);
   private RelativeEncoder frontEncoder;
@@ -64,16 +70,21 @@ public class ShooterS extends SubsystemBase implements Loggable{
     frontPID.setTolerance(Constants.SHOOTER_PID_ERROR, 0);
     backPID.setTolerance(Constants.SHOOTER_PID_ERROR, 0);
 
-
     frontPID.setIntegratorRange(0, 0);
     backPID.setIntegratorRange(0, 0);
   }
 
+  /**
+   * When running in manual mode, add a deadband
+   * 
+   * @param value The input value
+   * @return The deadbanded value
+   */
   public double deadbandJoystick(double value) {
     if (Math.abs(value) < Constants.DRIVEBASE_DEADBAND) {
       value = 0;
     }
-    
+
     return value;
   }
 
@@ -126,9 +137,9 @@ public class ShooterS extends SubsystemBase implements Loggable{
   public void pidFrontSpeed(double frontTargetRPM) {
     SmartDashboard.putNumber("frontTargetRPM", frontTargetRPM);
     frontSparkMax.setVoltage(
-        frontPID.calculate(getFrontEncoderSpeed()/60.0, frontTargetRPM/60.0) + frontFF.calculate(frontTargetRPM/60.0)
-        );
-        
+        frontPID.calculate(getFrontEncoderSpeed() / 60.0, frontTargetRPM / 60.0)
+            + frontFF.calculate(frontTargetRPM / 60.0));
+
   }
 
   /**
@@ -139,8 +150,7 @@ public class ShooterS extends SubsystemBase implements Loggable{
   public void pidBackSpeed(double backTargetRPM) {
     SmartDashboard.putNumber("backTargetRPM", backTargetRPM);
     backSparkMax.setVoltage(
-      backPID.calculate(getBackEncoderSpeed()/60.0, backTargetRPM/60.0) + backFF.calculate(backTargetRPM / 60.0)
-    );
+        backPID.calculate(getBackEncoderSpeed() / 60.0, backTargetRPM / 60.0) + backFF.calculate(backTargetRPM / 60.0));
   }
 
   /**
@@ -203,7 +213,9 @@ public class ShooterS extends SubsystemBase implements Loggable{
 
   /**
    * Converts a distance in feet into the proper shooter RPM
-   * @param distance the distance to the target in feet (measured horizontally from the Limelight to the vision ring)
+   * 
+   * @param distance the distance to the target in feet (measured horizontally
+   *                 from the Limelight to the vision ring)
    * @return the shooter RPM
    */
 
@@ -214,8 +226,10 @@ public class ShooterS extends SubsystemBase implements Loggable{
   }
 
   /**
-   * Finds the index of the highest distance in the provided array that is less than the provided distance.
-   * @param distance the distance
+   * Finds the index of the highest distance in the provided array that is less
+   * than the provided distance.
+   * 
+   * @param distance       the distance
    * @param DISTANCES_FEET the distance array
    * @return the index
    */
@@ -223,19 +237,31 @@ public class ShooterS extends SubsystemBase implements Loggable{
   public static int getIndexForDistance(double distance, double[] DISTANCES_FEET) {
     int index = 0;
     for (int i = 0; i < DISTANCES_FEET.length; i++) {
-        if (distance > DISTANCES_FEET[i]) {
-            index = i;
-        }
+      if (distance > DISTANCES_FEET[i]) {
+        index = i;
+      }
     }
     return index;
   }
 
+   /**
+   * Given two points in an array of doubles and an x point between them,
+   * draw a line between them and find the appropriate y value
+   * 
+   * @param smallerIndex
+   * @param biggerIndex
+   * @param distance
+   * @param DISTANCES_FEET
+   * @param RPMS
+   * @return
+   */
   public static double calcSpeed(int smallerIndex, int biggerIndex, double distance, double[] DISTANCES_FEET, double[][] RPMS, boolean isBackWheel) {
     double smallerRPM = RPMS[Math.max(smallerIndex, 0)][isBackWheel ? 1 : 0];
     double biggerRPM = RPMS[Math.min(biggerIndex, RPMS.length-1)][isBackWheel ? 1 : 0] + 0.0001; //add a tiny amount to avoid NaN if distance is out of range
     double smallerDistance = DISTANCES_FEET[Math.max(smallerIndex, 0)];
-    double biggerDistance = DISTANCES_FEET[Math.min(biggerIndex, DISTANCES_FEET.length-1)] + 0.0001;
-    double newRPM = ((biggerRPM - smallerRPM) / (biggerDistance - smallerDistance) * (distance - smallerDistance)) + smallerRPM;
+    double biggerDistance = DISTANCES_FEET[Math.min(biggerIndex, DISTANCES_FEET.length - 1)] + 0.0001;
+    double newRPM = ((biggerRPM - smallerRPM) / (biggerDistance - smallerDistance) * (distance - smallerDistance))
+        + smallerRPM;
 
     return newRPM;
   }

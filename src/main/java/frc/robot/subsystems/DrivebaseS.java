@@ -69,6 +69,9 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
 
   }
 
+  /**
+   * Creates a deadband for the drivebase joystick
+   */
   public double deadbandJoysticks(double value) {
     if (Math.abs(value) < DRIVEBASE_DEADBAND) {
       value = 0;
@@ -76,8 +79,10 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
     return value;
   }
 
-  // Curvature drive method
-  // Forward back is from 1 to -1, turn is from 1 to -1
+  /**
+   * Curvature drive method
+   * Forward back is from 1 to -1, turn is from 1 to -1
+   */
   public void curvatureDrive(double fwdBack, double turn) {
     fwdBack = deadbandJoysticks(fwdBack);
     turn = deadbandJoysticks(turn);
@@ -91,6 +96,12 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
     tankDrive(speeds.left, speeds.right);
   }
 
+  /**
+   * makes robot drive with both wheels going in the same direction
+   * 
+   * @param left
+   * @param right
+   */
   public void tankDrive(double left, double right) {
     SmartDashboard.putNumber("leftSpeed", left);
     SmartDashboard.putNumber("rightSpeed", right);
@@ -100,6 +111,13 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
 
   public void tankDriveVelocity(double leftVelocityMPS, double rightVelocityMPS) {
     tankDriveVolts(leftFF.calculate(leftVelocityMPS), rightFF.calculate(rightVelocityMPS));
+  }
+
+  /**
+   * Sets motor speed to 0 when subsystem ends
+   */
+  public void stopAll() {
+    tankDrive(0, 0);
   }
 
   @Override
@@ -193,7 +211,6 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
     resetRobotPose(new Pose2d());
   }
 
-
   public void stopAll() {
     tankDrive(0, 0);
   }
@@ -202,6 +219,4 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
     frontLeft.setVoltage(leftVolts);
     frontRight.setVoltage(rightVolts);
   }
-
-
 }

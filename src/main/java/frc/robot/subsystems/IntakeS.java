@@ -12,6 +12,8 @@ import frc.robot.Constants;
 /**
  * The intake subsystem, which extends and spins to pull balls over the bumper
  * into the midtake.
+ * 
+ * @author Ben Su, Jeremiah Shue
  */
 public class IntakeS extends SubsystemBase {
     private final CANSparkMax intakeLeadMotor = new CANSparkMax(Constants.CAN_ID_INTAKE_LEAD_MOTOR,

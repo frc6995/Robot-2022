@@ -27,6 +27,9 @@ public class MidtakeS extends SubsystemBase {
   private DigitalInput beamBreakBottom = new DigitalInput(Constants.BEAM_BREAK_BOTTOM_PORT_NUMBER);
   private final ColorSensorV3 colorSensor = new ColorSensorV3(I2C.Port.kOnboard);
 
+  /**
+   * Create a new MidtakeS
+   */
   public MidtakeS() {
     frontSparkMax.restoreFactoryDefaults();
     frontSparkMax.setInverted(true);

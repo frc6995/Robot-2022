@@ -6,7 +6,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.ShooterS;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 
-/** Add your docs here. */
+/** Factory class to create shoot commands. */
 public class ShooterCommandFactory {
     /**
      * Creates a ShooterFollowC, which uses PID to run the front and back wheels to the given speeds.
@@ -32,5 +32,19 @@ public class ShooterCommandFactory {
         .withName("ShooterFollowC");
     }
 
+    public static Command createShooterIdleC(ShooterS shooterS) {
+        return new FunctionalCommand(
+            ()->{}, 
+            ()->{
+                shooterS.pidFrontSpeed(3000);
+                shooterS.pidBackSpeed(3000);        
+            },
+            interrupted -> {},
+            () -> false,
+            shooterS
+        )
+        .withName("ShooterIdleC");
+    
+    }
 
 }

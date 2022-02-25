@@ -61,7 +61,6 @@ public class RobotContainer {
   private OdometryManager odometryManager;
 
   public RobotContainer() {
-    // Configure the button bindings
     createControllers();
     createSubsystems();
     createCommands();
@@ -104,10 +103,16 @@ public class RobotContainer {
     driverController.a().whileActiveOnce(runIntake);
   }
 
+  /**
+   * Instantiate the driver and operator controllers
+   */
   private void createControllers() {
     driverController = new CommandXboxController(Constants.USB_PORT_DRIVER_CONTROLLER);
   }
 
+  /**
+   * Instantiate the commands
+   */
   private void createCommands() {
     xboxDriveCommand = DrivebaseCommandFactory.createCurvatureDriveC(
         () -> {
@@ -128,11 +133,14 @@ public class RobotContainer {
           ()->{return ShooterS.getSpeedForDistance(odometryManager.getDistanceToCenter(), false);},
           ()->{return ShooterS.getSpeedForDistance(odometryManager.getDistanceToCenter(), true);},
           shooterS);
-    shooterS.setDefaultCommand(shooterSpinC);
     turretTurningC = TurretCommandFactory.createTurretTurnC(40, turretS);
+    shooterS.setDefaultCommand(ShooterCommandFactory.createShooterIdleC(shooterS));
     SmartDashboard.putData(new InstantCommand(turretS::resetEncoder));
   }
 
+  /**
+   * Instantiate the subsystems
+   */
   private void createSubsystems() {
     drivebaseS = new DrivebaseS();
 
@@ -176,10 +184,10 @@ public class RobotContainer {
           odometryManager.getCurrentRobotPose().getRotation())),
     Rotation2d.fromDegrees(0)));
 
-    field.getObject("cameraTarget").setPose(
-      odometryManager.getCurrentRobotPose().transformBy(
-        odometryManager.getRobotToCamera()).transformBy(
-          odometryManager.getCameraToHub()));
+//     field.getObject("cameraTarget").setPose(
+//       odometryManager.getCurrentRobotPose().transformBy(
+//         odometryManager.getRobotToCamera()).transformBy(
+//           odometryManager.getCameraToHub()));
     field.getObject("Turret").setPose(odometryManager.getCurrentRobotPose().transformBy(
         odometryManager.getRobotToTurret()
       )

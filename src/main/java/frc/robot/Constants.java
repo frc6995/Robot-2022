@@ -25,6 +25,7 @@ import edu.wpi.first.math.util.Units;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
+
     /** Can ids for the front left drive motor */
     public static final int CAN_ID_FRONT_LEFT_DRIVE_MOTOR = 13;
 
@@ -46,6 +47,7 @@ public final class Constants {
 
     /** Slew limit for drivebase motors */
     public static final double DRIVEBASE_TURN_SLEW_LIMIT = 2.0; // 0 to 200% in one second. 0 to full in 1/2 second.
+
 
     /** Slew limit for drivebase forward back motors */
     public static final double DRIVEBASE_FWD_BACK_SLEW_LIMIT = 1; // 0 to 100% in one second.
@@ -112,13 +114,12 @@ public final class Constants {
     public static final Vector<N7> DRIVEBASE_SIM_ENCODER_STD_DEV = VecBuilder.fill(0, 0, 0, 0, 0, 0, 0);
     
    // Shooter Constants
-
     /** Can ids for front shooter motor */
     public static final int CAN_ID_FRONT_SHOOTER_MOTOR = 41;
 
     /** Can id for back shooter motor */
     public static final int CAN_ID_BACK_SHOOTER_MOTOR = 40;
-    
+
     /** Shooter front wheel feed forward */
     public static final double[] SHOOTER_FRONT_FF = { 0.16382, 0.12618, 0.0038694 };
 
@@ -157,7 +158,7 @@ public final class Constants {
 
     /** Port that limit switch goes into */
     public static final int TURRET_LIMIT_SWITCH_PORT = 0;
-
+  
     /** Counterclockwise limit at which the turret cannot pass */
     public static final float SOFT_LIMIT_FORWARD_DEGREE = 110f;
 
@@ -181,6 +182,7 @@ public final class Constants {
 
     /** The maximum manual-drive angular velocity of the turret in rotations per second */
     public static final double TURRET_MAX_SPEED = 1.0;
+
 
     // Midtake Constants
 

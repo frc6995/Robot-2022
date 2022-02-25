@@ -1,7 +1,6 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
@@ -53,32 +52,24 @@ public class MainCommandFactory {
         new InstantCommand(intakeS::deploy, intakeS),
         // Spin until a ball is picked up, then
         new RunCommand(intakeS::spin, intakeS)
-            .withInterrupt(midtakeS::getColorSensorDetectsBall)
+            .withInterrupt(midtakeS::getIsBottomBeamBroken)
             .andThen(intakeS::stop, intakeS),
-        // Decide whether to store or reject, and do so
-        new ConditionalCommand(
-            // If the color is correct
-            // Spin until the color sensor no longer detects the ball or an already-loaded
-            // ball would enter the shooter
-            new RunCommand(midtakeS::spin, midtakeS)
-                .withInterrupt(() -> !midtakeS.getColorSensorDetectsBall())
-                .withInterrupt(midtakeS::getIsTopBeamBroken)
-                // Also spin the intake while the midtake is going
-                .raceWith(
-                    new RunCommand(intakeS::spin, intakeS))
-                .andThen(midtakeS::stop, midtakeS),
-            // If the color is wrong
-            // Eject the ball for 3 seconds
-            new RunCommand(intakeS::eject, intakeS)
-                .withTimeout(3),
-            // choose between the above two commands based on the color sensor
-            midtakeS::getIsBallColorCorrect),
-        new InstantCommand(intakeS::stop, intakeS)
-    // Don't retract the intake
+
+        // Spin until the color sensor no longer detects the ball or an already-loaded
+        // ball would enter the shooter
+        new RunCommand(midtakeS::spin, midtakeS)
+            .withInterrupt(() -> !midtakeS.getIsBottomBeamBroken())
+            .withInterrupt(midtakeS::getIsTopBeamBroken)
+            // Also spin the intake while the midtake is going
+            .raceWith(
+                new RunCommand(intakeS::spin, intakeS))
+            .andThen(midtakeS::stop, midtakeS),
+
+        new InstantCommand(intakeS::stop, intakeS),
+        new InstantCommand(intakeS::retract, intakeS)
     // (the command group may be instantly restarted to intake another ball)
     // Only retract the intake if interrupted
     )
-      .withName("IntakeIndexCG");
+        .withName("IntakeIndexCG");
   }
-
 }

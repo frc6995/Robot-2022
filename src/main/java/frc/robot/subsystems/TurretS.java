@@ -42,6 +42,7 @@ public class TurretS extends SubsystemBase implements Loggable {
   private SimEncoder turretSimEncoder = new SimEncoder();
   // Open-loop drive in turret rotations per second
   private SimpleMotorFeedforward turretFF = new SimpleMotorFeedforward(
+
     Constants.TURRET_FF[0],
     Constants.TURRET_FF[1],
     Constants.TURRET_FF[2]);
@@ -84,7 +85,7 @@ public class TurretS extends SubsystemBase implements Loggable {
    * 
    * @return the encoder counts
    */
-  @Log(name="turretPosition")
+  @Log(name = "turretPosition")
   public double getEncoderCounts() {
     if(RobotBase.isReal()){
       return sparkMaxEncoder.getPosition();
@@ -146,7 +147,7 @@ public class TurretS extends SubsystemBase implements Loggable {
    * 
    * @return True if homing switch is triggered.
    */
-  @Log(name="turretHomed")
+  @Log(name = "turretHomed")
   public boolean getIsHomed() {
     return !limitSwitch.get();
   }
@@ -156,7 +157,7 @@ public class TurretS extends SubsystemBase implements Loggable {
    * 
    * @return The velocity of the motor, in turret rotations per second
    */
-  @Log(name="turretVelocity")
+  @Log(name = "turretVelocity")
   public double getVelocity() {
     if(RobotBase.isReal()) {
       return sparkMaxEncoder.getVelocity();
@@ -168,7 +169,8 @@ public class TurretS extends SubsystemBase implements Loggable {
   }
 
   /**
-   * sets the speed of the turret from -1 to 1, ensures the position of the turret is 
+   * sets the speed of the turret from -1 to 1, ensures the position of the turret
+   * is
    * within the soft limit, calculates the power to give to the motor
    * 
    * @param target The desired angle
@@ -196,8 +198,6 @@ public class TurretS extends SubsystemBase implements Loggable {
     else{
       sparkMax.setVoltage(0);
     }
-
-    
   }
 
   public void simulationPeriodic() {

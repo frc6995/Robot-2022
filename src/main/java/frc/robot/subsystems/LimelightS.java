@@ -49,6 +49,7 @@ public class LimelightS extends SubsystemBase {
   SimCamera limelightSimVisionSystem;
   Trigger hasSteadyTarget = new Trigger(() -> limelight.getLatestResult().hasTargets()).debounce(0.5);
   // Data filtering
+
   @Log(methodName = "getFilteredXOffset")
   @Log(methodName = "getFilteredDistance")
   private FilterValues filterValues;
