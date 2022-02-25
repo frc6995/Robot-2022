@@ -8,8 +8,6 @@ import java.util.List;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
@@ -17,7 +15,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import frc.robot.commands.MainCommandFactory;
 import frc.robot.commands.auto.AutoCommandFactory;
 import frc.robot.commands.drivebase.DrivebaseCommandFactory;
 import frc.robot.commands.shooter.ShooterCommandFactory;
@@ -29,7 +26,6 @@ import frc.robot.subsystems.MidtakeS;
 import frc.robot.subsystems.ShooterS;
 import frc.robot.subsystems.TurretS;
 import frc.robot.util.OdometryManager;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 import io.github.oblarg.oblog.annotations.Log;
 
 
@@ -66,7 +62,6 @@ public class RobotContainer {
   private Command turretHomingC;
   private Command turretTurningC;
   private Command turretAimC;
-  private Command aimbotC;
   private Command shooterSpinC;
 
   private OdometryManager odometryManager;

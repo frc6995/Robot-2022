@@ -4,40 +4,38 @@
 
 package frc.robot.subsystems;
 
-import org.photonvision.PhotonCamera;
-import org.photonvision.PhotonUtils;
-import org.photonvision.PhotonVersion;
-import org.photonvision.SimPhotonCamera;
-import org.photonvision.SimVisionSystem;
-import org.photonvision.SimVisionTarget;
-import org.photonvision.common.hardware.VisionLEDMode;
-import org.photonvision.targeting.PhotonTrackedTarget;
-import org.photonvision.targeting.TargetCorner;
+import static frc.robot.Constants.CAMERA_CENTER_OFFSET;
+import static frc.robot.Constants.CAMERA_DIAG_FOV_DEGREES;
+import static frc.robot.Constants.CAMERA_HEIGHT_METERS;
+import static frc.robot.Constants.CAMERA_HORIZ_RES;
+import static frc.robot.Constants.CAMERA_PITCH_RADIANS;
+import static frc.robot.Constants.CAMERA_VERT_RES;
+import static frc.robot.Constants.HUB_CENTER_POSE;
+import static frc.robot.Constants.HUB_RADIUS_METERS;
+import static frc.robot.Constants.TAPE_STRIP_COUNT;
+import static frc.robot.Constants.TARGET_HEIGHT_METERS;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import edu.wpi.first.math.filter.Debouncer;
-import edu.wpi.first.math.filter.LinearFilter;
+import org.photonvision.PhotonCamera;
+import org.photonvision.PhotonUtils;
+import org.photonvision.common.hardware.VisionLEDMode;
+import org.photonvision.targeting.PhotonTrackedTarget;
+import org.photonvision.targeting.TargetCorner;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.RobotBase;
-import edu.wpi.first.wpilibj.smartdashboard.Field2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.Robot;
 import frc.robot.util.OdometryManager;
 import frc.robot.util.SimCamera;
-
-import static frc.robot.Constants.*;
-import io.github.oblarg.oblog.Loggable;
 import io.github.oblarg.oblog.annotations.Log;
 
 /**
@@ -59,8 +57,8 @@ public class LimelightS extends SubsystemBase {
   @Log(methodName = "getFilteredDistance")
   private FilterValues filterValues;
 
-  private LinearFilter xOffsetFilter;
-  private LinearFilter distanceFilter;
+  // private LinearFilter xOffsetFilter;
+  // private LinearFilter distanceFilter;
 
   /** Creates a new LimelightS. */
   public LimelightS(OdometryManager odometryManager,
@@ -69,10 +67,10 @@ public class LimelightS extends SubsystemBase {
     this.turretAngleSupplier = ()->odometryManager.getRobotToTurret().getRotation();
 
 
-    xOffsetFilter = LinearFilter.singlePoleIIR(LIMELIGHT_FILTER_TIME_CONSTANT,
-        LIMELIGHT_FILTER_PERIOD_CONSTANT);
-    distanceFilter = LinearFilter.singlePoleIIR(LIMELIGHT_FILTER_TIME_CONSTANT,
-        LIMELIGHT_FILTER_PERIOD_CONSTANT);
+    // xOffsetFilter = LinearFilter.singlePoleIIR(LIMELIGHT_FILTER_TIME_CONSTANT,
+    //     LIMELIGHT_FILTER_PERIOD_CONSTANT);
+    // distanceFilter = LinearFilter.singlePoleIIR(LIMELIGHT_FILTER_TIME_CONSTANT,
+    //     LIMELIGHT_FILTER_PERIOD_CONSTANT);
     if (!RobotBase.isReal()) {
       limelightSimVisionSystem = new SimCamera(
           "gloworm",

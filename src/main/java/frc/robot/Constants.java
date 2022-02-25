@@ -15,7 +15,6 @@ import edu.wpi.first.math.system.LinearSystem;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.simulation.DifferentialDrivetrainSim;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -34,18 +33,19 @@ public final class Constants {
     public static final double DRIVEBASE_DEADBAND = 0.03; // anything under 1.5% of full joystick away from 0 should be considered 0
     public static final double DRIVEBASE_TURN_SLEW_LIMIT = 2.0; // 0 to 200% in one second. 0 to full in 1/2 second.
     public static final double DRIVEBASE_FWD_BACK_SLEW_LIMIT = 1; // 0 to 100% in one second.
-    public static final double DRIVEBASE_ENCODER_ROTATIONS_PER_WHEEL_ROTATION = 10.71; //TODO get real number
+    public static final double DRIVEBASE_ENCODER_ROTATIONS_PER_WHEEL_ROTATION = 28.0/20.0 * 64.0/11.0;
+    public static final double DRIVEBASE_MAX_WHEEL_VELOCITY_MPS = 3.0;
     public static final double DRIVEBASE_WHEEL_DIAMETER = Units.inchesToMeters(6);
 
     public static final double DRIVEBASE_METERS_PER_WHEEL_ROTATION = Math.PI * DRIVEBASE_WHEEL_DIAMETER;
-    public static final double drivbaseEncoderRotationsToMeters(double rotations) {
+    public static final double drivebaseEncoderRotationsToMeters(double rotations) {
         return rotations
         * DRIVEBASE_METERS_PER_WHEEL_ROTATION 
         / DRIVEBASE_ENCODER_ROTATIONS_PER_WHEEL_ROTATION;
     }
     public static final double[] DRIVEBASE_LINEAR_FF = {0.22, 1.98, 0.2}; // TODO real numbers
     public static final double[] DRIVEBASE_ANGULAR_FF = {0.22, 1.5, 0.3}; // TODO real numbers
-    public static final double DRIVEBASE_TRACKWIDTH = 0.69; // TODO real numbers
+    public static final double DRIVEBASE_TRACKWIDTH = Units.inchesToMeters(22.5);
     public static final LinearSystem<N2, N2, N2> DRIVEBASE_PLANT = LinearSystemId.identifyDrivetrainSystem(
         DRIVEBASE_LINEAR_FF[1],
         DRIVEBASE_LINEAR_FF[2],
@@ -94,9 +94,9 @@ public final class Constants {
     //Limelight Constants
     public static final double LIMELIGHT_FILTER_TIME_CONSTANT = 0.1; 
     public static final double LIMELIGHT_FILTER_PERIOD_CONSTANT = 0.02;
-    public static final double CAMERA_DIAG_FOV_DEGREES = 67.8; // TODO real numbers
+    public static final double CAMERA_DIAG_FOV_DEGREES = 67.8; 
     public static final double CAMERA_HEIGHT_METERS = 0.9398; //37 inches
-    public static final double CAMERA_CENTER_OFFSET = Units.inchesToMeters(7); // TODO real numbers
+    public static final double CAMERA_CENTER_OFFSET = Units.inchesToMeters(9.5); 
     public static final double CAMERA_PITCH_RADIANS = Units.degreesToRadians(30); // 30 degrees above horizontal
     public static final int CAMERA_HORIZ_RES = 320;
     public static final int CAMERA_VERT_RES = 240;
@@ -118,7 +118,7 @@ public final class Constants {
     public static final double TAPE_STRIP_HEIGHT = Units.inchesToMeters(2);
     public static final double HUB_RADIUS_METERS = Units.feetToMeters(2);
     public static final double TARGET_HEIGHT_METERS = Units.inchesToMeters(104); //8ft 8 inches
-    public static final double TAPE_STRIP_COUNT = 16.0; // TODO real numbers
+    public static final double TAPE_STRIP_COUNT = 16.0;
 
 }
 

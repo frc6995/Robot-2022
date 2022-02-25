@@ -4,11 +4,9 @@
 
 package frc.robot.util;
 
-import io.github.oblarg.oblog.Loggable;
-import io.github.oblarg.oblog.annotations.Log;
 
 /** Add your docs here. */
-public class SimEncoder implements Loggable {
+public class SimEncoder {
     private double position = 0;
     private double velocity = 0;
 

@@ -4,28 +4,28 @@
 
 package frc.robot.subsystems;
 
+import static frc.robot.Constants.*;
+
+
 import com.kauailabs.navx.frc.AHRS;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds;
-import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.SerialPort.Port;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive.WheelSpeeds;
 import edu.wpi.first.wpilibj.simulation.DifferentialDrivetrainSim;
-import edu.wpi.first.wpilibj.simulation.EncoderSim;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import static frc.robot.Constants.*;
 
-import frc.robot.Constants;
 import frc.robot.util.SimEncoder;
 import io.github.oblarg.oblog.Loggable;
 import io.github.oblarg.oblog.annotations.Log;
@@ -38,6 +38,8 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
   private final CANSparkMax backLeft = new CANSparkMax(CAN_ID_BACK_LEFT_DRIVE_MOTOR, MotorType.kBrushless);
   private final SlewRateLimiter fwdBackLimiter = new SlewRateLimiter(DRIVEBASE_FWD_BACK_SLEW_LIMIT);
   private final SlewRateLimiter turnLimiter = new SlewRateLimiter(DRIVEBASE_TURN_SLEW_LIMIT);
+  private final SimpleMotorFeedforward leftFF = new SimpleMotorFeedforward(DRIVEBASE_LINEAR_FF[0], DRIVEBASE_LINEAR_FF[1], DRIVEBASE_LINEAR_FF[2]);
+  private final SimpleMotorFeedforward rightFF = new SimpleMotorFeedforward(DRIVEBASE_LINEAR_FF[0], DRIVEBASE_LINEAR_FF[1], DRIVEBASE_LINEAR_FF[2]);
   private final AHRS navX = new AHRS(Port.kMXP);
 
   //Sim stuff
@@ -107,6 +109,10 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
 
   }
 
+  public void tankDriveVelocity(double leftVelocityMPS, double rightVelocityMPS) {
+    tankDrive(leftFF.calculate(leftVelocityMPS), rightFF.calculate(rightVelocityMPS));
+  }
+
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
@@ -154,7 +160,7 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
 
   public double getLeftVelocity() {
     if(RobotBase.isReal()) {
-      return Constants.drivbaseEncoderRotationsToMeters(frontLeft.getEncoder().getVelocity() / 60.0);
+      return drivebaseEncoderRotationsToMeters(frontLeft.getEncoder().getVelocity() / 60.0);
     }
     else {
       return m_leftEncoder.getVelocity();
@@ -164,7 +170,7 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
   
   public double getRightVelocity() {
     if(RobotBase.isReal()) {
-      return Constants.drivbaseEncoderRotationsToMeters(frontRight.getEncoder().getVelocity() / 60.0);
+      return drivebaseEncoderRotationsToMeters(frontRight.getEncoder().getVelocity() / 60.0);
     }
     else {
       return m_rightEncoder.getVelocity();

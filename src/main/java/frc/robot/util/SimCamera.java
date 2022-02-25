@@ -16,21 +16,24 @@
  */
 package frc.robot.util;
 
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Transform2d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.util.Units;
-import edu.wpi.first.networktables.NetworkTableInstance;
-import frc.robot.Constants;
+import static frc.robot.Constants.HUB_CENTER_POSE;
+import static frc.robot.Constants.HUB_RADIUS_METERS;
+import static frc.robot.Constants.TAPE_STRIP_HEIGHT;
+import static frc.robot.Constants.TAPE_STRIP_LENGTH;
+import static frc.robot.Constants.TARGET_HEIGHT_METERS;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.photonvision.targeting.PhotonTrackedTarget;
-import org.photonvision.targeting.TargetCorner;
+
 import org.photonvision.PhotonVersion;
 import org.photonvision.SimPhotonCamera;
-import frc.robot.util.SimVisionTarget;
-import static frc.robot.Constants.*;
+import org.photonvision.targeting.PhotonTrackedTarget;
+import org.photonvision.targeting.TargetCorner;
+
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.util.Units;
+import edu.wpi.first.networktables.NetworkTableInstance;
 
 public class SimCamera {
     SimPhotonCamera cam;
@@ -158,7 +161,7 @@ public class SimCamera {
                                     - this.camPitchDegrees;
 
                     if (camCanSeeTarget(distMeters, yawDegrees, pitchDegrees, area)) {
-                        // TODO simulate target corners
+                        // TOXDO simulate target corners
                         visibleTgtList.add(
                                 new PhotonTrackedTarget(
                                         yawDegrees,
