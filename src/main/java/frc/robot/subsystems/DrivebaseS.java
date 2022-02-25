@@ -86,7 +86,6 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
     fwdBack = fwdBackLimiter.calculate(fwdBack);
     turn = turnLimiter.calculate(turn);
     boolean quickTurn = false;
-    SmartDashboard.putNumber("fwdBack", fwdBack);
     if (fwdBack == 0) {
       quickTurn = true;
     }
@@ -122,7 +121,6 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
     }
     else {
       odometry.update(m_gyroSim, m_leftEncoder.getPosition(), m_rightEncoder.getPosition());
-      simulationPeriodic();
 
     }
 

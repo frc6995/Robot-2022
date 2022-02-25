@@ -262,10 +262,10 @@ public class ShooterS extends SubsystemBase implements Loggable{
       lastBackEncoderPosition = backEncoderPosition;
     }
     else {
-      simulationPeriodic();
     }
   }
 
+  @Override
   public void simulationPeriodic() {
     frontSim.setInput(frontSparkMax.getAppliedOutput() - 
       (Math.signum(frontSparkMax.getAppliedOutput()) * Constants.SHOOTER_FRONT_FF[0]));

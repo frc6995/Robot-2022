@@ -25,8 +25,8 @@ public class DrivebaseCommandFactory {
             () -> {},
             () -> {
                 drivebaseS.curvatureDrive(
-                    drivebaseS.deadbandJoysticks(fwdBack.getAsDouble()),
-                    drivebaseS.deadbandJoysticks(turn.getAsDouble())
+                    fwdBack.getAsDouble() * 0.25,
+                    turn.getAsDouble() * 0.25
                 );
             },
             interrupted -> {

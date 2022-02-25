@@ -124,12 +124,13 @@ public class RobotContainer {
 
   private void createSubsystems() {
     drivebaseS = new DrivebaseS();
-    odometryManager = new OdometryManager(drivebaseS::getRobotPose);
+
     intakeS = new IntakeS();
     midtakeS = new MidtakeS();
     turretS = new TurretS();
     shooterS = new ShooterS();
-    limelightS = new LimelightS(odometryManager, turretS::getRotation2d,
+    odometryManager = new OdometryManager(drivebaseS::getRobotPose, turretS::getRotation2d);
+    limelightS = new LimelightS(odometryManager,
     (List<Pose2d> list)->{field.getObject("targetRing").setPoses(list);});
   }
 
@@ -158,17 +159,23 @@ public class RobotContainer {
     /*Field2d setup */
     field.setRobotPose(drivebaseS.getRobotPose());
     odometryManager.periodic();
-    field.getObject("target").setPose(
-      odometryManager.getTargetPose()
-      );
-    field.getObject("Turret").setPose(field.getRobotPose().transformBy(
-        new Transform2d(
-          new Translation2d(), Rotation2d.fromDegrees(
-            turretS.getEncoderCounts()
-          )
-        )
+
+    field.getObject("target").setPose(new Pose2d(
+      odometryManager.getCurrentRobotPose().getTranslation().plus(
+        odometryManager.getRobotToHub().getTranslation().rotateBy(
+          odometryManager.getCurrentRobotPose().getRotation())),
+    Rotation2d.fromDegrees(0)));
+
+    field.getObject("cameraTarget").setPose(
+      odometryManager.getCurrentRobotPose().transformBy(
+        odometryManager.getRobotToCamera()).transformBy(
+          odometryManager.getCameraToHub()));
+    field.getObject("Turret").setPose(odometryManager.getCurrentRobotPose().transformBy(
+        odometryManager.getRobotToTurret()
       )
     );
+
+    field.getObject("camera").setPose(odometryManager.getCurrentRobotPose().transformBy(odometryManager.getRobotToCamera()));
     
   }
 }

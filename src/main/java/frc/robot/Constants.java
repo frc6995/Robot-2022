@@ -94,10 +94,12 @@ public final class Constants {
     //Limelight Constants
     public static final double LIMELIGHT_FILTER_TIME_CONSTANT = 0.1; 
     public static final double LIMELIGHT_FILTER_PERIOD_CONSTANT = 0.02;
-    public static final double CAMERA_DIAG_FOV_DEGREES = 45; // TODO real numbers
+    public static final double CAMERA_DIAG_FOV_DEGREES = 67.8; // TODO real numbers
     public static final double CAMERA_HEIGHT_METERS = 0.9398; //37 inches
     public static final double CAMERA_CENTER_OFFSET = Units.inchesToMeters(7); // TODO real numbers
     public static final double CAMERA_PITCH_RADIANS = Units.degreesToRadians(30); // 30 degrees above horizontal
+    public static final int CAMERA_HORIZ_RES = 320;
+    public static final int CAMERA_VERT_RES = 240;
   
     //Intake Constants
     public static final int CAN_ID_INTAKE_LEAD_MOTOR = 20;
@@ -112,9 +114,11 @@ public final class Constants {
         Units.feetToMeters(54.0/2),
         Units.feetToMeters(27.0/2),
         Rotation2d.fromDegrees(0));
+    public static final double TAPE_STRIP_LENGTH = Units.inchesToMeters(5);
+    public static final double TAPE_STRIP_HEIGHT = Units.inchesToMeters(2);
     public static final double HUB_RADIUS_METERS = Units.feetToMeters(2);
     public static final double TARGET_HEIGHT_METERS = Units.inchesToMeters(104); //8ft 8 inches
-    public static final double TAPE_STRIP_COUNT = 24.0; // TODO real numbers
+    public static final double TAPE_STRIP_COUNT = 16.0; // TODO real numbers
 
 }
 

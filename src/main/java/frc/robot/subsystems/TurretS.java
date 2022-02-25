@@ -240,9 +240,6 @@ public class TurretS extends SubsystemBase implements Loggable {
 
   @Override
   public void periodic() {
-    if(!RobotBase.isReal()) {
-      simulationPeriodic();
-    }
   }
 
 }

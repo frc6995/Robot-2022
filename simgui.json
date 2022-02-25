@@ -22,7 +22,12 @@
     "windows": {
       "/Shuffleboard/RobotContainer/field": {
         "Turret": {
-          "arrows": false,
+          "arrowColor": [
+            0.1937011480331421,
+            0.20695680379867554,
+            0.7172995805740356,
+            255.0
+          ],
           "color": [
             0.47257381677627563,
             0.2651996612548828,
@@ -31,6 +36,27 @@
           ],
           "length": 0.4000000059604645,
           "width": 0.30000001192092896
+        },
+        "camera": {
+          "arrowColor": [
+            0.8268757462501526,
+            0.8354430198669434,
+            0.1586284041404724,
+            255.0
+          ],
+          "color": [
+            0.7932489514350891,
+            0.13388170301914215,
+            0.6513597965240479,
+            255.0
+          ],
+          "length": 0.30000001192092896,
+          "width": 0.20000000298023224
+        },
+        "targetRing": {
+          "arrows": false,
+          "length": 0.009999999776482582,
+          "width": 0.03999999910593033
         },
         "window": {
           "visible": true
@@ -48,9 +74,19 @@
       }
     },
     "Shuffleboard": {
+      "OdometryManager": {
+        "open": true
+      },
+      "RobotContainer": {
+        "field": {
+          "open": true
+        },
+        "open": true
+      },
       "ShooterS": {
         "open": true
-      }
+      },
+      "open": true
     },
     "SmartDashboard": {
       "open": true
@@ -66,23 +102,8 @@
     "Plot <0>": {
       "plots": [
         {
-          "axis": [
-            {
-              "autoFit": true,
-              "lockMin": true
-            }
-          ],
           "height": 332,
           "series": [
-            {
-              "color": [
-                0.2980392277240753,
-                0.44705885648727417,
-                0.6901960968971252,
-                1.0
-              ],
-              "id": "NT:/Shuffleboard/ShooterS/frontEncoderVelocityRPM"
-            },
             {
               "color": [
                 0.8666667342185974,
@@ -90,7 +111,7 @@
                 0.32156863808631897,
                 1.0
               ],
-              "id": "NT:/Shuffleboard/ShooterS/backEncoderVelocityRPM"
+              "id": "NT:/photonvision/gloworm/hasTargetEntry"
             }
           ]
         }

@@ -34,6 +34,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Robot;
 import frc.robot.util.OdometryManager;
+import frc.robot.util.SimCamera;
 
 import static frc.robot.Constants.*;
 import io.github.oblarg.oblog.Loggable;
@@ -48,11 +49,10 @@ import io.github.oblarg.oblog.annotations.Log;
 public class LimelightS extends SubsystemBase {
   OdometryManager odometryManager;
   Supplier<Rotation2d> turretAngleSupplier;
-  ArrayList<Pose2d> targetPoseList = new ArrayList<>();
   PhotonCamera limelight = new PhotonCamera("gloworm");
 
   // Sim stuff
-  //SimVisionSystem limelightSimVisionSystem;
+  SimCamera limelightSimVisionSystem;
   Trigger hasSteadyTarget = new Trigger(() -> limelight.getLatestResult().hasTargets()).debounce(0.5);
   // Data filtering
   @Log(methodName = "getFilteredXOffset")
@@ -63,44 +63,41 @@ public class LimelightS extends SubsystemBase {
   private LinearFilter distanceFilter;
 
   /** Creates a new LimelightS. */
-  public LimelightS(OdometryManager odometryManager, Supplier<Rotation2d> turretAngleSupplier,
+  public LimelightS(OdometryManager odometryManager,
       Consumer<List<Pose2d>> addFieldVisionTargets) {
-    this.turretAngleSupplier = turretAngleSupplier;
-    this.odometryManager = odometryManager;
+        this.odometryManager = odometryManager;
+    this.turretAngleSupplier = ()->odometryManager.getRobotToTurret().getRotation();
+
 
     xOffsetFilter = LinearFilter.singlePoleIIR(LIMELIGHT_FILTER_TIME_CONSTANT,
         LIMELIGHT_FILTER_PERIOD_CONSTANT);
     distanceFilter = LinearFilter.singlePoleIIR(LIMELIGHT_FILTER_TIME_CONSTANT,
         LIMELIGHT_FILTER_PERIOD_CONSTANT);
-    NetworkTableInstance.getDefault().getTable("photonvision").getSubTable("gloworm").getEntry("version")
-        .setString(PhotonVersion.versionString);
-    /* if (RobotBase.isReal()) {
-      limelightSimVisionSystem = new SimVisionSystem(
+    if (!RobotBase.isReal()) {
+      limelightSimVisionSystem = new SimCamera(
           "gloworm",
           CAMERA_DIAG_FOV_DEGREES, Units.radiansToDegrees(CAMERA_PITCH_RADIANS),
           new Transform2d(
               new Translation2d(
-                  Units.inchesToMeters(7), Rotation2d.fromDegrees(0)),
+                  CAMERA_CENTER_OFFSET, Rotation2d.fromDegrees(0)),
               new Rotation2d()),
-          CAMERA_HEIGHT_METERS, 9000, 920, 540, 5);
+          CAMERA_HEIGHT_METERS, 9000, CAMERA_HORIZ_RES, CAMERA_VERT_RES, 5);
       // Set up the target ring
-      for (int i = 0; i > TAPE_STRIP_COUNT; i++) {
+      ArrayList<Pose2d> targetPoseList = new ArrayList<>();
+      for (int i = 0; i < TAPE_STRIP_COUNT; i++) {
+
         Pose2d targetPose = HUB_CENTER_POSE
             .transformBy(
                 new Transform2d(
                     new Translation2d(
                         HUB_RADIUS_METERS,
-                        360.0 * i / TAPE_STRIP_COUNT),
+                        Rotation2d.fromDegrees(360.0 * i / TAPE_STRIP_COUNT)),
                     Rotation2d.fromDegrees(360.0 * i / TAPE_STRIP_COUNT)));
         targetPoseList.add(targetPose);
-        limelightSimVisionSystem.addSimVisionTarget(new SimVisionTarget(
-            targetPose,
-            TARGET_HEIGHT_METERS,
-            Units.inchesToMeters(6),
-            Units.inchesToMeters(2)));
       } 
-      //addFieldVisionTargets.accept(targetPoseList);
-    }*/
+      
+      addFieldVisionTargets.accept(targetPoseList);
+    }
   }
 
   /**
@@ -126,38 +123,32 @@ public class LimelightS extends SubsystemBase {
    */
   @Override
   public void periodic() {
-    // if (!RobotBase.isReal()) {
-    // limelightSimVisionSystem.moveCamera(
-    // new Transform2d(
-    // new Translation2d(
-    // CAMERA_CENTER_OFFSET, 0).rotateBy(
-    // turretAngleSupplier.get()),
-    // turretAngleSupplier.get()),
-    // CAMERA_HEIGHT_METERS,
-    // Units.radiansToDegrees(CAMERA_PITCH_RADIANS));
-    // limelightSimVisionSystem.processFrame(odometryManager.getCurrentRobotPose());
-    // }
-    // This method will be called once per scheduler run
+    Transform2d cameraToRobotTrans = odometryManager.getRobotToCamera().inverse();
+    if (!RobotBase.isReal()) {
+    limelightSimVisionSystem.moveCamera(
+      cameraToRobotTrans,
+      CAMERA_HEIGHT_METERS,
+      Units.radiansToDegrees(CAMERA_PITCH_RADIANS));
+      limelightSimVisionSystem.processFrame(odometryManager.getCurrentRobotPose());
+    }
 
     PhotonTrackedTarget target = limelight.getLatestResult().hasTargets()
         ? limelight.getLatestResult().getBestTarget()
         : new PhotonTrackedTarget(0, 0, 0, 0, new Transform2d(), new ArrayList<TargetCorner>());
-    this.filterValues = new FilterValues(
-        xOffsetFilter.calculate(target.getYaw()),
-        distanceFilter.calculate(
-            PhotonUtils.calculateDistanceToTargetMeters(
-                CAMERA_HEIGHT_METERS,
-                TARGET_HEIGHT_METERS,
-                CAMERA_PITCH_RADIANS,
-                Units.degreesToRadians(target.getPitch()))
-                + CAMERA_CENTER_OFFSET
-                + HUB_RADIUS_METERS));
-    SmartDashboard.putNumber("x offset", this.filterValues.getFilteredXOffset()); // TODO Oblog
-    SmartDashboard.putNumber("y offset", this.filterValues.getFilteredDistance());
-    // if (hasSteadyTarget.get()) {
-    // odometryManager.addVisionMeasurement(this.filterValues.getFilteredDistance(),
-    // turretAngleSupplier.get().plus(Rotation2d.fromDegrees(this.filterValues.getFilteredXOffset())));
-    // }
+    double xOffset = target.getYaw();
+    double distance = PhotonUtils.calculateDistanceToTargetMeters(
+      CAMERA_HEIGHT_METERS,
+      TARGET_HEIGHT_METERS,
+      CAMERA_PITCH_RADIANS,
+      Units.degreesToRadians(target.getPitch()));
+    
+    Transform2d cameraToHubTrans = new Transform2d(
+      PhotonUtils.estimateCameraToTargetTranslation(distance, Rotation2d.fromDegrees(-1 * xOffset))
+      .times((distance + HUB_RADIUS_METERS)/distance),
+      Rotation2d.fromDegrees(0)); //Scale the translation an extra 2 meters to account for the radius of the ring
+    if (hasSteadyTarget.get()) {
+      odometryManager.addVisionMeasurement(cameraToHubTrans);
+    }
   }
 
   /**
