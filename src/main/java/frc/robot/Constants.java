@@ -74,9 +74,17 @@ public final class Constants {
     public static final double INTAKE_EJECT_SPEED = -0.5;
 
     //LED Constants
+
+    /** The roboRIO spark value for solid green LEDs */
     public static final double LED_SOLID_GREEN = 0.77;
+
+    /** The roboRIO spark value for Light Chase pattern */
     public static final double LED_PATTERN_GREEN = 0.01;
+
+    /** The roboRIO spark value for Strobe, Red pattern */
     public static final double LED_PATTERN_RED = -0.11;
+
+    /** The roboRIO spark value for Rainbow, Party Palette pattern */
     public static final double LED_PARTY_MODE = -0.97;
 
 }

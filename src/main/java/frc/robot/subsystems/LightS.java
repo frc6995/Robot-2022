@@ -10,26 +10,52 @@ import frc.robot.Constants;
 
 public class LightS extends SubsystemBase {
 
-  public states currentState;
+  public static states currentState;
   private Spark spark;
 
   /** Creates a new LedS. */
   public LightS() {
   }
 
+  /**
+   * Different states of the robot, with an integer that determines the priority
+   * of the state (the lower the number, the higher the priority)
+   */
   public enum states {
-    Disabled,
-    IntakingWrongColor,
-    Intaking,
-    Shooting,
-    Climbing,
-    Default;
+    Disabled(0),
+    Climbing(1),
+    IntakingWrongColor(2),
+    Intaking(3),
+    Shooting(4),
+    Default(5);
+
+    public int value;
+
+    private states(int priority) {
+      value = priority;
+    }
   }
 
+  /**
+   * Requests the current state of the robot, determines whether the requested
+   * state is a higher priority than the current state, sets the current state to
+   * the requested state
+   * 
+   * @param state The requested state of the robot when the method is called
+   */
   public void requestState(states state) {
-    currentState = state;
+
+    // if (currentState.value < stat.value) {}
+
+    if (currentState.value >= state.value) {
+      currentState = state;
+    }
   }
 
+  /**
+   * Periodically checks the current state of the robot and sets the LEDs to the
+   * corresponding light pattern
+   */
   @Override
   public void periodic() {
     // This method will be called once per scheduler run

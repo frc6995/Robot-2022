@@ -16,6 +16,8 @@ public class ShooterCommandFactory {
     private static LightS lightS = new LightS();
     /**
      * Creates a TurretFollowC, which uses PID to point the turret to the given angle, where the homing switch is 0.
+     * Sets the current state of the robot to "Shooting"
+     * 
      * @param angle a DoubleSupplier for the desired angle
      * @param turretS the turret subsystem
      * @return the TurretTurnC
