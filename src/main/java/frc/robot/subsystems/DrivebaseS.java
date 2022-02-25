@@ -1,7 +1,3 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
 package frc.robot.subsystems;
 
 import static frc.robot.Constants.*;
@@ -98,19 +94,12 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
   public void tankDrive(double left, double right) {
     SmartDashboard.putNumber("leftSpeed", left);
     SmartDashboard.putNumber("rightSpeed", right);
-    if(RobotBase.isReal()) {
-      frontLeft.set(left);
-      frontRight.set(right);
-    }
-    else {
-      frontLeft.setVoltage(left);
-      frontRight.setVoltage(right); // this does not actually set -1..1 volts, it just works around Rev's broken sim support. 
-    }
-
+    frontLeft.setVoltage(left * RobotController.getInputVoltage());
+    frontRight.setVoltage(left * RobotController.getInputVoltage());
   }
 
   public void tankDriveVelocity(double leftVelocityMPS, double rightVelocityMPS) {
-    tankDrive(leftFF.calculate(leftVelocityMPS), rightFF.calculate(rightVelocityMPS));
+    tankDriveVolts(leftFF.calculate(leftVelocityMPS), rightFF.calculate(rightVelocityMPS));
   }
 
   @Override
@@ -129,16 +118,13 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
       odometry.update(m_gyroSim, m_leftEncoder.getPosition(), m_rightEncoder.getPosition());
 
     }
-
-
   }
 
   public void simulationPeriodic() {
 		// Set the inputs to the system. Note that we need to convert
 		// the [-1, 1] PWM signal to voltage by multiplying it by the
 		// robot controller voltage.
-		m_driveSim.setInputs(frontLeft.getAppliedOutput() * RobotController.getInputVoltage(),
-				frontRight.getAppliedOutput() * RobotController.getInputVoltage());
+		m_driveSim.setInputs(frontLeft.getAppliedOutput(), frontRight.getAppliedOutput());
 
 		// Advance the model by 20 ms. Note that if you are running this
 		// subsystem in a separate thread or have changed the nominal timestep

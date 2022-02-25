@@ -1,7 +1,3 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
 package frc.robot;
 
 import java.util.List;
@@ -40,10 +36,7 @@ import io.github.oblarg.oblog.annotations.Log;
  * subsystems, commands, and button mappings) should be declared here.
  */
 public class RobotContainer {
-  // The robot's subsystems and commands are defined here...
-  /**
-   * The container for the robot. Contains subsystems, OI devices, and commands.
-   */
+
   private CommandXboxController driverController;
 
   @Log
@@ -132,8 +125,8 @@ public class RobotContainer {
     turretS.setDefaultCommand(turretAimC);
     
     shooterSpinC = ShooterCommandFactory.createShooterFollowC(
-          ()->{return ShooterS.getSpeedForDistance(odometryManager.getDistanceToCenter());},
-          ()->{return 1.3 * ShooterS.getSpeedForDistance(odometryManager.getDistanceToCenter());},
+          ()->{return ShooterS.getSpeedForDistance(odometryManager.getDistanceToCenter(), false);},
+          ()->{return ShooterS.getSpeedForDistance(odometryManager.getDistanceToCenter(), true);},
           shooterS);
     shooterS.setDefaultCommand(shooterSpinC);
     turretTurningC = TurretCommandFactory.createTurretTurnC(40, turretS);

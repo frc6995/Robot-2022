@@ -1,7 +1,3 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
 package frc.robot.util;
 
 import java.util.function.Supplier;
@@ -29,6 +25,8 @@ public class OdometryManager implements Loggable {
     Supplier<Rotation2d> turretAngleSupplier;
     private Transform2d m_cameraToHubTrans;
 
+    
+
     public OdometryManager(Supplier<Pose2d> currentPose, Supplier<Rotation2d> turretAngle) {
         poseSupplier = currentPose;
         turretAngleSupplier = turretAngle;
@@ -46,7 +44,6 @@ public class OdometryManager implements Loggable {
           );
         getRobotToCamera();
         updateOdometry();
-
     }
 
     public Transform2d getRobotToTurret() {
@@ -130,6 +127,10 @@ public class OdometryManager implements Loggable {
     @Log
     public double getDistanceToCenter() {
         return m_robotToHubTrans.getTranslation().getNorm();
+    }
+
+    public boolean getDistanceInRange() {
+        return (CONSTANTS.SHOOTER)
     }
     
     /**

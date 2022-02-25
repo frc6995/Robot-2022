@@ -1,7 +1,3 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
 package frc.robot.subsystems;
 
 import com.revrobotics.CANSparkMax;
@@ -211,9 +207,9 @@ public class ShooterS extends SubsystemBase implements Loggable{
    * @return the shooter RPM
    */
 
-  public static double getSpeedForDistance(double distance) {
-    int index = Math.max(Math.min(Constants.DISTANCES.length-2, getIndexForDistance(distance, Constants.DISTANCES)), 0);
-    double rpm = calcSpeed(index, index+1, distance, Constants.DISTANCES, Constants.SPEEDS);
+  public static double getSpeedForDistance(double distance, boolean isBackWheel) {
+    int index = Math.max(Math.min(Constants.SHOOTER_DISTANCES.length-2, getIndexForDistance(distance, Constants.SHOOTER_DISTANCES)), 0);
+    double rpm = calcSpeed(index, index+1, distance, Constants.SHOOTER_DISTANCES, Constants.SHOOTER_SPEEDS, isBackWheel);
     return rpm; 
   }
 
@@ -234,9 +230,9 @@ public class ShooterS extends SubsystemBase implements Loggable{
     return index;
   }
 
-  public static double calcSpeed(int smallerIndex, int biggerIndex, double distance, double[] DISTANCES_FEET, double[] RPMS) {
-    double smallerRPM = RPMS[Math.max(smallerIndex, 0)];
-    double biggerRPM = RPMS[Math.min(biggerIndex, RPMS.length-1)] + 0.0001; //add a tiny amount to avoid NaN if distance is out of range
+  public static double calcSpeed(int smallerIndex, int biggerIndex, double distance, double[] DISTANCES_FEET, double[][] RPMS, boolean isBackWheel) {
+    double smallerRPM = RPMS[Math.max(smallerIndex, 0)][isBackWheel ? 1 : 0];
+    double biggerRPM = RPMS[Math.min(biggerIndex, RPMS.length-1)][isBackWheel ? 1 : 0] + 0.0001; //add a tiny amount to avoid NaN if distance is out of range
     double smallerDistance = DISTANCES_FEET[Math.max(smallerIndex, 0)];
     double biggerDistance = DISTANCES_FEET[Math.min(biggerIndex, DISTANCES_FEET.length-1)] + 0.0001;
     double newRPM = ((biggerRPM - smallerRPM) / (biggerDistance - smallerDistance) * (distance - smallerDistance)) + smallerRPM;
