@@ -1,7 +1,3 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
 package frc.robot.subsystems;
 
 import com.revrobotics.CANSparkMax;
@@ -23,8 +19,7 @@ import io.github.oblarg.oblog.annotations.Log;
  * The turret subsystem. It contains methods to get encoder counts and converts
  * them to degrees. It uses a PID controller to control the turret position.
  * 
- * @author Benjamin Su
- * @author Noah Kim
+ * @author Benjamin Su, Noah Kim
  */
 public class TurretS extends SubsystemBase implements Loggable {
   private CANSparkMax sparkMax = new CANSparkMax(Constants.CAN_ID_TURRET, MotorType.kBrushless);
@@ -33,9 +28,9 @@ public class TurretS extends SubsystemBase implements Loggable {
   private PIDController turretPID = new PIDController(Constants.TURRET_P, 0, 0);
   // Open-loop drive in turret rotations per second
   private SimpleMotorFeedforward turretFF = new SimpleMotorFeedforward(
-    Constants.TURRET_FF[0],
-    Constants.TURRET_FF[1],
-    Constants.TURRET_FF[2]);
+      Constants.TURRET_FF[0],
+      Constants.TURRET_FF[1],
+      Constants.TURRET_FF[2]);
 
   /** Creates a new TurretS. */
   public TurretS() {
@@ -70,7 +65,7 @@ public class TurretS extends SubsystemBase implements Loggable {
    * 
    * @return the encoder counts
    */
-  @Log(name="turretPosition")
+  @Log(name = "turretPosition")
   public double getEncoderCounts() {
     return sparkMaxEncoder.getPosition();
   }
@@ -88,9 +83,9 @@ public class TurretS extends SubsystemBase implements Loggable {
   /**
    * Turns the turret towards the homing switch at a safe speed.
    */
-   public void turnHoming() {
-     sparkMax.set(Constants.TURRET_HOMING_SPEED);
-   }
+  public void turnHoming() {
+    sparkMax.set(Constants.TURRET_HOMING_SPEED);
+  }
 
   /**
    * Stops the motor.
@@ -111,7 +106,7 @@ public class TurretS extends SubsystemBase implements Loggable {
    * 
    * @return True if homing switch is triggered.
    */
-  @Log(name="turretHomed")
+  @Log(name = "turretHomed")
   public boolean getIsHomed() {
     return !limitSwitch.get();
   }
@@ -121,13 +116,14 @@ public class TurretS extends SubsystemBase implements Loggable {
    * 
    * @return The velocity of the motor, in turret rotations per second
    */
-  @Log(name="turretVelocity")
+  @Log(name = "turretVelocity")
   public double getVelocity() {
     return sparkMaxEncoder.getVelocity();
   }
 
   /**
-   * sets the speed of the turret from -1 to 1, ensures the position of the turret is 
+   * sets the speed of the turret from -1 to 1, ensures the position of the turret
+   * is
    * within the soft limit, calculates the power to give to the motor
    * 
    * @param target The desired angle
@@ -140,13 +136,11 @@ public class TurretS extends SubsystemBase implements Loggable {
       target = Constants.SOFT_LIMIT_REVERSE_DEGREE;
     }
     sparkMax.setVoltage(
-      MathUtil.clamp(
-        turretFF.calculate(
-          turretPID.calculate(this.getEncoderCounts(), target)
-        ),
-         -3, 3)
-    );
-    
+        MathUtil.clamp(
+            turretFF.calculate(
+                turretPID.calculate(this.getEncoderCounts(), target)),
+            -3, 3));
+
   }
 
   /**
@@ -168,6 +162,7 @@ public class TurretS extends SubsystemBase implements Loggable {
   }
 
   @Override
-  public void periodic() {}
+  public void periodic() {
+  }
 
 }
