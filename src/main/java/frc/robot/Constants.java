@@ -42,7 +42,6 @@ public final class Constants {
     public static final double DRIVEBASE_FWD_BACK_SLEW_LIMIT = 1; // 0 to 100% in one second.
 
     // Shooter Constants
-
     /** Can ids for front shooter motor */
     public static final int CAN_ID_FRONT_SHOOTER_MOTOR = 41;
 

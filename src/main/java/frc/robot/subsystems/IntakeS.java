@@ -29,7 +29,8 @@ public class IntakeS extends SubsystemBase {
     public IntakeS() {
         intakeLeadMotor.restoreFactoryDefaults();
         intakeFollowerMotor.restoreFactoryDefaults();
-        intakeFollowerMotor.follow(intakeLeadMotor, true);
+        intakeFollowerMotor.setInverted(true);
+        // intakeFollowerMotor.follow(intakeLeadMotor, true);
     }
 
     /**
@@ -60,6 +61,7 @@ public class IntakeS extends SubsystemBase {
      */
     public void spin(double speed) {
         intakeLeadMotor.set(speed);
+        intakeFollowerMotor.set(speed);
     }
 
     /**

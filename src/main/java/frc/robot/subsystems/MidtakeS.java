@@ -32,6 +32,7 @@ public class MidtakeS extends SubsystemBase {
    */
   public MidtakeS() {
     frontSparkMax.restoreFactoryDefaults();
+    frontSparkMax.setInverted(true);
     backSparkMax.restoreFactoryDefaults();
   }
 

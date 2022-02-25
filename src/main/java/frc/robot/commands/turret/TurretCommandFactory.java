@@ -63,17 +63,17 @@ public class TurretCommandFactory {
      */
     public static Command createTurretFollowC(DoubleSupplier angle, TurretS turretS) {
         return new FunctionalCommand(
-                () -> {
-                },
-                () -> {
-                    turretS.setTurretAngle(angle.getAsDouble());
-                },
-                interrupted -> {
-                    turretS.stopMotor();
-                },
-                () -> false,
-                turretS)
-                        .withName("TurretTurnC");
+            ()->{}, 
+            ()->{
+                turretS.setTurretAngle(angle.getAsDouble());
+            },
+            interrupted -> {
+                turretS.stopMotor();
+            },
+            () -> false,
+            turretS
+        )
+        .withName("TurretFollowC");
     }
 
     /**
