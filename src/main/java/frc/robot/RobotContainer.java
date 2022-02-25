@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj2.command.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.commands.auto.AutoCommandFactory;
 import frc.robot.commands.drivebase.DrivebaseCommandFactory;
+import frc.robot.commands.shooter.ShooterCommandFactory;
 import frc.robot.commands.turret.TurretCommandFactory;
 import frc.robot.subsystems.DrivebaseS;
 import frc.robot.subsystems.IntakeS;
@@ -94,7 +95,7 @@ public class RobotContainer {
 
     turretTurningC = TurretCommandFactory.createTurretTurnC(40, turretS);
 
-
+    shooterS.setDefaultCommand(ShooterCommandFactory.createShooterIdleC(shooterS));
     
     SmartDashboard.putData(new InstantCommand(turretS::resetEncoder));
   }

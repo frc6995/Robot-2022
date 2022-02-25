@@ -16,7 +16,7 @@ public class ShooterCommandFactory {
      * Creates a TurretFollowC, which uses PID to point the turret to the given angle, where the homing switch is 0.
      * @param angle a DoubleSupplier for the desired angle
      * @param turretS the turret subsystem
-     * @return the TurretTurnC
+     * @return the ShooterFollowC
      */
     public static Command createShooterFollowC(DoubleSupplier frontSpeed, DoubleSupplier backSpeed, ShooterS shooterS) {
         return new FunctionalCommand(
@@ -32,8 +32,22 @@ public class ShooterCommandFactory {
             () -> false,
             shooterS
         )
-        .withName("TurretTurnC");
+        .withName("ShooterFollowC");
     }
 
+    public static Command createShooterIdleC(ShooterS shooterS) {
+        return new FunctionalCommand(
+            ()->{}, 
+            ()->{
+                shooterS.pidFrontSpeed(3000);
+                shooterS.pidBackSpeed(3000);        
+            },
+            interrupted -> {},
+            () -> false,
+            shooterS
+        )
+        .withName("ShooterIdleC");
+    
+    }
 
 }
