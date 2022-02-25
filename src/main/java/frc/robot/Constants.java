@@ -57,8 +57,8 @@ public final class Constants {
     public static final double TURRET_P = 1.0 / 90.0;
 
     // Midtake Constants
-    public static final int CAN_ID_MIDTAKE_FRONT = 22;
-    public static final int CAN_ID_MIDTAKE_BACK = 23;
+    public static final int CAN_ID_MIDTAKE_FRONT = 23;
+    public static final int CAN_ID_MIDTAKE_BACK = 22;
     public static final int BEAM_BREAK_TOP_PORT_NUMBER = 1;
     public static final int BEAM_BREAK_BOTTOM_PORT_NUMBER = 2;
     public static final double COLOR_SENSOR_PROXIMITY_THRESHOLD = 250;
