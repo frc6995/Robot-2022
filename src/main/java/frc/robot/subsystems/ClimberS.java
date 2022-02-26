@@ -123,6 +123,13 @@ public class ClimberS extends SubsystemBase {
   }
 
   /**
+   * Sets the climber to Off so that it locks in place
+   */
+  public void climberOff() {
+    doubleSolenoid.set(Value.kOff);
+  }
+
+  /**
    * Sets back spark max speed to 0.1.
    */
   public void extendArmTwo() {

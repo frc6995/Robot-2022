@@ -100,15 +100,15 @@ public final class Constants {
     /**
      * The port number of the double solenoid when it folds the climber up
      */
-    public static final int DOUBLE_SOLENOID_CLIMBER_UP = 4;
+    public static final int DOUBLE_SOLENOID_CLIMBER_UP = 0;
     /**
      * The port number of the double solenoid when it folds the climber down
      */
-    public static final int DOUBLE_SOLENOID_CLIMBER_DOWN = 5;
+    public static final int DOUBLE_SOLENOID_CLIMBER_DOWN = 1;
     /**
      * The CAN ID of the back climb motor
      */
-    public static final int CAN_ID_BACK_CLIMB_MOTOR = 0;
+    public static final int CAN_ID_BACK_CLIMB_MOTOR = 1;
     /**
      * The proportional constant for the back climber
      */
