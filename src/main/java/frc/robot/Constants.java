@@ -160,10 +160,10 @@ public final class Constants {
     public static final int TURRET_LIMIT_SWITCH_PORT = 0;
   
     /** Counterclockwise limit at which the turret cannot pass */
-    public static final float SOFT_LIMIT_FORWARD_DEGREE = 110f;
+    public static final double SOFT_LIMIT_FORWARD_RADIAN = Units.degreesToRadians(110);
 
     /** Clockwise limit at which the turret cannot pass */
-    public static final float SOFT_LIMIT_REVERSE_DEGREE = -110f;
+    public static final double SOFT_LIMIT_REVERSE_RADIAN = Units.degreesToRadians(-110);
 
     /** Number of degrees of allowable error for turret */
     public static final int TURRET_PID_ERROR = 1;
@@ -175,10 +175,10 @@ public final class Constants {
     public static final double TURRET_DEADBAND = 0.02;
 
     /** Feedforward for the turret */
-    public static final double[] TURRET_FF = {0.39475, 3.5435, 0.19223}; // for velocity in turret rotations per second
+    public static final double[] TURRET_FF = {0.39475, Units.radiansToRotations(3.5435), Units.radiansToRotations(0.19223)}; // for velocity in turret rotations per second
 
     /** Proportional term for the turret */
-    public static final double TURRET_P = 1.0/90.0;
+    public static final double TURRET_P = 2.0/Math.PI;
 
     /** The maximum manual-drive angular velocity of the turret in rotations per second */
     public static final double TURRET_MAX_SPEED = 1.0;

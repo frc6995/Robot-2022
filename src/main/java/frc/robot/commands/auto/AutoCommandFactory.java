@@ -49,7 +49,7 @@ public class AutoCommandFactory {
                 TurretCommandFactory.createTurretHomingC(turretS)
                         .andThen(
                                 TurretCommandFactory.createTurretTurnC(
-                                        Constants.SOFT_LIMIT_FORWARD_DEGREE / 2.0, // halfway between 0 and the forward
+                                        Constants.SOFT_LIMIT_FORWARD_RADIAN / 2.0, // halfway between 0 and the forward
                                                                                    // limit.
                                         turretS))
                         .andThen(

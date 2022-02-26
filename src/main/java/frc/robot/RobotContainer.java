@@ -12,7 +12,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.auto.AutoCommandFactory;
 import frc.robot.commands.drivebase.DrivebaseCommandFactory;
 import frc.robot.commands.shooter.ShooterCommandFactory;
@@ -58,6 +58,13 @@ public class RobotContainer {
   private Command turretAimC;
   private Command shooterSpinC;
 
+  private Trigger targetDistanceInRangeTrigger;
+  private Trigger shooterReadyTrigger;
+  private Trigger turretReadyTrigger;
+  private Trigger ballReadyTrigger;
+
+  private Trigger shootBallTrigger;
+
   private OdometryManager odometryManager;
 
   public RobotContainer() {
@@ -97,7 +104,18 @@ public class RobotContainer {
           midtakeS.stop();
         },
         () -> false, midtakeS);
-    driverController.b().whileActiveOnce(runMidtake);// runTurretC);
+
+    targetDistanceInRangeTrigger = new Trigger(odometryManager::getDistanceInRange);
+    turretReadyTrigger = new Trigger(turretS::isAtTarget);
+    shooterReadyTrigger = new Trigger(shooterS::isAtTarget);
+    ballReadyTrigger = new Trigger(midtakeS::getIsTopBeamBroken); // TODO fix this logic
+
+    targetDistanceInRangeTrigger.whileActiveContinuous(shooterSpinC);
+
+    shootBallTrigger = targetDistanceInRangeTrigger.and(turretReadyTrigger).and(shooterReadyTrigger).and(ballReadyTrigger);
+
+    shootBallTrigger.whenActive(runMidtake);
+    driverController.b().whileActiveOnce(runMidtake);
     driverController.x().whenActive(turretHomingC);
     driverController.y().whenActive(turretTurningC);
     driverController.a().whileActiveOnce(runIntake);

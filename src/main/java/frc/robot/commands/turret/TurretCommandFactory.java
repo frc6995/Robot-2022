@@ -26,7 +26,7 @@ public class TurretCommandFactory {
             interrupted -> {
                 turretS.stopMotor();
                 if(!interrupted) {
-                    turretS.resetEncoder(Constants.SOFT_LIMIT_REVERSE_DEGREE);
+                    turretS.resetEncoder(Constants.SOFT_LIMIT_REVERSE_RADIAN);
                 }
             }, turretS::getIsHomed, turretS
         )
@@ -35,9 +35,9 @@ public class TurretCommandFactory {
 
     /**
      * Creates a TurretTurnC, which uses PID to point the turret to the given angle,
-     * where the homing switch is 0.
+     * where robot opposite intake is 0.
      * 
-     * @param angle   the desired angle
+     * @param angle   the desired angle in radians counterclockwise from forward
      * @param turretS the turret subsystem
      * @return the TurretTurnC
      */
@@ -68,7 +68,7 @@ public class TurretCommandFactory {
         return new FunctionalCommand(
             ()->{}, 
             ()->{
-                turretS.setTurretAngle(angle.get().getDegrees());
+                turretS.setTurretAngle(angle.get().getRadians());
             },
             interrupted -> {
                 turretS.stopMotor();

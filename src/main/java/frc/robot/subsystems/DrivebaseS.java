@@ -27,7 +27,7 @@ import io.github.oblarg.oblog.Loggable;
 import io.github.oblarg.oblog.annotations.Log;
 
 public class DrivebaseS extends SubsystemBase implements Loggable {
-  DifferentialDriveOdometry odometry = new DifferentialDriveOdometry(Rotation2d.fromDegrees(0));
+  DifferentialDriveOdometry odometry = new DifferentialDriveOdometry(new Rotation2d());
   private final CANSparkMax frontRight = new CANSparkMax(CAN_ID_FRONT_RIGHT_DRIVE_MOTOR, MotorType.kBrushless);
   private final CANSparkMax frontLeft = new CANSparkMax(CAN_ID_FRONT_LEFT_DRIVE_MOTOR, MotorType.kBrushless);
   private final CANSparkMax backRight = new CANSparkMax(CAN_ID_BACK_RIGHT_DRIVE_MOTOR, MotorType.kBrushless);
@@ -66,6 +66,8 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
         DRIVEBASE_SIM_ENCODER_STD_DEV);
 
 		}
+
+    odometry.resetPosition(new Pose2d (HUB_CENTER_POSE.getX() - 2, HUB_CENTER_POSE.getY(), new Rotation2d()), navX.getRotation2d());
 
   }
 
@@ -106,7 +108,7 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
     SmartDashboard.putNumber("leftSpeed", left);
     SmartDashboard.putNumber("rightSpeed", right);
     frontLeft.setVoltage(left * RobotController.getInputVoltage());
-    frontRight.setVoltage(left * RobotController.getInputVoltage());
+    frontRight.setVoltage(right * RobotController.getInputVoltage());
   }
 
   public void tankDriveVelocity(double leftVelocityMPS, double rightVelocityMPS) {
@@ -209,10 +211,6 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
 
   public void resetRobotPose() {
     resetRobotPose(new Pose2d());
-  }
-
-  public void stopAll() {
-    tankDrive(0, 0);
   }
 
   public void tankDriveVolts(double leftVolts, double rightVolts) {
