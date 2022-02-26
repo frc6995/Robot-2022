@@ -184,7 +184,7 @@ public final class Constants {
     public static final double[] TURRET_FF = {0.39475, Units.radiansToRotations(3.5435), Units.radiansToRotations(0.19223)}; // for velocity in turret rotations per second
 
     /** Proportional term for the turret */
-    public static final double TURRET_P = 2.0/Math.PI;
+    public static final double TURRET_P = 2 * Math.PI * (2.0/Math.PI);
 
     /** The maximum manual-drive angular velocity of the turret in rotations per second */
     public static final double TURRET_MAX_SPEED = 1.0;

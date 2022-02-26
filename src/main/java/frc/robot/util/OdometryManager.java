@@ -1,5 +1,6 @@
 package frc.robot.util;
 
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -23,18 +24,22 @@ public class OdometryManager implements Loggable {
 
     Supplier<Pose2d> poseSupplier;
     Supplier<Rotation2d> turretAngleSupplier;
+    Consumer<Double> transformAngularVelocityConsumer;
     private Transform2d m_cameraToHubTrans;
+    private Transform2d m_lastRobotToHubTrans;
 
     
 
-    public OdometryManager(Supplier<Pose2d> currentPose, Supplier<Rotation2d> turretAngle) {
+    public OdometryManager(Supplier<Pose2d> currentPose, Supplier<Rotation2d> turretAngle, Consumer<Double> transformAngularVelocityConsumer) {
         poseSupplier = currentPose;
         turretAngleSupplier = ()->{return turretAngle.get().rotateBy(Constants.ROBOT_TO_TURRET_ZERO_ROT);};
+        this.transformAngularVelocityConsumer = transformAngularVelocityConsumer;
         m_currPoseMeters = currentPose.get();
         m_lastPoseMeters = m_currPoseMeters;
         getRobotToCamera();
         m_robotToHubTrans = new Transform2d(m_currPoseMeters, Constants.HUB_CENTER_POSE);
         m_cameraToHubTrans = m_robotToHubTrans.plus(m_robotToCameraTrans.inverse());
+        m_lastRobotToHubTrans = m_robotToHubTrans;
     }
 
 
@@ -75,9 +80,10 @@ public class OdometryManager implements Loggable {
      * Read the pose from the Field2d widget and treat it as a drivetrain odometry update.
      */
     public void updateOdometry() {
-        m_lastPoseMeters = m_currPoseMeters;
         m_currPoseMeters = poseSupplier.get();
         updateTargetOffset(m_currPoseMeters);
+        m_lastPoseMeters = m_currPoseMeters;
+        m_lastRobotToHubTrans = m_robotToHubTrans;
     }
 
     public Pose2d getCurrentRobotPose() {
@@ -97,14 +103,18 @@ public class OdometryManager implements Loggable {
      */
     public void updateTargetOffset(Pose2d newPose) {
         Transform2d deltaInverse = new Transform2d(newPose, m_lastPoseMeters);
+        
+        Translation2d deltaTranslation = new Translation2d(
+            m_robotToHubTrans.getX() + deltaInverse.getX(),
+            m_robotToHubTrans.getY() + deltaInverse.getY()
+        ).rotateBy(deltaInverse.getRotation());
         m_robotToHubTrans =
             new Transform2d(
-                new Translation2d(
-                    m_robotToHubTrans.getX() + deltaInverse.getX(),
-                    m_robotToHubTrans.getY() + deltaInverse.getY()
-                ).rotateBy(deltaInverse.getRotation()),
+                deltaTranslation,
                 new Rotation2d()
             );
+        transformAngularVelocityConsumer.accept(
+            getDirection(m_robotToHubTrans).minus(getDirection(m_lastRobotToHubTrans)).getRadians() / 0.02);
     }
 
     /**
@@ -131,6 +141,14 @@ public class OdometryManager implements Loggable {
 
     public boolean getDistanceInRange() {
         return (Constants.SHOOTER_DISTANCES[0] < getDistanceToCenter() && (getDistanceToCenter() < Constants.SHOOTER_DISTANCES[Constants.SHOOTER_DISTANCES.length - 1]));
+    }
+
+    /**
+     * Get the rate of change of the transform's heading offset, in radians per second.
+     */
+
+    public double getTransformAngularVelocity() {
+        return (getDirection(m_lastRobotToHubTrans.plus(m_robotToHubTrans)).getRadians()) / 0.02 /*dt*/;
     }
     
     /**
