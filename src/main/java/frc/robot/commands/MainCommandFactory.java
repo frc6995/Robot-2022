@@ -49,7 +49,7 @@ public class MainCommandFactory {
   public static Command createIntakeIndexCG(IntakeS intakeS, MidtakeS midtakeS) {
     return new SequentialCommandGroup(
         // Deploy intake, then
-        new InstantCommand(intakeS::deploy, intakeS),
+        IntakeCommandFactory.getIntakeDeploy(intakeS),
         // Spin until a ball is picked up, then
         new RunCommand(intakeS::spin, intakeS)
             .withInterrupt(midtakeS::getIsBottomBeamBroken)
@@ -57,19 +57,17 @@ public class MainCommandFactory {
 
         // Spin until the color sensor no longer detects the ball or an already-loaded
         // ball would enter the shooter
-        new RunCommand(midtakeS::spin, midtakeS)
-            .withInterrupt(() -> !midtakeS.getIsBottomBeamBroken())
-            .withInterrupt(midtakeS::getIsTopBeamBroken)
+            MidtakeCommandFactory.getLoadMidtake(midtakeS)
             // Also spin the intake while the midtake is going
             .raceWith(
-                new RunCommand(intakeS::spin, intakeS))
-            .andThen(midtakeS::stop, midtakeS),
+                IntakeCommandFactory.getIntakeSpin(intakeS)
+            .andThen(MidtakeCommandFactory.getStopMidtake(midtakeS)),
 
-        new InstantCommand(intakeS::stop, intakeS),
-        new InstantCommand(intakeS::retract, intakeS)
+        IntakeCommandFactory.getIntakeStop(intakeS),
+        IntakeCommandFactory.getIntakeRetract(intakeS)
     // (the command group may be instantly restarted to intake another ball)
     // Only retract the intake if interrupted
-    )
+    ))
         .withName("IntakeIndexCG");
   }
 }
