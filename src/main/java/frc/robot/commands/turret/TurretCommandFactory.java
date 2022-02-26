@@ -46,7 +46,7 @@ public class TurretCommandFactory {
                 () -> {
                 },
                 () -> {
-                    turretS.setTurretAngle(angle);
+                    turretS.setTurretAngle(new Rotation2d(angle));
                 },
                 interrupted -> {
                     turretS.stopMotor();
@@ -68,7 +68,7 @@ public class TurretCommandFactory {
         return new FunctionalCommand(
             ()->{}, 
             ()->{
-                turretS.setTurretAngle(angle.get().getRadians());
+                turretS.setTurretAngle(angle.get());
             },
             interrupted -> {
                 turretS.stopMotor();

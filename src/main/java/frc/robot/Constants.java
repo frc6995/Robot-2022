@@ -172,7 +172,7 @@ public final class Constants {
     public static final double SOFT_LIMIT_REVERSE_RADIAN = Units.degreesToRadians(-110);
 
     /** Number of degrees of allowable error for turret */
-    public static final int TURRET_PID_ERROR = 1;
+    public static final double TURRET_PID_ERROR = Units.degreesToRadians(5);
 
     /** Speed at which the turret should go back to home */
     public static final double TURRET_HOMING_SPEED = -0.1;
@@ -188,6 +188,9 @@ public final class Constants {
 
     /** The maximum manual-drive angular velocity of the turret in rotations per second */
     public static final double TURRET_MAX_SPEED = 1.0;
+
+    /** The 180-degree offset because the turret zero is with the turret facing backwards relative to the robot */
+    public static final Rotation2d ROBOT_TO_TURRET_ZERO_ROT = new Rotation2d(Math.PI);
 
 
     // Midtake Constants

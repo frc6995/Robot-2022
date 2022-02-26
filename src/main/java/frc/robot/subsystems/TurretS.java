@@ -62,6 +62,7 @@ public class TurretS extends SubsystemBase implements Loggable {
     sparkMax.setSoftLimit(SoftLimitDirection.kForward, (float) Units.radiansToDegrees(Constants.SOFT_LIMIT_FORWARD_RADIAN));
     sparkMax.setSoftLimit(SoftLimitDirection.kReverse, (float) Units.radiansToDegrees(Constants.SOFT_LIMIT_REVERSE_RADIAN));
     turretPID.setTolerance(Constants.TURRET_PID_ERROR, 0);
+    sparkMax.setSmartCurrentLimit(20, 20, 0);
     turretPID.setIntegratorRange(0, 0);
   }
 
@@ -97,7 +98,7 @@ public class TurretS extends SubsystemBase implements Loggable {
   public Rotation2d getRotation2d() {
     return new Rotation2d(getEncoderCounts());
   }
-
+  
   /**
    * Sets the turn speed of the turret
    * 
@@ -172,21 +173,21 @@ public class TurretS extends SubsystemBase implements Loggable {
    * is
    * within the soft limit, calculates the power to give to the motor
    * 
-   * @param target The desired angle in radians
+   * @param target The desired angle, relative to the +x axis of the robot coordinate frame.
    */
-  public void setTurretAngle(double target) {
-
-    if (target >= Constants.SOFT_LIMIT_FORWARD_RADIAN) {
+  public void setTurretAngle(Rotation2d target) {
+    Rotation2d targetZeroRelative = target.rotateBy(Constants.ROBOT_TO_TURRET_ZERO_ROT.unaryMinus());
+    if (targetZeroRelative.getRadians() >= Constants.SOFT_LIMIT_FORWARD_RADIAN) {
       targetInRange = false;
-      target = Constants.SOFT_LIMIT_FORWARD_RADIAN;
+      targetZeroRelative = new Rotation2d(Constants.SOFT_LIMIT_FORWARD_RADIAN);
     }
-    else if (target <= Constants.SOFT_LIMIT_REVERSE_RADIAN) {
+    else if (targetZeroRelative.getRadians() <= Constants.SOFT_LIMIT_REVERSE_RADIAN) {
       targetInRange = false;
-      target = Constants.SOFT_LIMIT_REVERSE_RADIAN;
+      targetZeroRelative = new Rotation2d(Constants.SOFT_LIMIT_REVERSE_RADIAN);
     } else {
       targetInRange = true;
     }
-    double velocity = turretPID.calculate(getEncoderCounts(), target); //radians per sec
+    double velocity = turretPID.calculate(getRotation2d().getRadians(), targetZeroRelative.getRadians()); //radians per sec
     SmartDashboard.putNumber("turretVelo", velocity);
     double voltage =
       turretFF.calculate(velocity

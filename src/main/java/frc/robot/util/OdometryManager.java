@@ -29,7 +29,7 @@ public class OdometryManager implements Loggable {
 
     public OdometryManager(Supplier<Pose2d> currentPose, Supplier<Rotation2d> turretAngle) {
         poseSupplier = currentPose;
-        turretAngleSupplier = turretAngle;
+        turretAngleSupplier = ()->{return turretAngle.get().rotateBy(Constants.ROBOT_TO_TURRET_ZERO_ROT);};
         m_currPoseMeters = currentPose.get();
         m_lastPoseMeters = m_currPoseMeters;
         getRobotToCamera();

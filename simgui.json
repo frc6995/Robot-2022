@@ -2,7 +2,9 @@
   "NTProvider": {
     "types": {
       "/FMSInfo": "FMSInfo",
+      "/Shuffleboard/DrivebaseS/navX": "Gyro",
       "/Shuffleboard/RobotContainer/field": "Field2d",
+      "/Shuffleboard/RobotContainer/shooterTestC": "Command",
       "/SmartDashboard/InstantCommand": "Command"
     },
     "windows": {

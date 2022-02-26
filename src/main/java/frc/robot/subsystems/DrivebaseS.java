@@ -67,7 +67,7 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
 
 		}
 
-    odometry.resetPosition(new Pose2d (HUB_CENTER_POSE.getX() - 2, HUB_CENTER_POSE.getY(), new Rotation2d()), navX.getRotation2d());
+    odometry.resetPosition(new Pose2d (HUB_CENTER_POSE.getX() - 2, HUB_CENTER_POSE.getY(), Rotation2d.fromDegrees(180)), navX.getRotation2d());
 
   }
 
