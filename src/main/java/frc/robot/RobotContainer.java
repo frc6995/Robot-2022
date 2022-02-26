@@ -174,7 +174,7 @@ public class RobotContainer {
     midtakeS = new MidtakeS();
     turretS = new TurretS();
     shooterS = new ShooterS();
-    odometryManager = new OdometryManager(drivebaseS::getRobotPose, turretS::getRotation2d);
+    odometryManager = new OdometryManager(drivebaseS::getRobotPose, turretS::getRotation2d, turretS::setTransformVelocity);
     limelightS = new LimelightS(odometryManager,
     (List<Pose2d> list)->{field.getObject("targetRing").setPoses(list);});
   }
