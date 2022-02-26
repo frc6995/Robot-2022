@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj2.command.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.commands.MainCommandFactory;
 import frc.robot.commands.ShooterTestC;
 import frc.robot.commands.auto.AutoCommandFactory;
 import frc.robot.commands.drivebase.DrivebaseCommandFactory;
@@ -124,7 +125,8 @@ public class RobotContainer {
     shootBallTrigger.whenActive(runMidtake);
     driverController.b().whileActiveOnce(runMidtake);
     driverController.x().whileActiveOnce(shooterTestC);
-    driverController.y().whenActive(turretTurningC);
+    //driverController.y().whenActive(turretTurningC);
+    driverController.y().whileActiveOnce(MainCommandFactory.createIntakeIndexCG(intakeS, midtakeS));
     driverController.a().whileActiveOnce(runIntake);
   }
 

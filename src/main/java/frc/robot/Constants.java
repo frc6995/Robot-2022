@@ -163,7 +163,7 @@ public final class Constants {
     public static final int CAN_ID_TURRET = 30;
 
     /** Port that limit switch goes into */
-    public static final int TURRET_LIMIT_SWITCH_PORT = 0;
+    public static final int TURRET_LIMIT_SWITCH_PORT = 3;
   
     /** Counterclockwise limit at which the turret cannot pass */
     public static final double SOFT_LIMIT_FORWARD_RADIAN = Units.degreesToRadians(110);
@@ -202,10 +202,10 @@ public final class Constants {
     public static final int CAN_ID_MIDTAKE_BACK = 23;
 
     /** Port number for the top beam break sensor */
-    public static final int BEAM_BREAK_TOP_PORT_NUMBER = 1;
+    public static final int BEAM_BREAK_TOP_PORT_NUMBER = 0;
 
     /** Port number for the bottom beam break sensor */
-    public static final int BEAM_BREAK_BOTTOM_PORT_NUMBER = 2;
+    public static final int BEAM_BREAK_BOTTOM_PORT_NUMBER = 1;
 
     /** Proximity threshold on the color sensor for detecting a ball*/
     public static final double COLOR_SENSOR_PROXIMITY_THRESHOLD = 250;

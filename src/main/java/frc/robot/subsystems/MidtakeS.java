@@ -7,6 +7,7 @@ import com.revrobotics.ColorSensorV3;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.I2C;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -74,7 +75,7 @@ public class MidtakeS extends SubsystemBase {
    *
    */
   public boolean getIsTopBeamBroken() {
-    return beamBreakTop.get();
+    return !beamBreakTop.get();
   }
 
   /**
@@ -82,7 +83,7 @@ public class MidtakeS extends SubsystemBase {
    * 
    */
   public boolean getIsBottomBeamBroken() {
-    return beamBreakBottom.get();
+    return !beamBreakBottom.get();
   }
 
   /**
@@ -114,6 +115,8 @@ public class MidtakeS extends SubsystemBase {
 
   @Override
   public void periodic() {
+    SmartDashboard.putBoolean("top beambreak", getIsTopBeamBroken());
+    SmartDashboard.putBoolean("bottom beambreak", getIsBottomBeamBroken());
     // This method will be called once per scheduler run
   }
 }
