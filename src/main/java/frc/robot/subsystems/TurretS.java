@@ -6,7 +6,6 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkMaxRelativeEncoder;
 
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -18,6 +17,7 @@ import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.simulation.LinearSystemSim;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants;
@@ -26,8 +26,7 @@ import io.github.oblarg.oblog.Loggable;
 import io.github.oblarg.oblog.annotations.Log;
 
 /**
- * The turret subsystem. It contains methods to get encoder counts and converts
- * them to degrees. It uses a PID controller to control the turret position.
+ * The turret subsystem. It uses a PID controller to control the turret position.
  * 
  * CCW POSITIVE
  * 
@@ -40,7 +39,7 @@ public class TurretS extends SubsystemBase implements Loggable {
   private DigitalInput limitSwitch = new DigitalInput(Constants.TURRET_LIMIT_SWITCH_PORT);
   private PIDController turretPID = new PIDController(Constants.TURRET_P, 0, 0);
   private SimEncoder turretSimEncoder = new SimEncoder();
-  // Open-loop drive in turret rotations per second
+  // Open-loop drive in turret radians per second
   private SimpleMotorFeedforward turretFF = new SimpleMotorFeedforward(
 
     Constants.TURRET_FF[0],
@@ -50,18 +49,18 @@ public class TurretS extends SubsystemBase implements Loggable {
     LinearSystemId.identifyPositionSystem(Units.radiansToRotations(Constants.TURRET_FF[1]), Units.radiansToRotations(Constants.TURRET_FF[2]))
     );
   private boolean targetInRange;
-  private Trigger targetInRangeTrigger = new Trigger(()->targetInRange).debounce(1.5);
+  private Trigger targetInRangeTrigger = new Trigger(()->targetInRange).debounce(0.5);
 
   /** Creates a new TurretS. */
   public TurretS() {
     sparkMax.restoreFactoryDefaults();
-    // Automatically multiply NEO rotations to read encoder in turret degrees.
-    sparkMaxEncoder.setPositionConversionFactor(360 / Constants.NEO_REVOLUTIONS_PER_TURRET_REVOLUTION);
-    sparkMaxEncoder.setVelocityConversionFactor(360 / Constants.NEO_REVOLUTIONS_PER_TURRET_REVOLUTION / 60);
+    // Automatically multiply NEO rotations to read encoder in turret radians.
+    sparkMaxEncoder.setPositionConversionFactor(2 * Math.PI / Constants.NEO_REVOLUTIONS_PER_TURRET_REVOLUTION);
+    sparkMaxEncoder.setVelocityConversionFactor(2 * Math.PI / Constants.NEO_REVOLUTIONS_PER_TURRET_REVOLUTION / 60);
     sparkMax.enableSoftLimit(SoftLimitDirection.kForward, true);
     sparkMax.enableSoftLimit(SoftLimitDirection.kReverse, true);
-    sparkMax.setSoftLimit(SoftLimitDirection.kForward, Constants.SOFT_LIMIT_FORWARD_DEGREE);
-    sparkMax.setSoftLimit(SoftLimitDirection.kReverse, Constants.SOFT_LIMIT_REVERSE_DEGREE);
+    sparkMax.setSoftLimit(SoftLimitDirection.kForward, (float) Units.radiansToDegrees(Constants.SOFT_LIMIT_FORWARD_RADIAN));
+    sparkMax.setSoftLimit(SoftLimitDirection.kReverse, (float) Units.radiansToDegrees(Constants.SOFT_LIMIT_REVERSE_RADIAN));
     turretPID.setTolerance(Constants.TURRET_PID_ERROR, 0);
     turretPID.setIntegratorRange(0, 0);
   }
@@ -96,7 +95,7 @@ public class TurretS extends SubsystemBase implements Loggable {
   }
 
   public Rotation2d getRotation2d() {
-    return Rotation2d.fromDegrees(getEncoderCounts());
+    return new Rotation2d(getEncoderCounts());
   }
 
   /**
@@ -133,12 +132,12 @@ public class TurretS extends SubsystemBase implements Loggable {
     /**
    * Resets encoder count.
    */
-  public void resetEncoder(double degrees) {
+  public void resetEncoder(double radians) {
     if(RobotBase.isReal()) {
-      sparkMaxEncoder.setPosition(degrees);
+      sparkMaxEncoder.setPosition(radians);
     }
     else {
-      turretSimEncoder.setPosition(degrees);
+      turretSimEncoder.setPosition(radians);
     }
   }
 
@@ -173,25 +172,31 @@ public class TurretS extends SubsystemBase implements Loggable {
    * is
    * within the soft limit, calculates the power to give to the motor
    * 
-   * @param target The desired angle
+   * @param target The desired angle in radians
    */
   public void setTurretAngle(double target) {
 
-    if (target >= Constants.SOFT_LIMIT_FORWARD_DEGREE) {
+    if (target >= Constants.SOFT_LIMIT_FORWARD_RADIAN) {
       targetInRange = false;
-      target = Constants.SOFT_LIMIT_FORWARD_DEGREE;
+      target = Constants.SOFT_LIMIT_FORWARD_RADIAN;
     }
-    else if (target <= Constants.SOFT_LIMIT_REVERSE_DEGREE) {
+    else if (target <= Constants.SOFT_LIMIT_REVERSE_RADIAN) {
       targetInRange = false;
-      target = Constants.SOFT_LIMIT_REVERSE_DEGREE;
+      target = Constants.SOFT_LIMIT_REVERSE_RADIAN;
     } else {
       targetInRange = true;
     }
-    double voltage = MathUtil.clamp(
-      turretFF.calculate(
-        turretPID.calculate(this.getEncoderCounts(), target)
-      ),
-       -3, 3);
+    double velocity = turretPID.calculate(getEncoderCounts(), target); //radians per sec
+    SmartDashboard.putNumber("turretVelo", velocity);
+    double voltage =
+      turretFF.calculate(velocity
+        // MathUtil.clamp(
+        //   velocity,
+        //   -Constants.TURRET_MAX_SPEED,
+        //   Constants.TURRET_MAX_SPEED
+        // )
+        
+      );
     if(targetInRangeTrigger.get()) {//If the target has been in range for more than 1.5 seconds, 
     sparkMax.setVoltage(voltage);
     }
@@ -209,7 +214,7 @@ public class TurretS extends SubsystemBase implements Loggable {
     }
 
     turretSim.update(0.02);
-    turretSimEncoder.setPosition(Units.radiansToDegrees(turretSim.getOutput().get(0, 0)));
+    turretSimEncoder.setPosition(turretSim.getOutput().get(0, 0));
   }
 
   /**
