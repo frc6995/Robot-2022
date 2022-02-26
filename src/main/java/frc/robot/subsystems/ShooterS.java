@@ -27,10 +27,12 @@ public class ShooterS extends SubsystemBase implements Loggable {
   private final CANSparkMax frontSparkMax = new CANSparkMax(Constants.CAN_ID_FRONT_SHOOTER_MOTOR, MotorType.kBrushless);
   private final CANSparkMax backSparkMax = new CANSparkMax(Constants.CAN_ID_BACK_SHOOTER_MOTOR, MotorType.kBrushless);
   private RelativeEncoder frontEncoder;
+  @Log
   private double lastFrontEncoderPosition = 0;
   @Log
   private double frontEncoderVelocityRPM = 0;
   private RelativeEncoder backEncoder;
+  @Log
   private double lastBackEncoderPosition = 0;
   @Log
   private double backEncoderVelocityRPM = 0;
@@ -62,6 +64,8 @@ public class ShooterS extends SubsystemBase implements Loggable {
     backSparkMax.restoreFactoryDefaults();
     frontSparkMax.setClosedLoopRampRate(6);
     backSparkMax.setClosedLoopRampRate(6);
+    frontSparkMax.setSmartCurrentLimit(20, 30, 0);
+    backSparkMax.setSmartCurrentLimit(20, 30, 0);
 
     frontEncoder = frontSparkMax.getEncoder();
     backEncoder = backSparkMax.getEncoder();
@@ -273,8 +277,10 @@ public class ShooterS extends SubsystemBase implements Loggable {
     if(Robot.isReal()) {
       frontEncoderPosition = frontEncoder.getPosition();
       backEncoderPosition = backEncoder.getPosition();
-      frontEncoderVelocityRPM = (frontEncoderPosition - lastFrontEncoderPosition) * 60.0 /*seconds/minute*/ / 0.02 /*seconds dt*/;
-      backEncoderVelocityRPM = (backEncoderPosition - lastBackEncoderPosition) * 60.0 /*seconds/minute*/ / 0.02 /*seconds dt*/;
+      frontEncoderVelocityRPM = frontEncoder.getVelocity();
+      backEncoderVelocityRPM = backEncoder.getVelocity();
+      // frontEncoderVelocityRPM = (frontEncoderPosition - lastFrontEncoderPosition) * 60.0 /*seconds/minute*/ / 0.02 /*seconds dt*/;
+      // backEncoderVelocityRPM = (backEncoderPosition - lastBackEncoderPosition) * 60.0 /*seconds/minute*/ / 0.02 /*seconds dt*/;
       lastFrontEncoderPosition = frontEncoderPosition;
       lastBackEncoderPosition = backEncoderPosition;
     }

@@ -26,17 +26,23 @@ import edu.wpi.first.math.util.Units;
  */
 public final class Constants {
 
+    /*
+     * Intake
+     * 10, 12
+     * 14, 13
+     * Battery
+     */
     /** Can ids for the front left drive motor */
-    public static final int CAN_ID_FRONT_LEFT_DRIVE_MOTOR = 13;
+    public static final int CAN_ID_FRONT_LEFT_DRIVE_MOTOR = 10;
 
     /** Can ids for the front right drive motor */
-    public static final int CAN_ID_FRONT_RIGHT_DRIVE_MOTOR = 14;
+    public static final int CAN_ID_FRONT_RIGHT_DRIVE_MOTOR = 12;
 
     /** Can ids for the back left drive motor */
-    public static final int CAN_ID_BACK_LEFT_DRIVE_MOTOR = 12;
+    public static final int CAN_ID_BACK_LEFT_DRIVE_MOTOR = 14;
 
     /** Can ids for the back right drive motor */
-    public static final int CAN_ID_BACK_RIGHT_DRIVE_MOTOR = 10;
+    public static final int CAN_ID_BACK_RIGHT_DRIVE_MOTOR = 13;
 
     /** USB port of xbox controller for driver */
     public static final int USB_PORT_DRIVER_CONTROLLER = 0;
@@ -53,7 +59,7 @@ public final class Constants {
     public static final double DRIVEBASE_FWD_BACK_SLEW_LIMIT = 1; // 0 to 100% in one second.
 
     /** Drivebase encoder rotations per wheel rotation. */
-    public static final double DRIVEBASE_ENCODER_ROTATIONS_PER_WHEEL_ROTATION = 28.0/20.0 * 64.0/11.0;
+    public static final double DRIVEBASE_ENCODER_ROTATIONS_PER_WHEEL_ROTATION = (28.0/20.0) * (64.0/12.0);
 
     /** The maximum teleop velocity of the drivebase in meters per second. */
     public static final double DRIVEBASE_MAX_WHEEL_VELOCITY_MPS = 3.0;
@@ -187,10 +193,10 @@ public final class Constants {
     // Midtake Constants
 
     /** Can ids for the front midtake motor */
-    public static final int CAN_ID_MIDTAKE_FRONT = 23;
+    public static final int CAN_ID_MIDTAKE_FRONT = 22;
 
     /** Can id for the back midtake motor */
-    public static final int CAN_ID_MIDTAKE_BACK = 22;
+    public static final int CAN_ID_MIDTAKE_BACK = 23;
 
     /** Port number for the top beam break sensor */
     public static final int BEAM_BREAK_TOP_PORT_NUMBER = 1;
@@ -235,10 +241,10 @@ public final class Constants {
     public static final int CAN_ID_INTAKE_FOLLOWER_MOTOR = 21;
 
     /** Port number for each electromagnet that extends */
-    public static final int DOUBLE_SOLENOID_INTAKE_PORT_EXTEND = 2;
+    public static final int DOUBLE_SOLENOID_INTAKE_PORT_EXTEND = 3;
 
     /** Port number for electromagnet that retracts */
-    public static final int DOUBLE_SOLENOID_INTAKE_PORT_RETRACT = 3;
+    public static final int DOUBLE_SOLENOID_INTAKE_PORT_RETRACT = 2;
 
     /** Speed at which the intake motor moves */
     public static final double INTAKE_SPEED = 0.25;

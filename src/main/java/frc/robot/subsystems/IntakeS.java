@@ -27,6 +27,7 @@ public class IntakeS extends SubsystemBase {
      * Constructs a new IntakeS.
      */
     public IntakeS() {
+        retract();
         intakeLeadMotor.restoreFactoryDefaults();
         intakeFollowerMotor.restoreFactoryDefaults();
         intakeFollowerMotor.setInverted(true);

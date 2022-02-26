@@ -130,7 +130,7 @@ public class OdometryManager implements Loggable {
     }
 
     public boolean getDistanceInRange() {
-        return (Constants.SHOOTER_DISTANCES[0] < getDistanceToCenter() && (getDistanceToCenter() < Constants.SHOOTER_DISTANCES[Constants.SHOOTER_DISTANCES.length]));
+        return (Constants.SHOOTER_DISTANCES[0] < getDistanceToCenter() && (getDistanceToCenter() < Constants.SHOOTER_DISTANCES[Constants.SHOOTER_DISTANCES.length - 1]));
     }
     
     /**

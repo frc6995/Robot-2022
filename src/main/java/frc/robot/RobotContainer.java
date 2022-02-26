@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj2.command.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.commands.ShooterTestC;
 import frc.robot.commands.auto.AutoCommandFactory;
 import frc.robot.commands.drivebase.DrivebaseCommandFactory;
 import frc.robot.commands.shooter.ShooterCommandFactory;
@@ -24,6 +25,7 @@ import frc.robot.subsystems.MidtakeS;
 import frc.robot.subsystems.ShooterS;
 import frc.robot.subsystems.TurretS;
 import frc.robot.util.OdometryManager;
+import io.github.oblarg.oblog.annotations.Config;
 import io.github.oblarg.oblog.annotations.Log;
 
 /**
@@ -57,6 +59,9 @@ public class RobotContainer {
   private Command turretTurningC;
   private Command turretAimC;
   private Command shooterSpinC;
+  @Log
+  @Config
+  private Command shooterTestC;
 
   private Trigger targetDistanceInRangeTrigger;
   private Trigger shooterReadyTrigger;
@@ -85,12 +90,14 @@ public class RobotContainer {
   private void configureButtonBindings() {
     Command runIntake = new FunctionalCommand(
         () -> {
+          intakeS.deploy();
         },
         () -> {
           intakeS.spin();
         },
         (interrupted) -> {
           intakeS.stop();
+          intakeS.retract();
         },
         () -> false, intakeS);
 
@@ -110,13 +117,13 @@ public class RobotContainer {
     shooterReadyTrigger = new Trigger(shooterS::isAtTarget);
     ballReadyTrigger = new Trigger(midtakeS::getIsTopBeamBroken); // TODO fix this logic
 
-    targetDistanceInRangeTrigger.whileActiveContinuous(shooterSpinC);
+    //targetDistanceInRangeTrigger.whileActiveContinuous(shooterSpinC);
 
     shootBallTrigger = targetDistanceInRangeTrigger.and(turretReadyTrigger).and(shooterReadyTrigger).and(ballReadyTrigger);
 
     shootBallTrigger.whenActive(runMidtake);
     driverController.b().whileActiveOnce(runMidtake);
-    driverController.x().whenActive(turretHomingC);
+    driverController.x().whileActiveOnce(shooterTestC);
     driverController.y().whenActive(turretTurningC);
     driverController.a().whileActiveOnce(runIntake);
   }
@@ -152,7 +159,8 @@ public class RobotContainer {
           ()->{return ShooterS.getSpeedForDistance(odometryManager.getDistanceToCenter(), true);},
           shooterS);
     turretTurningC = TurretCommandFactory.createTurretTurnC(40, turretS);
-    shooterS.setDefaultCommand(ShooterCommandFactory.createShooterIdleC(shooterS));
+    shooterTestC = new ShooterTestC(shooterS);
+    //shooterS.setDefaultCommand(ShooterCommandFactory.createShooterIdleC(shooterS));
     SmartDashboard.putData(new InstantCommand(turretS::resetEncoder));
   }
 

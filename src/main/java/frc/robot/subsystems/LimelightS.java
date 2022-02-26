@@ -18,6 +18,7 @@ import java.util.function.Supplier;
 
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonUtils;
+import org.photonvision.PhotonVersion;
 import org.photonvision.common.hardware.VisionLEDMode;
 import org.photonvision.targeting.PhotonTrackedTarget;
 import org.photonvision.targeting.TargetCorner;
@@ -27,6 +28,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -45,29 +47,20 @@ public class LimelightS extends SubsystemBase {
   Supplier<Rotation2d> turretAngleSupplier;
   PhotonCamera limelight = new PhotonCamera("gloworm");
 
+
   // Sim stuff
   SimCamera limelightSimVisionSystem;
   Trigger hasSteadyTarget = new Trigger(() -> limelight.getLatestResult().hasTargets()).debounce(0.5);
-  // Data filtering
-
-  @Log(methodName = "getFilteredXOffset")
-  @Log(methodName = "getFilteredDistance")
-  private FilterValues filterValues;
-
-  // private LinearFilter xOffsetFilter;
-  // private LinearFilter distanceFilter;
 
   /** Creates a new LimelightS. */
   public LimelightS(OdometryManager odometryManager,
       Consumer<List<Pose2d>> addFieldVisionTargets) {
+        NetworkTableInstance.getDefault().getTable("photonvision").getEntry("version").setString(
+          PhotonVersion.versionString
+        );
         this.odometryManager = odometryManager;
     this.turretAngleSupplier = ()->odometryManager.getRobotToTurret().getRotation();
 
-
-    // xOffsetFilter = LinearFilter.singlePoleIIR(LIMELIGHT_FILTER_TIME_CONSTANT,
-    //     LIMELIGHT_FILTER_PERIOD_CONSTANT);
-    // distanceFilter = LinearFilter.singlePoleIIR(LIMELIGHT_FILTER_TIME_CONSTANT,
-    //     LIMELIGHT_FILTER_PERIOD_CONSTANT);
     if (!RobotBase.isReal()) {
       limelightSimVisionSystem = new SimCamera(
           "gloworm",
@@ -144,63 +137,5 @@ public class LimelightS extends SubsystemBase {
     if (hasSteadyTarget.get()) {
       odometryManager.addVisionMeasurement(cameraToHubTrans);
     }
-  }
-
-  /**
-   * Returns the current FilterValues.
-   * 
-   * @return
-   */
-  public FilterValues getFilterValues() {
-    return this.filterValues;
-  }
-
-  /**
-   * Returns the filtered X offset.
-   */
-  public double getFilteredXOffset() {
-    return this.filterValues.filteredXOffset;
-  }
-
-  /**
-   * Returns the filtered distance.
-   */
-  public double getFilteredDistance() {
-    return this.filterValues.filteredDistance;
-  }
-
-  /**
-   * A data class to store filtered X offset and distance.
-   */
-  public class FilterValues {
-    private double filteredXOffset;
-    private double filteredDistance;
-
-    /**
-     * Constructs a new FilterValues class.
-     * 
-     * @param filteredXOffset  the X offset
-     * @param filteredDistance the distance
-     */
-    public FilterValues(double filteredXOffset, double filteredDistance) {
-      this.filteredXOffset = filteredXOffset;
-      this.filteredDistance = filteredDistance;
-
-    }
-
-    /**
-     * Returns the filtered X offset.
-     */
-    public double getFilteredXOffset() {
-      return this.filteredXOffset;
-    }
-
-    /**
-     * Returns the filtered distance.
-     */
-    public double getFilteredDistance() {
-      return this.filteredDistance;
-    }
-
   }
 }
