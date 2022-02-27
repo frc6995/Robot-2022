@@ -10,6 +10,7 @@ import edu.wpi.first.math.numbers.N7;
 import edu.wpi.first.math.system.LinearSystem;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
+import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.util.Units;
 
 /**
@@ -80,6 +81,10 @@ public final class Constants {
         * DRIVEBASE_METERS_PER_WHEEL_ROTATION 
         / DRIVEBASE_ENCODER_ROTATIONS_PER_WHEEL_ROTATION;
     }
+        /**
+     * The track width of the drivebase.
+     */
+    public static final double DRIVEBASE_TRACKWIDTH = Units.inchesToMeters(22.5);
 
     /**
      * The feedforward constants for forward-back driving.
@@ -89,12 +94,13 @@ public final class Constants {
     /**
      * The feedforward constants for rotation while driving.
      */
-    public static final double[] DRIVEBASE_ANGULAR_FF = {0.22, 1.5, 0.3}; // TODO real numbers
+    public static final double[] DRIVEBASE_ANGULAR_FF = {0.22, 1.5/DRIVEBASE_TRACKWIDTH*0.6995, 0.3/DRIVEBASE_TRACKWIDTH*0.6995}; // TODO real numbers
 
     /**
-     * The track width of the drivebase.
+     * The proportional constant for the drivebase wheel.
      */
-    public static final double DRIVEBASE_TRACKWIDTH = Units.inchesToMeters(22.5);
+    public static final double DRIVEBASE_P = 0.294; // TODO real numbers
+
 
     /**
      * The system modeling plant for the drivebase.
@@ -103,7 +109,8 @@ public final class Constants {
         DRIVEBASE_LINEAR_FF[1],
         DRIVEBASE_LINEAR_FF[2],
         DRIVEBASE_ANGULAR_FF[1],
-        DRIVEBASE_ANGULAR_FF[2]
+        DRIVEBASE_ANGULAR_FF[2],
+        DRIVEBASE_TRACKWIDTH
         );
     
     /** The DifferentialDriveKinematics for the drivebase. */
@@ -118,6 +125,11 @@ public final class Constants {
      * Standard deviations for noise in simulation encoders.
      */
     public static final Vector<N7> DRIVEBASE_SIM_ENCODER_STD_DEV = VecBuilder.fill(0, 0, 0, 0, 0, 0, 0);
+
+    /**
+     * Trajectory config for auto.
+     */
+    public static final TrajectoryConfig TRAJECTORY_CONFIG = new TrajectoryConfig(3, 2).setEndVelocity(0);
     
    // Shooter Constants
     /** Can ids for front shooter motor */
@@ -181,13 +193,16 @@ public final class Constants {
     public static final double TURRET_DEADBAND = 0.02;
 
     /** Feedforward for the turret */
-    public static final double[] TURRET_FF = {0.39475, Units.radiansToRotations(3.5435), Units.radiansToRotations(0.19223)}; // for velocity in turret rotations per second
+    public static final double[] TURRET_FF = {0.39505, 0.56397, 0.030497}; // for velocity in turret radians per second
 
     /** Proportional term for the turret */
-    public static final double TURRET_P = 2 * Math.PI * (2.0/Math.PI);
+    public static final double TURRET_P = 2.243;
 
-    /** The maximum manual-drive angular velocity of the turret in rotations per second */
-    public static final double TURRET_MAX_SPEED = 1.0;
+    /** Derivative term for the turret */
+    public static final double TURRET_D = 1.0032;
+
+    /** The maximum manual-drive angular velocity of the turret in radians per second */
+    public static final double TURRET_MAX_SPEED = Math.PI;
 
     /** The 180-degree offset because the turret zero is with the turret facing backwards relative to the robot */
     public static final Rotation2d ROBOT_TO_TURRET_ZERO_ROT = new Rotation2d(Math.PI);
@@ -259,8 +274,8 @@ public final class Constants {
 
     /** The field-relative position of the center of the hub. */
     public static final Pose2d HUB_CENTER_POSE = new Pose2d(
-        Units.feetToMeters(54.0/2),
-        Units.feetToMeters(27.0/2),
+        Units.inchesToMeters(324.0),
+        Units.inchesToMeters(162.0),
         Rotation2d.fromDegrees(0));
 
     /** The length of a vision tape strip in meters. */
@@ -270,7 +285,7 @@ public final class Constants {
     public static final double TAPE_STRIP_HEIGHT = Units.inchesToMeters(2);
 
     /** The radius of the upper hub vision ring in meters */
-    public static final double HUB_RADIUS_METERS = Units.feetToMeters(2);
+    public static final double HUB_RADIUS_METERS = Units.feetToMeters(4.625/2);
 
     /** The height of the bottom edge of the tape strips off the floor in meters. */
     public static final double TARGET_HEIGHT_METERS = Units.inchesToMeters(104); //8ft 8 inches

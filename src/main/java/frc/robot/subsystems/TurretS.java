@@ -37,12 +37,14 @@ import io.github.oblarg.oblog.annotations.Log;
  */
 public class TurretS extends SubsystemBase implements Loggable {
   private CANSparkMax sparkMax = new CANSparkMax(Constants.CAN_ID_TURRET, MotorType.kBrushless);
-  private RelativeEncoder sparkMaxEncoder = sparkMax.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42);
+  private RelativeEncoder sparkMaxEncoder = sparkMax.getEncoder();
   private DigitalInput limitSwitch = new DigitalInput(Constants.TURRET_LIMIT_SWITCH_PORT);
-  private PIDController turretPID = new PIDController(Constants.TURRET_P, 0, 0);
+
+  private PIDController turretPID = new PIDController(Constants.TURRET_P, 0, Constants.TURRET_D);
 
   @Log
   private double omega = 0;
+  private double lastTotalVelocity = 0;
 
   private SimEncoder turretSimEncoder = new SimEncoder();
   // Open-loop drive in turret radians per second
@@ -54,10 +56,11 @@ public class TurretS extends SubsystemBase implements Loggable {
   private LinearSystemSim<N2, N1, N1> turretSim = new LinearSystemSim<N2, N1, N1>(
     LinearSystemId.identifyPositionSystem(Constants.TURRET_FF[1], Constants.TURRET_FF[2])
     );
+  @Log
   private boolean targetInRange;
   private Trigger velocityThresholdTrigger = new Trigger(()->{return Math.abs(omega) < Math.PI;}).debounce(0.5, DebounceType.kFalling);
-  private Trigger targetInRangeTrigger = new Trigger(()->targetInRange).debounce(0.25);
-  private Trigger safeToMoveTrigger = velocityThresholdTrigger.and(targetInRangeTrigger);
+  private Trigger targetInRangeTrigger = new Trigger(()->targetInRange);
+  private Trigger safeToMoveTrigger = targetInRangeTrigger;
 
   /** Creates a new TurretS. */
   public TurretS() {
@@ -67,8 +70,8 @@ public class TurretS extends SubsystemBase implements Loggable {
     sparkMaxEncoder.setVelocityConversionFactor(2 * Math.PI / Constants.NEO_REVOLUTIONS_PER_TURRET_REVOLUTION / 60);
     sparkMax.enableSoftLimit(SoftLimitDirection.kForward, true);
     sparkMax.enableSoftLimit(SoftLimitDirection.kReverse, true);
-    sparkMax.setSoftLimit(SoftLimitDirection.kForward, (float) Units.radiansToDegrees(Constants.SOFT_LIMIT_FORWARD_RADIAN));
-    sparkMax.setSoftLimit(SoftLimitDirection.kReverse, (float) Units.radiansToDegrees(Constants.SOFT_LIMIT_REVERSE_RADIAN));
+    sparkMax.setSoftLimit(SoftLimitDirection.kForward, (float) Constants.SOFT_LIMIT_FORWARD_RADIAN);
+    sparkMax.setSoftLimit(SoftLimitDirection.kReverse, (float) Constants.SOFT_LIMIT_REVERSE_RADIAN);
     turretPID.setTolerance(Constants.TURRET_PID_ERROR, 0);
     sparkMax.setSmartCurrentLimit(20, 20, 0);
     turretPID.setIntegratorRange(0, 0);
@@ -198,15 +201,13 @@ public class TurretS extends SubsystemBase implements Loggable {
       targetInRange = true;
     }
     double pidVelocity = turretPID.calculate(getRotation2d().getRadians(), targetZeroRelative.getRadians()); //radians per sec
-    SmartDashboard.putNumber("turretVelo", pidVelocity);
+    double totalVelocity = pidVelocity + omega;
+    double acceleration = (totalVelocity - lastTotalVelocity) / 0.02;
+    lastTotalVelocity = totalVelocity;
     double voltage =
-      turretFF.calculate(pidVelocity + omega    // MathUtil.clamp(
-        //   velocity,
-        //   -Constants.TURRET_MAX_SPEED,
-        //   Constants.TURRET_MAX_SPEED
-        // )  
+      turretFF.calculate(pidVelocity + omega, acceleration
       );
-    if(safeToMoveTrigger.get()) {//If the target has been in range for more than 1.5 seconds, 
+    if(targetInRange) {//If the target is in range, 
       sparkMax.setVoltage(voltage);
     }
     else{
@@ -241,6 +242,7 @@ public class TurretS extends SubsystemBase implements Loggable {
    * 
    * @return True if the turret is at the target angle
    */
+  @Log
   public boolean isAtTarget() {
     return turretPID.atSetpoint();
   }

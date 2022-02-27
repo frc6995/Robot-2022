@@ -69,7 +69,7 @@ public class LimelightS extends SubsystemBase {
               new Translation2d(
                   CAMERA_CENTER_OFFSET, Rotation2d.fromDegrees(0)),
               new Rotation2d()),
-          CAMERA_HEIGHT_METERS, 9000, CAMERA_HORIZ_RES, CAMERA_VERT_RES, 5);
+          CAMERA_HEIGHT_METERS, 4, CAMERA_HORIZ_RES, CAMERA_VERT_RES, 5);
       // Set up the target ring
       ArrayList<Pose2d> targetPoseList = new ArrayList<>();
       for (int i = 0; i < TAPE_STRIP_COUNT; i++) {
@@ -133,7 +133,7 @@ public class LimelightS extends SubsystemBase {
     Transform2d cameraToHubTrans = new Transform2d(
       PhotonUtils.estimateCameraToTargetTranslation(distance, Rotation2d.fromDegrees(-1 * xOffset))
       .times((distance + HUB_RADIUS_METERS)/distance),
-      Rotation2d.fromDegrees(0)); //Scale the translation an extra 2 meters to account for the radius of the ring
+      new Rotation2d()); //Scale the translation an extra 2 meters to account for the radius of the ring
     if (hasSteadyTarget.get()) {
       odometryManager.addVisionMeasurement(cameraToHubTrans);
     }

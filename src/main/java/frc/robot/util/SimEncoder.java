@@ -1,5 +1,8 @@
 package frc.robot.util;
 
+import io.github.oblarg.oblog.Loggable;
+import io.github.oblarg.oblog.annotations.Log;
+
 
 /** Add your docs here. */
 public class SimEncoder {

@@ -5,12 +5,16 @@ import static frc.robot.Constants.*;
 
 import com.kauailabs.navx.frc.AHRS;
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.RamseteController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds;
 import edu.wpi.first.wpilibj.RobotBase;
@@ -21,7 +25,7 @@ import edu.wpi.first.wpilibj.drive.DifferentialDrive.WheelSpeeds;
 import edu.wpi.first.wpilibj.simulation.DifferentialDrivetrainSim;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-
+import frc.robot.Constants;
 import frc.robot.util.SimEncoder;
 import io.github.oblarg.oblog.Loggable;
 import io.github.oblarg.oblog.annotations.Log;
@@ -36,7 +40,12 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
   private final SlewRateLimiter turnLimiter = new SlewRateLimiter(DRIVEBASE_TURN_SLEW_LIMIT);
   private final SimpleMotorFeedforward leftFF = new SimpleMotorFeedforward(DRIVEBASE_LINEAR_FF[0], DRIVEBASE_LINEAR_FF[1], DRIVEBASE_LINEAR_FF[2]);
   private final SimpleMotorFeedforward rightFF = new SimpleMotorFeedforward(DRIVEBASE_LINEAR_FF[0], DRIVEBASE_LINEAR_FF[1], DRIVEBASE_LINEAR_FF[2]);
+
+  private final PIDController leftPID = new PIDController(DRIVEBASE_P, 0, 0);
+  private final PIDController rightPID = new PIDController(DRIVEBASE_P, 0, 0);
   private final AHRS navX = new AHRS(Port.kMXP);
+  public final RamseteController ramseteController = new RamseteController();
+  public final Pose2d START_POSE = new Pose2d (HUB_CENTER_POSE.getX() - 4, HUB_CENTER_POSE.getY(), Rotation2d.fromDegrees(180));
 
   //Sim stuff
   private DifferentialDrivetrainSim m_driveSim;
@@ -51,6 +60,8 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
     frontLeft.restoreFactoryDefaults();
     backRight.restoreFactoryDefaults();
     backLeft.restoreFactoryDefaults();
+    frontRight.setIdleMode(IdleMode.kBrake);
+    frontLeft.setIdleMode(IdleMode.kBrake);
     frontRight.setInverted(true);
     backRight.follow(frontRight, false);
     backLeft.follow(frontLeft, false);
@@ -67,7 +78,7 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
 
 		}
 
-    odometry.resetPosition(new Pose2d (HUB_CENTER_POSE.getX() - 2, HUB_CENTER_POSE.getY(), Rotation2d.fromDegrees(180)), navX.getRotation2d());
+    odometry.resetPosition(START_POSE, getRotation2d());
 
   }
 
@@ -79,6 +90,11 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
       value = 0;
     }
     return value;
+  }
+
+  @Log(methodName = "getRadians", name = "gyroHeading")
+  public Rotation2d getRotation2d() {
+    return odometry.getPoseMeters().getRotation();
   }
 
   /**
@@ -113,14 +129,18 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
   }
 
   public void tankDriveVelocity(double leftVelocityMPS, double rightVelocityMPS) {
-    tankDriveVolts(leftFF.calculate(leftVelocityMPS), rightFF.calculate(rightVelocityMPS));
+    SmartDashboard.putNumber("leftVelo", leftVelocityMPS);
+    SmartDashboard.putNumber("rightVelo", rightVelocityMPS);
+    tankDriveVolts(
+      leftFF.calculate(leftVelocityMPS) + leftPID.calculate(getLeftVelocity(), leftVelocityMPS),
+      rightFF.calculate(rightVelocityMPS) + rightPID.calculate(getLeftVelocity(), rightVelocityMPS));
   }
 
   /**
    * Sets motor speed to 0 when subsystem ends
    */
   public void stopAll() {
-    tankDrive(0, 0);
+    tankDriveVelocity(0, 0);
   }
 
   @Override
@@ -137,7 +157,6 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
     }
     else {
       odometry.update(m_gyroSim, m_leftEncoder.getPosition(), m_rightEncoder.getPosition());
-
     }
   }
 
@@ -165,6 +184,7 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
     return new DifferentialDriveWheelSpeeds(getLeftVelocity(), getRightVelocity());
   }
 
+  @Log
   public double getLeftVelocity() {
     if(RobotBase.isReal()) {
       return drivebaseEncoderRotationsToMeters(frontLeft.getEncoder().getVelocity() / 60.0);
@@ -174,7 +194,7 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
     }
   }
 
-  
+  @Log
   public double getRightVelocity() {
     if(RobotBase.isReal()) {
       return drivebaseEncoderRotationsToMeters(frontRight.getEncoder().getVelocity() / 60.0);
@@ -206,8 +226,9 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
   }
 
   public void resetRobotPose(Pose2d pose) {
+    resetEncoders(); 
     odometry.resetPosition(pose, navX.getRotation2d());
-    resetEncoders();
+       
   }
 
   public void resetRobotPose() {

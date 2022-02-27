@@ -2,9 +2,14 @@ package frc.robot.commands.drivebase;
 
 import java.util.function.DoubleSupplier;
 
+import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.RamseteCommand;
+import frc.robot.Constants;
 import frc.robot.subsystems.DrivebaseS;
+import frc.robot.util.OdometryManager;
 
 /** Factory class to create drive commands */
 public class DrivebaseCommandFactory {
@@ -50,6 +55,17 @@ public class DrivebaseCommandFactory {
         drivebaseS)
             .withTimeout(time)
             .withName("DriveTimedC");
+  }
+
+  public static Command createRamseteC(Trajectory trajectory,  OdometryManager odometryManager, DrivebaseS drivebaseS) {
+    return new RamseteCommand(
+        trajectory,
+        odometryManager::getEstimatedRobotPose,
+        drivebaseS.ramseteController,
+        Constants.DRIVEBASE_KINEMATICS,
+        drivebaseS::tankDriveVelocity,
+        drivebaseS
+      );
   }
 
 }

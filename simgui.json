@@ -5,10 +5,15 @@
       "/Shuffleboard/DrivebaseS/navX": "Gyro",
       "/Shuffleboard/RobotContainer/field": "Field2d",
       "/Shuffleboard/RobotContainer/shooterTestC": "Command",
-      "/SmartDashboard/InstantCommand": "Command"
+      "/SmartDashboard/InstantCommand": "Command",
+      "/SmartDashboard/Reset Robot Pose": "Command"
     },
     "windows": {
       "/Shuffleboard/RobotContainer/field": {
+        "Robot": {
+          "length": 0.6349999904632568,
+          "width": 0.6349999904632568
+        },
         "Turret": {
           "arrowColor": [
             232.4050750732422,
@@ -22,9 +27,10 @@
             0.27516958117485046,
             255.0
           ],
-          "length": 0.4000000059604645,
-          "width": 0.30000001192092896
+          "length": 0.3799999952316284,
+          "width": 0.2800000011920929
         },
+        "bottom": 900,
         "camera": {
           "arrows": false,
           "color": [
@@ -33,14 +39,35 @@
             0.8304758667945862,
             255.0
           ],
-          "length": 0.20000000298023224,
+          "length": 0.10000000149011612,
           "width": 0.20000000298023224
         },
+        "estRobot": {
+          "color": [
+            0.28886744379997253,
+            0.011696852743625641,
+            0.9240506291389465,
+            255.0
+          ],
+          "length": 0.800000011920929,
+          "width": 0.800000011920929
+        },
+        "height": 8.229599952697754,
+        "image": "C:\\Users\\jashu\\PathWeaver\\Games\\2022 Rapid React\\2022-field.png",
+        "left": 74,
+        "right": 1774,
         "targetRing": {
           "arrows": false,
           "length": 0.009999999776482582,
           "width": 0.009999999776482582
         },
+        "top": 50,
+        "width": 16.459199905395508,
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/Reset Robot Pose": {
         "window": {
           "visible": true
         }
@@ -49,12 +76,21 @@
   },
   "NetworkTables": {
     "Shuffleboard": {
+      "DrivebaseS": {
+        "open": true
+      },
+      "OdometryManager": {
+        "open": true
+      },
       "TurretS": {
         "open": true
       },
       "open": true
     },
     "SmartDashboard": {
+      "Reset Robot Pose": {
+        "open": true
+      },
       "open": true
     }
   },
@@ -67,26 +103,8 @@
               "autoFit": true
             }
           ],
-          "height": 216,
+          "height": 316,
           "series": [
-            {
-              "color": [
-                0.2980392277240753,
-                0.44705885648727417,
-                0.6901960968971252,
-                1.0
-              ],
-              "id": "NT:/Shuffleboard/TurretS/turretPosition"
-            },
-            {
-              "color": [
-                0.8666667342185974,
-                0.5176470875740051,
-                0.32156863808631897,
-                1.0
-              ],
-              "id": "NT:/Shuffleboard/TurretS/getError"
-            },
             {
               "color": [
                 0.3333333432674408,
@@ -95,6 +113,65 @@
                 1.0
               ],
               "id": "NT:/Shuffleboard/TurretS/omega"
+            }
+          ]
+        }
+      ]
+    },
+    "Plot <1>": {
+      "plots": [
+        {
+          "axis": [
+            {
+              "autoFit": true
+            }
+          ],
+          "height": 534,
+          "series": [
+            {
+              "color": [
+                0.3333333432674408,
+                0.658823549747467,
+                0.4078431725502014,
+                1.0
+              ],
+              "id": "NT:/SmartDashboard/leftVelo"
+            },
+            {
+              "color": [
+                0.7686275243759155,
+                0.30588236451148987,
+                0.32156863808631897,
+                1.0
+              ],
+              "id": "NT:/SmartDashboard/rightVelo"
+            },
+            {
+              "color": [
+                0.8666667342185974,
+                0.5176470875740051,
+                0.32156863808631897,
+                1.0
+              ],
+              "id": "NT:/Shuffleboard/DrivebaseS/gyroHeading"
+            },
+            {
+              "color": [
+                0.7686275243759155,
+                0.30588236451148987,
+                0.32156863808631897,
+                1.0
+              ],
+              "id": "NT:/Shuffleboard/DrivebaseS/getLeftVelocity"
+            },
+            {
+              "color": [
+                0.5058823823928833,
+                0.44705885648727417,
+                0.7019608020782471,
+                1.0
+              ],
+              "id": "NT:/Shuffleboard/DrivebaseS/getRightVelocity"
             }
           ]
         }
