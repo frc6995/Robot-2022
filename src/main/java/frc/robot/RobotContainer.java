@@ -20,6 +20,8 @@ import edu.wpi.first.wpilibj2.command.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.commands.IntakeCommandFactory;
+import frc.robot.commands.MidtakeCommandFactory;
 import frc.robot.commands.ShooterTestC;
 import frc.robot.commands.auto.AutoCommandFactory;
 import frc.robot.commands.drivebase.DrivebaseCommandFactory;
@@ -66,6 +68,8 @@ public class RobotContainer {
   private Command turretTurningC;
   private Command turretAimC;
   private Command shooterSpinC;
+  private Command runMidtakeC;
+  private Command runIntakeC;
   @Log
   @Config
   private Command shooterTestC;
@@ -86,54 +90,7 @@ public class RobotContainer {
     configureButtonBindings();
   }
 
-  /**
-   * Use this method to define your button->command mappings. Buttons can be
-   * created by
-   * instantiating a {@link GenericHID} or one of its subclasses ({@link
-   * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then passing
-   * it to a {@link
-   * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
-   */
-  private void configureButtonBindings() {
-    Command runIntake = new FunctionalCommand(
-        () -> {
-          intakeS.deploy();
-        },
-        () -> {
-          intakeS.spin();
-        },
-        (interrupted) -> {
-          intakeS.stop();
-          intakeS.retract();
-        },
-        () -> false, intakeS);
 
-    Command runMidtake = new FunctionalCommand(
-        () -> {
-        },
-        () -> {
-          midtakeS.spin(0.75);
-        },
-        (interrupted) -> {
-          midtakeS.stop();
-        },
-        () -> false, midtakeS);
-    
-    targetDistanceInRangeTrigger = new Trigger(odometryManager::getDistanceInRange);
-    turretReadyTrigger = new Trigger(turretS::isAtTarget);
-    shooterReadyTrigger = new Trigger(shooterS::isAtTarget);
-    ballReadyTrigger = new Trigger(midtakeS::getIsTopBeamBroken); // TODO fix this logic
-
-    //targetDistanceInRangeTrigger.whileActiveContinuous(shooterSpinC);
-
-    shootBallTrigger = targetDistanceInRangeTrigger.and(turretReadyTrigger).and(shooterReadyTrigger).and(ballReadyTrigger);
-
-    shootBallTrigger.whenActive(runMidtake);
-    driverController.b().whileActiveOnce(runMidtake);
-    driverController.x().whileActiveOnce(shooterTestC);
-    driverController.y().whenActive(turretManualC);
-    driverController.a().whileActiveOnce(runIntake);
-  }
 
   /**
    * Instantiate the driver and operator controllers
@@ -143,6 +100,27 @@ public class RobotContainer {
   }
 
   /**
+   * Instantiate the subsystems
+   */
+  private void createSubsystems() {
+    drivebaseS = new DrivebaseS();
+
+    intakeS = new IntakeS();
+    midtakeS = new MidtakeS();
+    turretS = new TurretS();
+    shooterS = new ShooterS();
+    odometryManager = new OdometryManager(
+      drivebaseS::getRobotPose,
+      drivebaseS::getRotation2d,
+      turretS::getRotation2d,
+      turretS::setTransformVelocity
+    );
+    odometryManager.setVisionEnabled(false);
+    limelightS = new LimelightS(odometryManager,
+    (list)->{field.getObject("targetRing").setPoses(list);});
+  }
+
+    /**
    * Instantiate the commands
    */
   private void createCommands() {
@@ -167,31 +145,37 @@ public class RobotContainer {
           shooterS);
     turretTurningC = TurretCommandFactory.createTurretTurnC(0, turretS);
     shooterTestC = new ShooterTestC(shooterS);
+    runIntakeC = IntakeCommandFactory.getIntakeRunCommand(intakeS);
+    runMidtakeC = MidtakeCommandFactory.getMidtakeRunCommand(midtakeS);
     //shooterS.setDefaultCommand(ShooterCommandFactory.createShooterIdleC(shooterS));
     SmartDashboard.putData(new InstantCommand(turretS::resetEncoder));
   }
-
-  /**
-   * Instantiate the subsystems
+    /**
+   * Use this method to define your button->command mappings. Buttons can be
+   * created by
+   * instantiating a {@link GenericHID} or one of its subclasses ({@link
+   * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then passing
+   * it to a {@link
+   * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
-  private void createSubsystems() {
-    drivebaseS = new DrivebaseS();
+  private void configureButtonBindings() {
+  
+    
+    targetDistanceInRangeTrigger = new Trigger(odometryManager::getDistanceInRange);
+    turretReadyTrigger = new Trigger(turretS::isAtTarget);
+    shooterReadyTrigger = new Trigger(shooterS::isAtTarget);
+    ballReadyTrigger = new Trigger(midtakeS::getIsTopBeamBroken); // TODO fix this logic
 
-    intakeS = new IntakeS();
-    midtakeS = new MidtakeS();
-    turretS = new TurretS();
-    shooterS = new ShooterS();
-    odometryManager = new OdometryManager(
-      drivebaseS::getRobotPose,
-      drivebaseS::getRotation2d,
-      turretS::getRotation2d,
-      turretS::setTransformVelocity
-    );
-    odometryManager.setVisionEnabled(false);
-    limelightS = new LimelightS(odometryManager,
-    (list)->{field.getObject("targetRing").setPoses(list);});
+    //targetDistanceInRangeTrigger.whileActiveContinuous(shooterSpinC);
+
+    // shootBallTrigger = targetDistanceInRangeTrigger.and(turretReadyTrigger).and(shooterReadyTrigger).and(ballReadyTrigger);
+
+    // shootBallTrigger.whenActive(runMidtake);
+    driverController.b().whileActiveOnce(runMidtakeC);
+    driverController.x().whileActiveOnce(shooterTestC);
+    driverController.y().whenActive(turretManualC);
+    driverController.a().whileActiveOnce(runIntakeC);
   }
-
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
    *
