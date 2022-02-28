@@ -153,12 +153,6 @@ public final class Constants {
     /** Allowable error to still be on target */
     public static final double SHOOTER_PID_ERROR = 0.5;
 
-    /** Shooter speed of [frontWheel, backWheel] in order. */
-    public static final double[][] SHOOTER_SPEEDS = { {2900, 2900}, {2650, 2650}, {2600, 2600}, {2600, 2600}, {2550, 2550} , {2600, 2600}, {3200, 3200}, {4400, 4400} };
-
-    /** Shooter distances that correspond to speeds */
-    public static final double[] SHOOTER_DISTANCES = { -25, -18, -15, -13, -9, -4, 6, 20 };
-
     // Turret Constants
 
     /** Number of encoder counts per turret motor revolution */
@@ -202,7 +196,7 @@ public final class Constants {
     public static final double TURRET_D = 1.0032;
 
     /** The maximum manual-drive angular velocity of the turret in radians per second */
-    public static final double TURRET_MAX_SPEED = Math.PI;
+    public static final double TURRET_MAX_SPEED = 3 * Math.PI;
 
     /** The 180-degree offset because the turret zero is with the turret facing backwards relative to the robot */
     public static final Rotation2d ROBOT_TO_TURRET_ZERO_ROT = new Rotation2d(Math.PI);

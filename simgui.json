@@ -6,7 +6,8 @@
       "/Shuffleboard/RobotContainer/field": "Field2d",
       "/Shuffleboard/RobotContainer/shooterTestC": "Command",
       "/SmartDashboard/InstantCommand": "Command",
-      "/SmartDashboard/Reset Robot Pose": "Command"
+      "/SmartDashboard/Reset Robot Pose": "Command",
+      "/SmartDashboard/Turret Reset": "Command"
     },
     "windows": {
       "/Shuffleboard/RobotContainer/field": {
@@ -30,7 +31,7 @@
           "length": 0.3799999952316284,
           "width": 0.2800000011920929
         },
-        "bottom": 900,
+        "bottom": 903,
         "camera": {
           "arrows": false,
           "color": [
@@ -55,13 +56,17 @@
         "height": 8.229599952697754,
         "image": "C:\\Users\\jashu\\PathWeaver\\Games\\2022 Rapid React\\2022-field.png",
         "left": 74,
-        "right": 1774,
+        "right": 1781,
         "targetRing": {
           "arrows": false,
           "length": 0.009999999776482582,
           "width": 0.009999999776482582
         },
-        "top": 50,
+        "tofTurret": {
+          "length": 15.0,
+          "width": 0.2800000011920929
+        },
+        "top": 45,
         "width": 16.459199905395508,
         "window": {
           "visible": true
@@ -103,8 +108,17 @@
               "autoFit": true
             }
           ],
-          "height": 316,
+          "height": 326,
           "series": [
+            {
+              "color": [
+                0.8666667342185974,
+                0.5176470875740051,
+                0.32156863808631897,
+                1.0
+              ],
+              "id": "NT:/Shuffleboard/OdometryManager/getTOFAdjustedDistanceToCenter"
+            },
             {
               "color": [
                 0.3333333432674408,
@@ -112,7 +126,25 @@
                 0.4078431725502014,
                 1.0
               ],
-              "id": "NT:/Shuffleboard/TurretS/omega"
+              "id": "NT:/Shuffleboard/OdometryManager/getDistanceToCenter"
+            },
+            {
+              "color": [
+                0.3333333432674408,
+                0.658823549747467,
+                0.4078431725502014,
+                1.0
+              ],
+              "id": "NT:/Shuffleboard/OdometryManager/getTOFAdjustedRotationOffset"
+            },
+            {
+              "color": [
+                0.7686275243759155,
+                0.30588236451148987,
+                0.32156863808631897,
+                1.0
+              ],
+              "id": "NT:/Shuffleboard/OdometryManager/getRotationOffset"
             }
           ]
         }

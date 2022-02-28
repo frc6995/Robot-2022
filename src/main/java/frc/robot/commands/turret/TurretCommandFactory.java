@@ -35,7 +35,7 @@ public class TurretCommandFactory {
 
     /**
      * Creates a TurretTurnC, which uses PID to point the turret to the given angle,
-     * where robot opposite intake is 0.
+     * where robot intake side is 0.
      * 
      * @param angle   the desired angle in radians counterclockwise from forward
      * @param turretS the turret subsystem

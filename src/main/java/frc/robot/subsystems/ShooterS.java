@@ -12,7 +12,7 @@ import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.simulation.FlywheelSim;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants;
+import static frc.robot.Constants.*;
 import frc.robot.Robot;
 import io.github.oblarg.oblog.Loggable;
 import io.github.oblarg.oblog.annotations.Log;
@@ -24,8 +24,8 @@ import io.github.oblarg.oblog.annotations.Log;
  * @author Noah Kim
  */
 public class ShooterS extends SubsystemBase implements Loggable {
-  private final CANSparkMax frontSparkMax = new CANSparkMax(Constants.CAN_ID_FRONT_SHOOTER_MOTOR, MotorType.kBrushless);
-  private final CANSparkMax backSparkMax = new CANSparkMax(Constants.CAN_ID_BACK_SHOOTER_MOTOR, MotorType.kBrushless);
+  private final CANSparkMax frontSparkMax = new CANSparkMax(CAN_ID_FRONT_SHOOTER_MOTOR, MotorType.kBrushless);
+  private final CANSparkMax backSparkMax = new CANSparkMax(CAN_ID_BACK_SHOOTER_MOTOR, MotorType.kBrushless);
   private RelativeEncoder frontEncoder;
   @Log
   private double lastFrontEncoderPosition = 0;
@@ -37,25 +37,25 @@ public class ShooterS extends SubsystemBase implements Loggable {
   @Log
   private double backEncoderVelocityRPM = 0;
 
-  private PIDController frontPID = new PIDController(Constants.SHOOTER_FRONT_P, 0, 0);
-  private PIDController backPID = new PIDController(Constants.SHOOTER_BACK_P, 0, 0);
+  private PIDController frontPID = new PIDController(SHOOTER_FRONT_P, 0, 0);
+  private PIDController backPID = new PIDController(SHOOTER_BACK_P, 0, 0);
   private SimpleMotorFeedforward frontFF = new SimpleMotorFeedforward(
-    Constants.SHOOTER_FRONT_FF[0],
-    Constants.SHOOTER_FRONT_FF[1],
-    Constants.SHOOTER_FRONT_FF[2]);
+    SHOOTER_FRONT_FF[0],
+    SHOOTER_FRONT_FF[1],
+    SHOOTER_FRONT_FF[2]);
   private FlywheelSim frontSim = new FlywheelSim(
     LinearSystemId.identifyVelocitySystem(
-      Constants.SHOOTER_FRONT_FF[1], 
-      Constants.SHOOTER_FRONT_FF[2]), 
+      SHOOTER_FRONT_FF[1], 
+      SHOOTER_FRONT_FF[2]), 
       DCMotor.getNEO(1), 1);
   private SimpleMotorFeedforward backFF = new SimpleMotorFeedforward(
-    Constants.SHOOTER_BACK_FF[0],
-    Constants.SHOOTER_BACK_FF[1],
-    Constants.SHOOTER_BACK_FF[2]);
+    SHOOTER_BACK_FF[0],
+    SHOOTER_BACK_FF[1],
+    SHOOTER_BACK_FF[2]);
     private FlywheelSim backSim = new FlywheelSim(
       LinearSystemId.identifyVelocitySystem(
-        Constants.SHOOTER_BACK_FF[1], 
-        Constants.SHOOTER_BACK_FF[2]), 
+        SHOOTER_BACK_FF[1], 
+        SHOOTER_BACK_FF[2]), 
         DCMotor.getNEO(1), 1);
 
   /** Creates a new ShooterS. */
@@ -71,8 +71,8 @@ public class ShooterS extends SubsystemBase implements Loggable {
     backEncoder = backSparkMax.getEncoder();
 
 
-    frontPID.setTolerance(Constants.SHOOTER_PID_ERROR, 0);
-    backPID.setTolerance(Constants.SHOOTER_PID_ERROR, 0);
+    frontPID.setTolerance(SHOOTER_PID_ERROR, 0);
+    backPID.setTolerance(SHOOTER_PID_ERROR, 0);
 
     frontPID.setIntegratorRange(0, 0);
     backPID.setIntegratorRange(0, 0);
@@ -85,7 +85,7 @@ public class ShooterS extends SubsystemBase implements Loggable {
    * @return The deadbanded value
    */
   public double deadbandJoystick(double value) {
-    if (Math.abs(value) < Constants.DRIVEBASE_DEADBAND) {
+    if (Math.abs(value) < DRIVEBASE_DEADBAND) {
       value = 0;
     }
 
@@ -215,61 +215,6 @@ public class ShooterS extends SubsystemBase implements Loggable {
     return isBackAtTarget() && isFrontAtTarget();
   }
 
-  /**
-   * Converts a distance in feet into the proper shooter RPM
-   * 
-   * @param distance the distance to the target in feet (measured horizontally
-   *                 from the Limelight to the vision ring)
-   * @return the shooter RPM
-   */
-
-  public static double getSpeedForDistance(double distance, boolean isBackWheel) {
-    int index = Math.max(Math.min(Constants.SHOOTER_DISTANCES.length-2, getIndexForDistance(distance, Constants.SHOOTER_DISTANCES)), 0);
-    double rpm = calcSpeed(index, index+1, distance, Constants.SHOOTER_DISTANCES, Constants.SHOOTER_SPEEDS, isBackWheel);
-    return rpm; 
-  }
-
-  /**
-   * Finds the index of the highest distance in the provided array that is less
-   * than the provided distance.
-   * 
-   * @param distance       the distance
-   * @param DISTANCES_FEET the distance array
-   * @return the index
-   */
-
-  public static int getIndexForDistance(double distance, double[] DISTANCES_FEET) {
-    int index = 0;
-    for (int i = 0; i < DISTANCES_FEET.length; i++) {
-      if (distance > DISTANCES_FEET[i]) {
-        index = i;
-      }
-    }
-    return index;
-  }
-
-   /**
-   * Given two points in an array of doubles and an x point between them,
-   * draw a line between them and find the appropriate y value
-   * 
-   * @param smallerIndex
-   * @param biggerIndex
-   * @param distance
-   * @param DISTANCES_FEET
-   * @param RPMS
-   * @return
-   */
-  public static double calcSpeed(int smallerIndex, int biggerIndex, double distance, double[] DISTANCES_FEET, double[][] RPMS, boolean isBackWheel) {
-    double smallerRPM = RPMS[Math.max(smallerIndex, 0)][isBackWheel ? 1 : 0];
-    double biggerRPM = RPMS[Math.min(biggerIndex, RPMS.length-1)][isBackWheel ? 1 : 0] + 0.0001; //add a tiny amount to avoid NaN if distance is out of range
-    double smallerDistance = DISTANCES_FEET[Math.max(smallerIndex, 0)];
-    double biggerDistance = DISTANCES_FEET[Math.min(biggerIndex, DISTANCES_FEET.length - 1)] + 0.0001;
-    double newRPM = ((biggerRPM - smallerRPM) / (biggerDistance - smallerDistance) * (distance - smallerDistance))
-        + smallerRPM;
-
-    return newRPM;
-  }
-
   @Override
   public void periodic() {
     double frontEncoderPosition = 0;
@@ -291,9 +236,9 @@ public class ShooterS extends SubsystemBase implements Loggable {
   @Override
   public void simulationPeriodic() {
     frontSim.setInput(frontSparkMax.getAppliedOutput() - 
-      (Math.signum(frontSparkMax.getAppliedOutput()) * Constants.SHOOTER_FRONT_FF[0]));
+      (Math.signum(frontSparkMax.getAppliedOutput()) * SHOOTER_FRONT_FF[0]));
     backSim.setInput(backSparkMax.getAppliedOutput() - 
-      (Math.signum(backSparkMax.getAppliedOutput()) * Constants.SHOOTER_BACK_FF[0]));
+      (Math.signum(backSparkMax.getAppliedOutput()) * SHOOTER_BACK_FF[0]));
     
     frontSim.update(0.02);
     backSim.update(0.02);

@@ -12,31 +12,10 @@ import frc.robot.subsystems.MidtakeS;
 import frc.robot.subsystems.ShooterS;
 import frc.robot.subsystems.TurretS;
 import frc.robot.util.OdometryManager;
+import frc.robot.util.interpolation.ShooterInterpolatingTable;
 
 /** Primary Command Factory. */
 public class MainCommandFactory {
-
-  /**
-   * Create a command to aim at the target with the turret and shooter
-   * 
-   * @param odometryManager The OdometryManager 
-   * @param turretS   The turret subsystem
-   * @param shooterS  The shooter subsystem
-   * @return The aimbot command
-   */
-    public static Command createAimBotC(OdometryManager odometryManager, TurretS turretS, ShooterS shooterS) {
-        return TurretCommandFactory.createTurretFollowC(odometryManager::getRotationOffset, turretS)
-        .alongWith(
-            ShooterCommandFactory.createShooterFollowC(
-                ()->{
-                  return ShooterS.getSpeedForDistance(odometryManager.getDistanceToCenter(), false);
-                },
-                ()->{
-                  return ShooterS.getSpeedForDistance(odometryManager.getDistanceToCenter(), true);
-                },
-                shooterS)
-        );
-    }
 
   /**
    * Creates a command group to intake and store or reject one ball.

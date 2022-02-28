@@ -34,6 +34,7 @@ import frc.robot.subsystems.MidtakeS;
 import frc.robot.subsystems.ShooterS;
 import frc.robot.subsystems.TurretS;
 import frc.robot.util.OdometryManager;
+import frc.robot.util.interpolation.ShooterInterpolatingTable;
 import io.github.oblarg.oblog.annotations.Config;
 import io.github.oblarg.oblog.annotations.Log;
 
@@ -112,6 +113,7 @@ public class RobotContainer {
     odometryManager = new OdometryManager(
       drivebaseS::getRobotPose,
       drivebaseS::getRotation2d,
+      drivebaseS::getChassisSpeeds,
       turretS::getRotation2d,
       turretS::setTransformVelocity
     );
@@ -140,15 +142,19 @@ public class RobotContainer {
     turretS.setDefaultCommand(turretAimC);
     
     shooterSpinC = ShooterCommandFactory.createShooterFollowC(
-          ()->{return ShooterS.getSpeedForDistance(odometryManager.getDistanceToCenter(), false);},
-          ()->{return ShooterS.getSpeedForDistance(odometryManager.getDistanceToCenter(), true);},
-          shooterS);
+      ()->{
+        return ShooterInterpolatingTable.get(odometryManager.getDistanceToCenter()).frontWheelRpm;
+      },
+      ()->{
+        return ShooterInterpolatingTable.get(odometryManager.getDistanceToCenter()).backWheelRpm;
+      },
+      shooterS);
     turretTurningC = TurretCommandFactory.createTurretTurnC(0, turretS);
     shooterTestC = new ShooterTestC(shooterS);
     runIntakeC = IntakeCommandFactory.getIntakeRunCommand(intakeS);
     runMidtakeC = MidtakeCommandFactory.getMidtakeRunCommand(midtakeS);
     //shooterS.setDefaultCommand(ShooterCommandFactory.createShooterIdleC(shooterS));
-    SmartDashboard.putData(new InstantCommand(turretS::resetEncoder));
+    SmartDashboard.putData(new InstantCommand(turretS::resetEncoder).withName("Turret Reset"));
   }
     /**
    * Use this method to define your button->command mappings. Buttons can be
@@ -173,7 +179,7 @@ public class RobotContainer {
     // shootBallTrigger.whenActive(runMidtake);
     driverController.b().whileActiveOnce(runMidtakeC);
     driverController.x().whileActiveOnce(shooterTestC);
-    driverController.y().whenActive(turretManualC);
+    driverController.y().toggleWhenActive(turretManualC);
     driverController.a().whileActiveOnce(runIntakeC);
   }
   /**
@@ -227,11 +233,6 @@ public class RobotContainer {
 
     field.getObject("target").setPose(odometryManager.getCurrentRobotPose().transformBy(odometryManager.getRobotToHub()));
       
-    /*new Pose2d(
-      odometryManager.getCurrentRobotPose().getTranslation().plus(
-        odometryManager.getRobotToHub().getTranslation().rotateBy(
-          odometryManager.getCurrentRobotPose().getRotation())),
-    Rotation2d.fromDegrees(0)));*/
     field.getObject("Turret").setPose(odometryManager.getCurrentRobotPose().transformBy(
         odometryManager.getRobotToTurret()
       )

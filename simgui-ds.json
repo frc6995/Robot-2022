@@ -1,11 +1,15 @@
 {
+  "Keyboard 0 Settings": {
+    "window": {
+      "visible": true
+    }
+  },
   "keyboardJoysticks": [
     {
       "axisConfig": [
         {
           "decKey": 65,
-          "incKey": 68,
-          "maxAbsValue": 0.4000000059604645
+          "incKey": 68
         },
         {},
         {
@@ -93,8 +97,7 @@
   ],
   "robotJoysticks": [
     {
-      "guid": "78696e70757401000000000000000000",
-      "useGamepad": true
+      "guid": "Keyboard0"
     }
   ]
 }

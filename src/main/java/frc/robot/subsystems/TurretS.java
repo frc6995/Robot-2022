@@ -200,14 +200,13 @@ public class TurretS extends SubsystemBase implements Loggable {
     } else {
       targetInRange = true;
     }
-    double pidVelocity = turretPID.calculate(getRotation2d().getRadians(), targetZeroRelative.getRadians()); //radians per sec
+    double pidVelocity = turretPID.calculate(getRotation2d().getRadians(),targetZeroRelative.getRadians()); //radians per sec
     double totalVelocity = pidVelocity + omega;
     double acceleration = (totalVelocity - lastTotalVelocity) / 0.02;
     lastTotalVelocity = totalVelocity;
     double voltage =
-      turretFF.calculate(pidVelocity + omega, acceleration
-      );
-    if(targetInRange) {//If the target is in range, 
+      turretFF.calculate(totalVelocity, acceleration);
+    if(targetInRange) {
       sparkMax.setVoltage(voltage);
     }
     else{
