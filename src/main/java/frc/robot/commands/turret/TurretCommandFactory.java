@@ -70,7 +70,7 @@ public class TurretCommandFactory {
             interrupted -> {
                 turretS.stopMotor();
             },
-            () -> false
+            () -> false, turretS
         )
         .withName("TurretManualC");
     }
