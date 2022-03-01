@@ -32,8 +32,8 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.util.OdometryManager;
 import frc.robot.util.SimCamera;
+import frc.robot.util.pose.NavigationManager;
 import io.github.oblarg.oblog.annotations.Log;
 
 /**
@@ -43,7 +43,7 @@ import io.github.oblarg.oblog.annotations.Log;
  */
 
 public class LimelightS extends SubsystemBase {
-  OdometryManager odometryManager;
+  NavigationManager navigationManager;
   Supplier<Rotation2d> turretAngleSupplier;
   PhotonCamera limelight = new PhotonCamera("gloworm");
 
@@ -53,13 +53,13 @@ public class LimelightS extends SubsystemBase {
   Trigger hasSteadyTarget = new Trigger(() -> limelight.getLatestResult().hasTargets()).debounce(0.5);
 
   /** Creates a new LimelightS. */
-  public LimelightS(OdometryManager odometryManager,
+  public LimelightS(NavigationManager navigationManager,
       Consumer<List<Pose2d>> addFieldVisionTargets) {
         NetworkTableInstance.getDefault().getTable("photonvision").getEntry("version").setString(
           PhotonVersion.versionString
         );
-        this.odometryManager = odometryManager;
-    this.turretAngleSupplier = ()->odometryManager.getRobotToTurret().getRotation();
+        this.navigationManager = navigationManager;
+    this.turretAngleSupplier = ()->navigationManager.getRobotToTurretTransform().getRotation();
 
     if (!RobotBase.isReal()) {
       limelightSimVisionSystem = new SimCamera(
@@ -111,31 +111,21 @@ public class LimelightS extends SubsystemBase {
    */
   @Override
   public void periodic() {
-    Transform2d cameraToRobotTrans = odometryManager.getRobotToCamera().inverse();
+    Transform2d cameraToRobotTrans = navigationManager.getRobotToCameraTransform().inverse();
     if (!RobotBase.isReal()) {
     limelightSimVisionSystem.moveCamera(
       cameraToRobotTrans,
       CAMERA_HEIGHT_METERS,
       Units.radiansToDegrees(CAMERA_PITCH_RADIANS));
-      limelightSimVisionSystem.processFrame(odometryManager.getCurrentRobotPose());
+      limelightSimVisionSystem.processFrame(navigationManager.getCurrentRobotPose());
     }
 
     PhotonTrackedTarget target = limelight.getLatestResult().hasTargets()
         ? limelight.getLatestResult().getBestTarget()
         : new PhotonTrackedTarget(0, 0, 0, 0, new Transform2d(), new ArrayList<TargetCorner>());
-    double xOffset = target.getYaw();
-    double distance = PhotonUtils.calculateDistanceToTargetMeters(
-      CAMERA_HEIGHT_METERS,
-      TARGET_HEIGHT_METERS,
-      CAMERA_PITCH_RADIANS,
-      Units.degreesToRadians(target.getPitch()));
     
-    Transform2d cameraToHubTrans = new Transform2d(
-      PhotonUtils.estimateCameraToTargetTranslation(distance, Rotation2d.fromDegrees(-1 * xOffset))
-      .times((distance + HUB_RADIUS_METERS)/distance),
-      new Rotation2d()); //Scale the translation an extra 2 meters to account for the radius of the ring
     if (hasSteadyTarget.get()) {
-      odometryManager.addVisionMeasurement(cameraToHubTrans);
+      navigationManager.addVisionMeasurement(target);
     }
   }
 }

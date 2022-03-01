@@ -7,7 +7,6 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.GenericHID;
@@ -17,24 +16,26 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.IntakeCommandFactory;
 import frc.robot.commands.MidtakeCommandFactory;
 import frc.robot.commands.ShooterTestC;
 import frc.robot.commands.auto.AutoCommandFactory;
+import frc.robot.commands.climber.ClimberCommandFactory;
 import frc.robot.commands.drivebase.DrivebaseCommandFactory;
 import frc.robot.commands.shooter.ShooterCommandFactory;
 import frc.robot.commands.turret.TurretCommandFactory;
+import frc.robot.subsystems.ClimberS;
 import frc.robot.subsystems.DrivebaseS;
 import frc.robot.subsystems.IntakeS;
 import frc.robot.subsystems.LimelightS;
 import frc.robot.subsystems.MidtakeS;
 import frc.robot.subsystems.ShooterS;
 import frc.robot.subsystems.TurretS;
-import frc.robot.util.OdometryManager;
+import frc.robot.util.NomadMathUtil;
 import frc.robot.util.interpolation.ShooterInterpolatingTable;
+import frc.robot.util.pose.NavigationManager;
 import io.github.oblarg.oblog.annotations.Config;
 import io.github.oblarg.oblog.annotations.Log;
 
@@ -50,6 +51,7 @@ import io.github.oblarg.oblog.annotations.Log;
 public class RobotContainer {
 
   private CommandXboxController driverController;
+  private CommandXboxController operatorController;
 
   @Log
   public Field2d field = new Field2d();
@@ -59,6 +61,7 @@ public class RobotContainer {
   private MidtakeS midtakeS;
   private ShooterS shooterS;
   private TurretS turretS;
+  private ClimberS climberS;
   @SuppressWarnings("unused")
   private LimelightS limelightS;
 
@@ -71,6 +74,8 @@ public class RobotContainer {
   private Command shooterSpinC;
   private Command runMidtakeC;
   private Command runIntakeC;
+  private Command climberForwardC;
+  private Command climberBackC;
   @Log
   @Config
   private Command shooterTestC;
@@ -82,7 +87,7 @@ public class RobotContainer {
 
   private Trigger shootBallTrigger;
 
-  private OdometryManager odometryManager;
+  private NavigationManager navigationManager;
 
   public RobotContainer() {
     createControllers();
@@ -98,6 +103,7 @@ public class RobotContainer {
    */
   private void createControllers() {
     driverController = new CommandXboxController(Constants.USB_PORT_DRIVER_CONTROLLER);
+    operatorController = new CommandXboxController(Constants.USB_PORT_OPERATOR_CONTROLLER);
   }
 
   /**
@@ -110,15 +116,15 @@ public class RobotContainer {
     midtakeS = new MidtakeS();
     turretS = new TurretS();
     shooterS = new ShooterS();
-    odometryManager = new OdometryManager(
+    climberS = new ClimberS();
+    navigationManager = new NavigationManager(
       drivebaseS::getRobotPose,
       drivebaseS::getRotation2d,
       drivebaseS::getChassisSpeeds,
-      turretS::getRotation2d,
-      turretS::setTransformVelocity
-    );
-    odometryManager.setVisionEnabled(false);
-    limelightS = new LimelightS(odometryManager,
+      turretS::getRobotToTurretRotation,
+      turretS::setTransformVelocity);
+    navigationManager.setVisionEnabled(false);
+    limelightS = new LimelightS(navigationManager,
     (list)->{field.getObject("targetRing").setPoses(list);});
   }
 
@@ -137,16 +143,26 @@ public class RobotContainer {
     runTurretC = TurretCommandFactory.createTurretManualC(
       driverController::getRightX, turretS);
 
-    turretAimC = TurretCommandFactory.createTurretFollowC(odometryManager::getRotationOffset, turretS);
+    turretAimC = TurretCommandFactory.createTurretFollowC(
+      ()-> {
+        return NomadMathUtil.getDirection(
+          navigationManager.getTOFAdjustedRobotToHubTransform()
+        );
+      },
+      turretS);
     turretManualC = TurretCommandFactory.createTurretManualC(driverController::getRightX, turretS);
     turretS.setDefaultCommand(turretAimC);
     
     shooterSpinC = ShooterCommandFactory.createShooterFollowC(
       ()->{
-        return ShooterInterpolatingTable.get(odometryManager.getDistanceToCenter()).frontWheelRpm;
+        return ShooterInterpolatingTable.get(
+          NomadMathUtil.getDistance(navigationManager.getTOFAdjustedRobotToHubTransform())
+        ).frontWheelRpm;
       },
       ()->{
-        return ShooterInterpolatingTable.get(odometryManager.getDistanceToCenter()).backWheelRpm;
+        return ShooterInterpolatingTable.get(
+          NomadMathUtil.getDistance(navigationManager.getTOFAdjustedRobotToHubTransform())
+        ).backWheelRpm;
       },
       shooterS);
     turretTurningC = TurretCommandFactory.createTurretTurnC(0, turretS);
@@ -155,6 +171,9 @@ public class RobotContainer {
     runMidtakeC = MidtakeCommandFactory.getMidtakeRunCommand(midtakeS);
     //shooterS.setDefaultCommand(ShooterCommandFactory.createShooterIdleC(shooterS));
     SmartDashboard.putData(new InstantCommand(turretS::resetEncoder).withName("Turret Reset"));
+
+    climberBackC = ClimberCommandFactory.createClimberBackC(climberS);
+    climberForwardC = ClimberCommandFactory.createClimberForwardC(climberS);
   }
     /**
    * Use this method to define your button->command mappings. Buttons can be
@@ -167,7 +186,7 @@ public class RobotContainer {
   private void configureButtonBindings() {
   
     
-    targetDistanceInRangeTrigger = new Trigger(odometryManager::getDistanceInRange);
+    targetDistanceInRangeTrigger = new Trigger(navigationManager::getTargetDistanceInRange);
     turretReadyTrigger = new Trigger(turretS::isAtTarget);
     shooterReadyTrigger = new Trigger(shooterS::isAtTarget);
     ballReadyTrigger = new Trigger(midtakeS::getIsTopBeamBroken); // TODO fix this logic
@@ -181,6 +200,9 @@ public class RobotContainer {
     driverController.x().whileActiveOnce(shooterTestC);
     driverController.y().toggleWhenActive(turretManualC);
     driverController.a().whileActiveOnce(runIntakeC);
+    
+    operatorController.a().whileActiveOnce(climberForwardC);
+    operatorController.b().whileActiveOnce(climberBackC);
   }
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
@@ -194,8 +216,8 @@ public class RobotContainer {
           new Pose2d(),
           List.of(),
           new Pose2d(2, 1, new Rotation2d()), 
-          Constants.TRAJECTORY_CONFIG).transformBy(new Transform2d(new Pose2d(), odometryManager.getCurrentRobotPose())),
-          odometryManager,
+          Constants.TRAJECTORY_CONFIG).transformBy(new Transform2d(new Pose2d(), navigationManager.getCurrentRobotPose())),
+          navigationManager,
         drivebaseS).andThen(drivebaseS::stopAll, drivebaseS);
     }
     return AutoCommandFactory.createTwoBallAutoCG(
@@ -210,35 +232,38 @@ public class RobotContainer {
   }
 
   public void robotPeriodic() {
-
-    odometryManager.periodic();
+    navigationManager.update();
+    
 
     /*Field2d setup */
     if(RobotBase.isSimulation()) {
       field.setRobotPose(new Pose2d(
-        MathUtil.clamp(odometryManager.getCurrentRobotPose().getX(), 0, Units.feetToMeters(54)),
-        MathUtil.clamp(odometryManager.getCurrentRobotPose().getY(), 0, Units.feetToMeters(27)),
-        odometryManager.getCurrentRobotPose().getRotation()
+        MathUtil.clamp(navigationManager.getCurrentRobotPose().getX(), 0, Units.feetToMeters(54)),
+        MathUtil.clamp(navigationManager.getCurrentRobotPose().getY(), 0, Units.feetToMeters(27)),
+        navigationManager.getCurrentRobotPose().getRotation()
       ));
     }
     else {
-      field.setRobotPose(odometryManager.getCurrentRobotPose());
+      field.setRobotPose(navigationManager.getCurrentRobotPose());
     }
 
 
     
 
     field.getObject("estRobot").setPose(
-      odometryManager.getEstimatedRobotPose());
+      navigationManager.getEstimatedRobotPose());
 
-    field.getObject("target").setPose(odometryManager.getCurrentRobotPose().transformBy(odometryManager.getRobotToHub()));
+    field.getObject("tofTarget").setPose(navigationManager.getCurrentRobotPose().transformBy(navigationManager.getTOFAdjustedRobotToHubTransform()));
+
+    field.getObject("target").setPose(navigationManager.getCurrentRobotPose().transformBy(navigationManager.getRobotToHubTransform()));
       
-    field.getObject("Turret").setPose(odometryManager.getCurrentRobotPose().transformBy(
-        odometryManager.getRobotToTurret()
+    field.getObject("Turret").setPose(navigationManager.getCurrentRobotPose().transformBy(
+      new Transform2d(new Translation2d(), turretS.getRobotToTurretRotation())
+
       )
     );
 
-    field.getObject("camera").setPose(odometryManager.getCurrentRobotPose().transformBy(odometryManager.getRobotToCamera()));
+    field.getObject("camera").setPose(navigationManager.getCurrentRobotPose().transformBy(navigationManager.getRobotToCameraTransform()));
     
   }
 }

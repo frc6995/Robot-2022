@@ -1,18 +1,10 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-
-import frc.robot.commands.shooter.ShooterCommandFactory;
-import frc.robot.commands.turret.TurretCommandFactory;
 import frc.robot.subsystems.IntakeS;
 import frc.robot.subsystems.MidtakeS;
-import frc.robot.subsystems.ShooterS;
-import frc.robot.subsystems.TurretS;
-import frc.robot.util.OdometryManager;
-import frc.robot.util.interpolation.ShooterInterpolatingTable;
 
 /** Primary Command Factory. */
 public class MainCommandFactory {

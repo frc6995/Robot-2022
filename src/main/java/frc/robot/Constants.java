@@ -48,6 +48,8 @@ public final class Constants {
     /** USB port of xbox controller for driver */
     public static final int USB_PORT_DRIVER_CONTROLLER = 0;
 
+    public static final int USB_PORT_OPERATOR_CONTROLLER = 1;
+
     /** Deadband for drive joystick */
     public static final double DRIVEBASE_DEADBAND = 0.03; // anything under 1.5% of full joystick away from 0 should be
                                                           // considered 0
@@ -169,13 +171,13 @@ public final class Constants {
     public static final int CAN_ID_TURRET = 30;
 
     /** Port that limit switch goes into */
-    public static final int TURRET_LIMIT_SWITCH_PORT = 0;
+    public static final int TURRET_LIMIT_SWITCH_PORT = 3;
   
     /** Counterclockwise limit at which the turret cannot pass */
-    public static final double SOFT_LIMIT_FORWARD_RADIAN = Units.degreesToRadians(110);
+    public static final double SOFT_LIMIT_FORWARD_RADIAN = Units.degreesToRadians(180 + 110);
 
     /** Clockwise limit at which the turret cannot pass */
-    public static final double SOFT_LIMIT_REVERSE_RADIAN = Units.degreesToRadians(-110);
+    public static final double SOFT_LIMIT_REVERSE_RADIAN = Units.degreesToRadians(180-110);
 
     /** Number of degrees of allowable error for turret */
     public static final double TURRET_PID_ERROR = Units.degreesToRadians(5);
@@ -198,10 +200,6 @@ public final class Constants {
     /** The maximum manual-drive angular velocity of the turret in radians per second */
     public static final double TURRET_MAX_SPEED = 3 * Math.PI;
 
-    /** The 180-degree offset because the turret zero is with the turret facing backwards relative to the robot */
-    public static final Rotation2d ROBOT_TO_TURRET_ZERO_ROT = new Rotation2d(Math.PI);
-
-
     // Midtake Constants
 
     /** Can ids for the front midtake motor */
@@ -211,10 +209,10 @@ public final class Constants {
     public static final int CAN_ID_MIDTAKE_BACK = 23;
 
     /** Port number for the top beam break sensor */
-    public static final int BEAM_BREAK_TOP_PORT_NUMBER = 1;
+    public static final int BEAM_BREAK_TOP_PORT_NUMBER = 0;
 
     /** Port number for the bottom beam break sensor */
-    public static final int BEAM_BREAK_BOTTOM_PORT_NUMBER = 2;
+    public static final int BEAM_BREAK_BOTTOM_PORT_NUMBER = 1;
 
     /** Proximity threshold on the color sensor for detecting a ball*/
     public static final double COLOR_SENSOR_PROXIMITY_THRESHOLD = 250;
@@ -286,5 +284,59 @@ public final class Constants {
 
     /** The number of tape strips around the vision ring */
     public static final double TAPE_STRIP_COUNT = 16.0;
+
+     //Climber Constants
+    /**
+     * The proportional constant for the climber
+     */
+    public static final double CLIMBER_P_CONSTANT = 0;
+    /**
+     * The integral constant for the climber
+     */
+    public static final double CLIMBER_I_CONSTANT = 0;
+    /**
+     * The derivative constant for the climber
+     */
+    public static final double CLIMBER_D_CONSTANT = 0;
+    /**
+     * The CAN ID of the climber motor
+     */
+    public static final int CAN_ID_CLIMBER_MOTOR = 0;
+    /**
+     * The PID error of the climber
+     */
+    public static final int CLIMBER_PID_ERROR = 10;
+    /**
+     * The max amount of rotations extending the climber
+     */
+    public static final int CLIMBER_SOFT_LIMIT_FORWARD = 20;
+    /**
+     * The maximum a mount of rotations retracting the climber
+     */
+    public static final int CLIMBER_SOFT_LIMIT_BACK = -1;
+    /**
+     * The port number of the double solenoid when it folds the climber up
+     */
+    public static final int DOUBLE_SOLENOID_CLIMBER_UP = 0;
+    /**
+     * The port number of the double solenoid when it folds the climber down
+     */
+    public static final int DOUBLE_SOLENOID_CLIMBER_DOWN = 1;
+    /**
+     * The CAN ID of the back climb motor
+     */
+    public static final int CAN_ID_BACK_CLIMB_MOTOR = 1;
+    /**
+     * The proportional constant for the back climber
+     */
+    public static final int BACK_CLIMBER_P_CONSTANT = 0;
+    /**
+     * The integral constant for the back climber
+     */
+    public static final int BACK_CLIMBER_I_CONSTANT = 0;
+    /**
+     * The derivative constant for the back climber
+     */
+    public static final int BACK_CLIMBER_D_CONSTANT = 0;
 
 }

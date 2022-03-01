@@ -7,6 +7,7 @@ import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkMaxRelativeEncoder;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
@@ -22,7 +23,10 @@ import edu.wpi.first.wpilibj.simulation.LinearSystemSim;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.Constants;
+import static frc.robot.Constants.*;
+
+import javax.swing.text.Position;
+
 import frc.robot.util.SimEncoder;
 import io.github.oblarg.oblog.Loggable;
 import io.github.oblarg.oblog.annotations.Log;
@@ -36,11 +40,11 @@ import io.github.oblarg.oblog.annotations.Log;
  * @author Noah Kim
  */
 public class TurretS extends SubsystemBase implements Loggable {
-  private CANSparkMax sparkMax = new CANSparkMax(Constants.CAN_ID_TURRET, MotorType.kBrushless);
+  private CANSparkMax sparkMax = new CANSparkMax(CAN_ID_TURRET, MotorType.kBrushless);
   private RelativeEncoder sparkMaxEncoder = sparkMax.getEncoder();
-  private DigitalInput limitSwitch = new DigitalInput(Constants.TURRET_LIMIT_SWITCH_PORT);
+  private DigitalInput limitSwitch = new DigitalInput(TURRET_LIMIT_SWITCH_PORT);
 
-  private PIDController turretPID = new PIDController(Constants.TURRET_P, 0, Constants.TURRET_D);
+  private PIDController turretPID = new PIDController(TURRET_P, 0, TURRET_D);
 
   @Log
   private double omega = 0;
@@ -50,31 +54,34 @@ public class TurretS extends SubsystemBase implements Loggable {
   // Open-loop drive in turret radians per second
   private SimpleMotorFeedforward turretFF = new SimpleMotorFeedforward(
 
-    Constants.TURRET_FF[0],
-    Constants.TURRET_FF[1],
-    Constants.TURRET_FF[2]);
+    TURRET_FF[0],
+    TURRET_FF[1],
+    TURRET_FF[2]);
   private LinearSystemSim<N2, N1, N1> turretSim = new LinearSystemSim<N2, N1, N1>(
-    LinearSystemId.identifyPositionSystem(Constants.TURRET_FF[1], Constants.TURRET_FF[2])
+    LinearSystemId.identifyPositionSystem(TURRET_FF[1], TURRET_FF[2])
     );
-  @Log
-  private boolean targetInRange;
-  private Trigger velocityThresholdTrigger = new Trigger(()->{return Math.abs(omega) < Math.PI;}).debounce(0.5, DebounceType.kFalling);
-  private Trigger targetInRangeTrigger = new Trigger(()->targetInRange);
-  private Trigger safeToMoveTrigger = targetInRangeTrigger;
 
   /** Creates a new TurretS. */
   public TurretS() {
     sparkMax.restoreFactoryDefaults();
     // Automatically multiply NEO rotations to read encoder in turret radians.
-    sparkMaxEncoder.setPositionConversionFactor(2 * Math.PI / Constants.NEO_REVOLUTIONS_PER_TURRET_REVOLUTION);
-    sparkMaxEncoder.setVelocityConversionFactor(2 * Math.PI / Constants.NEO_REVOLUTIONS_PER_TURRET_REVOLUTION / 60);
+    sparkMaxEncoder.setPositionConversionFactor(2 * Math.PI / NEO_REVOLUTIONS_PER_TURRET_REVOLUTION);
+    sparkMaxEncoder.setVelocityConversionFactor(2 * Math.PI / NEO_REVOLUTIONS_PER_TURRET_REVOLUTION / 60);
     sparkMax.enableSoftLimit(SoftLimitDirection.kForward, true);
     sparkMax.enableSoftLimit(SoftLimitDirection.kReverse, true);
-    sparkMax.setSoftLimit(SoftLimitDirection.kForward, (float) Constants.SOFT_LIMIT_FORWARD_RADIAN);
-    sparkMax.setSoftLimit(SoftLimitDirection.kReverse, (float) Constants.SOFT_LIMIT_REVERSE_RADIAN);
-    turretPID.setTolerance(Constants.TURRET_PID_ERROR, 0);
+    sparkMax.setSoftLimit(SoftLimitDirection.kForward, (float) SOFT_LIMIT_FORWARD_RADIAN);
+    sparkMax.setSoftLimit(SoftLimitDirection.kReverse, (float) SOFT_LIMIT_REVERSE_RADIAN);
+    turretPID.setTolerance(TURRET_PID_ERROR, 0);
     sparkMax.setSmartCurrentLimit(20, 20, 0);
     turretPID.setIntegratorRange(0, 0);
+
+    if(RobotBase.isReal()) {
+      sparkMaxEncoder.setPosition(Math.PI);
+    }
+    else {
+      turretSimEncoder.setPosition(Math.PI);
+    }
+    getEncoderCounts();
   }
 
   /**
@@ -85,7 +92,7 @@ public class TurretS extends SubsystemBase implements Loggable {
    * @return The speed of the turret
    */
   public double deadbandJoysticks(double value) {
-    if (Math.abs(value) < Constants.TURRET_DEADBAND) {
+    if (Math.abs(value) < TURRET_DEADBAND) {
       value = 0;
     }
     return value;
@@ -106,7 +113,7 @@ public class TurretS extends SubsystemBase implements Loggable {
     }
   }
 
-  public Rotation2d getRotation2d() {
+  public Rotation2d getRobotToTurretRotation() {
     return new Rotation2d(getEncoderCounts());
   }
   
@@ -116,7 +123,7 @@ public class TurretS extends SubsystemBase implements Loggable {
    * @param speed The turn speed of the turret
    */
   public void turnSpeed(double speed) {
-    sparkMax.setVoltage(turretFF.calculate(speed * Constants.TURRET_MAX_SPEED));
+    sparkMax.setVoltage(turretFF.calculate(speed * TURRET_MAX_SPEED));
 
   }
 
@@ -124,7 +131,7 @@ public class TurretS extends SubsystemBase implements Loggable {
    * Turns the turret towards the homing switch at a safe speed.
    */
    public void turnHoming() {
-     turnSpeed(Constants.TURRET_HOMING_SPEED);
+     turnSpeed(TURRET_HOMING_SPEED);
    }
 
   /**
@@ -191,41 +198,45 @@ public class TurretS extends SubsystemBase implements Loggable {
    * @param target The desired angle, relative to the +x axis of the robot coordinate frame.
    */
   public void setTurretAngle(Rotation2d target) {
-    Rotation2d targetZeroRelative = target.rotateBy(Constants.ROBOT_TO_TURRET_ZERO_ROT.unaryMinus());
-    if (targetZeroRelative.getRadians() >= Constants.SOFT_LIMIT_FORWARD_RADIAN) {
-      targetInRange = false;
+    // the given target switches from -pi to pi as it crosses the back of the robot, so we mod by 2pi
+    double targetPosition = Math.IEEEremainder(target.getRadians(), (2 * Math.PI));
+    targetPosition = MathUtil.clamp(targetPosition, SOFT_LIMIT_REVERSE_RADIAN, SOFT_LIMIT_FORWARD_RADIAN);
+    // now the target wraps at 0 or 2pi, giving a nice continuous range over the places the turret can actually be.
+    double currentPosition = Math.IEEEremainder(getEncoderCounts(), (2 * Math.PI));
+
+    if (targetPosition >= SOFT_LIMIT_FORWARD_RADIAN) {
+      targetPosition = SOFT_LIMIT_FORWARD_RADIAN;
     }
-    else if (targetZeroRelative.getRadians() <= Constants.SOFT_LIMIT_REVERSE_RADIAN) {
-      targetInRange = false;
-    } else {
-      targetInRange = true;
+    else if (targetPosition <= SOFT_LIMIT_REVERSE_RADIAN) {
+      targetPosition = SOFT_LIMIT_REVERSE_RADIAN;
     }
-    double pidVelocity = turretPID.calculate(getRotation2d().getRadians(),targetZeroRelative.getRadians()); //radians per sec
+
+    SmartDashboard.putNumber("turretPos", currentPosition);
+    SmartDashboard.putNumber("turretTgt", targetPosition);
+    double pidVelocity = turretPID.calculate(currentPosition, targetPosition); //radians per sec
     double totalVelocity = pidVelocity + omega;
     double acceleration = (totalVelocity - lastTotalVelocity) / 0.02;
     lastTotalVelocity = totalVelocity;
     double voltage =
       turretFF.calculate(totalVelocity, acceleration);
-    if(targetInRange) {
-      sparkMax.setVoltage(voltage);
-    }
-    else{
-      sparkMax.setVoltage(0);
-    }
+    sparkMax.setVoltage(voltage);
   }
 
   public void simulationPeriodic() {
+    double voltage = sparkMax.getAppliedOutput();
+
     if(DriverStation.isEnabled()) {
-      turretSim.setInput(sparkMax.getAppliedOutput() - (Constants.TURRET_FF[0]*Math.signum(sparkMax.getAppliedOutput())));
+        turretSim.setInput(voltage - (TURRET_FF[0]*Math.signum(voltage)));
     }
     else {
       turretSim.setInput(0);
     }
 
     turretSim.update(0.02);
-    turretSimEncoder.setPosition(MathUtil.clamp(turretSim.getOutput().get(0, 0), Constants.SOFT_LIMIT_REVERSE_RADIAN, Constants.SOFT_LIMIT_FORWARD_RADIAN));
+    double newPosition = turretSim.getOutput().get(0, 0);
+    SmartDashboard.putNumber("turretSimPos", newPosition);
+    turretSimEncoder.setPosition(newPosition);
   }
-
   /**
    * gets the position error
    * 

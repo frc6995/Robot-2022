@@ -11,13 +11,15 @@ import edu.wpi.first.wpilibj.I2C;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import io.github.oblarg.oblog.Loggable;
+import io.github.oblarg.oblog.annotations.Log;
 
 /**
  * Takes balls from the intake and holds it and sends it to the shooter.
  * 
  * @authors Jonas An and Ben Su
  */
-public class MidtakeS extends SubsystemBase {
+public class MidtakeS extends SubsystemBase implements Loggable{
   /** Creates a new IntakeS. */
   private CANSparkMax frontSparkMax = new CANSparkMax(Constants.CAN_ID_MIDTAKE_FRONT,
       MotorType.kBrushless);
@@ -73,16 +75,18 @@ public class MidtakeS extends SubsystemBase {
    * Returns whether the top Beam Break sensor is triggered
    *
    */
+  @Log
   public boolean getIsTopBeamBroken() {
-    return beamBreakTop.get();
+    return !beamBreakTop.get();
   }
 
   /**
    * Returns whether the bottom Beam Break sensor is triggered
    * 
    */
+  @Log
   public boolean getIsBottomBeamBroken() {
-    return beamBreakBottom.get();
+    return !beamBreakBottom.get();
   }
 
   /**

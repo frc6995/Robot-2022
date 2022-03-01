@@ -26,7 +26,7 @@ public class TurretCommandFactory {
             interrupted -> {
                 turretS.stopMotor();
                 if(!interrupted) {
-                    turretS.resetEncoder(Constants.SOFT_LIMIT_REVERSE_RADIAN);
+                    turretS.resetEncoder(Math.PI - Constants.SOFT_LIMIT_REVERSE_RADIAN);
                 }
             }, turretS::getIsHomed, turretS
         )
@@ -58,7 +58,7 @@ public class TurretCommandFactory {
 
     /**
      * Creates a TurretFollowC, which uses PID to point the turret to the given
-     * angle, where the homing switch is 0.
+     * angle, where the robot front is 0;
      * 
      * @param angle   a DoubleSupplier for the desired angle
      * @param turretS the turret subsystem
