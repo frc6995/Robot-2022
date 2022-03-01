@@ -99,7 +99,7 @@ public class ShooterS extends SubsystemBase implements Loggable {
    */
   @Log
   public double getFrontEncoderSpeed() {
-    return frontEncoderVelocityRPM;
+    return frontEncoder.getVelocity();
 
   }
 
@@ -110,7 +110,7 @@ public class ShooterS extends SubsystemBase implements Loggable {
    */
   @Log
   public double getBackEncoderSpeed() {
-    return backEncoderVelocityRPM;
+    return backEncoder.getVelocity();
   }
 
   /**
@@ -141,8 +141,8 @@ public class ShooterS extends SubsystemBase implements Loggable {
   public void pidFrontSpeed(double frontTargetRPM) {
     SmartDashboard.putNumber("frontTargetRPM", frontTargetRPM);
     frontSparkMax.setVoltage(
-        frontPID.calculate(getFrontEncoderSpeed() / 60.0, frontTargetRPM / 60.0)
-            + frontFF.calculate(frontTargetRPM / 60.0));
+        /*frontPID.calculate(getFrontEncoderSpeed() / 60.0, frontTargetRPM / 60.0)
+            + */frontFF.calculate(frontTargetRPM / 60.0));
 
   }
 
@@ -154,7 +154,7 @@ public class ShooterS extends SubsystemBase implements Loggable {
   public void pidBackSpeed(double backTargetRPM) {
     SmartDashboard.putNumber("backTargetRPM", backTargetRPM);
     backSparkMax.setVoltage(
-        backPID.calculate(getBackEncoderSpeed() / 60.0, backTargetRPM / 60.0) + backFF.calculate(backTargetRPM / 60.0));
+        /*backPID.calculate(getBackEncoderSpeed() / 60.0, backTargetRPM / 60.0) + */backFF.calculate(backTargetRPM / 60.0));
   }
 
   /**
@@ -217,20 +217,6 @@ public class ShooterS extends SubsystemBase implements Loggable {
 
   @Override
   public void periodic() {
-    double frontEncoderPosition = 0;
-    double backEncoderPosition = 0;
-    if(Robot.isReal()) {
-      frontEncoderPosition = frontEncoder.getPosition();
-      backEncoderPosition = backEncoder.getPosition();
-      frontEncoderVelocityRPM = frontEncoder.getVelocity();
-      backEncoderVelocityRPM = backEncoder.getVelocity();
-      // frontEncoderVelocityRPM = (frontEncoderPosition - lastFrontEncoderPosition) * 60.0 /*seconds/minute*/ / 0.02 /*seconds dt*/;
-      // backEncoderVelocityRPM = (backEncoderPosition - lastBackEncoderPosition) * 60.0 /*seconds/minute*/ / 0.02 /*seconds dt*/;
-      lastFrontEncoderPosition = frontEncoderPosition;
-      lastBackEncoderPosition = backEncoderPosition;
-    }
-    else {
-    }
   }
 
   @Override

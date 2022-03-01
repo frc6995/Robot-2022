@@ -31,8 +31,8 @@ public class MainCommandFactory {
             MidtakeCommandFactory.getLoadMidtake(midtakeS)
             // Also spin the intake while the midtake is going
             .raceWith(
-                IntakeCommandFactory.getIntakeSpin(intakeS)
-            .andThen(MidtakeCommandFactory.getStopMidtake(midtakeS)),
+                IntakeCommandFactory.getIntakeSpin(intakeS))
+            .andThen(MidtakeCommandFactory.getStopMidtake(midtakeS),
 
         IntakeCommandFactory.getIntakeStop(intakeS),
         IntakeCommandFactory.getIntakeRetract(intakeS)

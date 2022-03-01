@@ -144,13 +144,13 @@ public final class Constants {
     public static final double[] SHOOTER_FRONT_FF = { 0.16382, 0.12618, 0.0038694 };
 
     /** Proportional term for front shooter wheel */
-    public static final double SHOOTER_FRONT_P = 0.13714;
+    public static final double SHOOTER_FRONT_P = 0; // 0.13714
 
     /** Shooter back wheel feed forward */
     public static final double[] SHOOTER_BACK_FF = { 0.29066, 0.12829, 0.0050724 };
 
     /** Proportional term for back shooter wheel */
-    public static final double SHOOTER_BACK_P = 0.19475;
+    public static final double SHOOTER_BACK_P = 0; //0.19475
 
     /** Allowable error to still be on target */
     public static final double SHOOTER_PID_ERROR = 0.5;
@@ -198,15 +198,15 @@ public final class Constants {
     public static final double TURRET_D = 1.0032;
 
     /** The maximum manual-drive angular velocity of the turret in radians per second */
-    public static final double TURRET_MAX_SPEED = 3 * Math.PI;
+    public static final double TURRET_MAX_SPEED = 1;
 
     // Midtake Constants
 
     /** Can ids for the front midtake motor */
-    public static final int CAN_ID_MIDTAKE_FRONT = 22;
+    public static final int CAN_ID_MIDTAKE_FRONT = 23;
 
     /** Can id for the back midtake motor */
-    public static final int CAN_ID_MIDTAKE_BACK = 23;
+    public static final int CAN_ID_MIDTAKE_BACK = 22;
 
     /** Port number for the top beam break sensor */
     public static final int BEAM_BREAK_TOP_PORT_NUMBER = 0;
@@ -218,10 +218,10 @@ public final class Constants {
     public static final double COLOR_SENSOR_PROXIMITY_THRESHOLD = 250;
 
     /** Midtake front motor speed */
-    public static final double MIDTAKE_FRONT_MOTOR_SPEED = 0.6995;
+    public static final double MIDTAKE_FRONT_MOTOR_SPEED = 0.3;
 
     /** Midtake back motor speed */
-    public static final double MIDTAKE_BACK_MOTOR_SPEED = 0.6995;
+    public static final double MIDTAKE_BACK_MOTOR_SPEED = 0.3;
 
     // Limelight Constants
     /** Degrees spanned by the diagonal of the camera's field of view */
@@ -251,10 +251,10 @@ public final class Constants {
     public static final int CAN_ID_INTAKE_FOLLOWER_MOTOR = 21;
 
     /** Port number for each electromagnet that extends */
-    public static final int DOUBLE_SOLENOID_INTAKE_PORT_EXTEND = 3;
+    public static final int DOUBLE_SOLENOID_INTAKE_PORT_EXTEND = 1;
 
     /** Port number for electromagnet that retracts */
-    public static final int DOUBLE_SOLENOID_INTAKE_PORT_RETRACT = 2;
+    public static final int DOUBLE_SOLENOID_INTAKE_PORT_RETRACT = 0;
 
     /** Speed at which the intake motor moves */
     public static final double INTAKE_SPEED = 0.25;
@@ -317,11 +317,11 @@ public final class Constants {
     /**
      * The port number of the double solenoid when it folds the climber up
      */
-    public static final int DOUBLE_SOLENOID_CLIMBER_UP = 0;
+    public static final int DOUBLE_SOLENOID_CLIMBER_UP = 2;
     /**
      * The port number of the double solenoid when it folds the climber down
      */
-    public static final int DOUBLE_SOLENOID_CLIMBER_DOWN = 1;
+    public static final int DOUBLE_SOLENOID_CLIMBER_DOWN = 3;
     /**
      * The CAN ID of the back climb motor
      */

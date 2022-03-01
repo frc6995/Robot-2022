@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj2.command.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.IntakeCommandFactory;
+import frc.robot.commands.MainCommandFactory;
 import frc.robot.commands.MidtakeCommandFactory;
 import frc.robot.commands.ShooterTestC;
 import frc.robot.commands.auto.AutoCommandFactory;
@@ -151,7 +152,7 @@ public class RobotContainer {
       },
       turretS);
     turretManualC = TurretCommandFactory.createTurretManualC(driverController::getRightX, turretS);
-    turretS.setDefaultCommand(turretAimC);
+    //turretS.setDefaultCommand(turretAimC);
     
     shooterSpinC = ShooterCommandFactory.createShooterFollowC(
       ()->{
@@ -197,9 +198,10 @@ public class RobotContainer {
 
     // shootBallTrigger.whenActive(runMidtake);
     driverController.b().whileActiveOnce(runMidtakeC);
-    driverController.x().whileActiveOnce(shooterTestC);
-    driverController.y().toggleWhenActive(turretManualC);
-    driverController.a().whileActiveOnce(runIntakeC);
+    driverController.a().whileActiveOnce(shooterTestC);
+    //driverController.y().toggleWhenActive(turretManualC);
+    //driverController.a().whileActiveOnce(runIntakeC);
+    driverController.start().whileActiveOnce(MainCommandFactory.createIntakeIndexCG(intakeS, midtakeS));
     
     operatorController.a().whileActiveOnce(climberForwardC);
     operatorController.b().whileActiveOnce(climberBackC);

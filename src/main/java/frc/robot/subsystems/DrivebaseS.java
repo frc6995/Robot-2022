@@ -44,7 +44,7 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
   private final PIDController rightPID = new PIDController(DRIVEBASE_P, 0, 0);
   private final AHRS navX = new AHRS(Port.kMXP);
   public final RamseteController ramseteController = new RamseteController();
-  public final Pose2d START_POSE = new Pose2d (HUB_CENTER_POSE.getX() - 4, HUB_CENTER_POSE.getY(), Rotation2d.fromDegrees(180));
+  public final Pose2d START_POSE = new Pose2d (HUB_CENTER_POSE.getX() - 2, HUB_CENTER_POSE.getY(), Rotation2d.fromDegrees(180));
 
   //Sim stuff
   private DifferentialDrivetrainSim m_driveSim;

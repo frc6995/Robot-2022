@@ -10,6 +10,7 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.numbers.N1;
@@ -21,6 +22,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.simulation.LinearSystemSim;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import static frc.robot.Constants.*;
@@ -40,6 +42,7 @@ import io.github.oblarg.oblog.annotations.Log;
  * @author Noah Kim
  */
 public class TurretS extends SubsystemBase implements Loggable {
+  @Log(methodName = "getAppliedOutput")
   private CANSparkMax sparkMax = new CANSparkMax(CAN_ID_TURRET, MotorType.kBrushless);
   private RelativeEncoder sparkMaxEncoder = sparkMax.getEncoder();
   private DigitalInput limitSwitch = new DigitalInput(TURRET_LIMIT_SWITCH_PORT);
@@ -51,6 +54,7 @@ public class TurretS extends SubsystemBase implements Loggable {
   private double lastTotalVelocity = 0;
 
   private SimEncoder turretSimEncoder = new SimEncoder();
+  private SlewRateLimiter voltageLimiter = new SlewRateLimiter(0.1);
   // Open-loop drive in turret radians per second
   private SimpleMotorFeedforward turretFF = new SimpleMotorFeedforward(
 
@@ -74,6 +78,7 @@ public class TurretS extends SubsystemBase implements Loggable {
     turretPID.setTolerance(TURRET_PID_ERROR, 0);
     sparkMax.setSmartCurrentLimit(20, 20, 0);
     turretPID.setIntegratorRange(0, 0);
+    SmartDashboard.putBoolean("requestTurrReset", false);
 
     if(RobotBase.isReal()) {
       sparkMaxEncoder.setPosition(Math.PI);
@@ -145,7 +150,7 @@ public class TurretS extends SubsystemBase implements Loggable {
    * Resets encoder count.
    */
   public void resetEncoder() {
-    resetEncoder(0);
+    resetEncoder(Math.PI);
   }
 
     /**
@@ -199,17 +204,15 @@ public class TurretS extends SubsystemBase implements Loggable {
    */
   public void setTurretAngle(Rotation2d target) {
     // the given target switches from -pi to pi as it crosses the back of the robot, so we mod by 2pi
-    double targetPosition = Math.IEEEremainder(target.getRadians(), (2 * Math.PI));
+    double targetPosition = target.getRadians();
+    if(targetPosition < 0) {
+      targetPosition = 2*Math.PI + targetPosition;
+    }
+
+    SmartDashboard.putNumber("targetUnadj", targetPosition);
     targetPosition = MathUtil.clamp(targetPosition, SOFT_LIMIT_REVERSE_RADIAN, SOFT_LIMIT_FORWARD_RADIAN);
     // now the target wraps at 0 or 2pi, giving a nice continuous range over the places the turret can actually be.
-    double currentPosition = Math.IEEEremainder(getEncoderCounts(), (2 * Math.PI));
-
-    if (targetPosition >= SOFT_LIMIT_FORWARD_RADIAN) {
-      targetPosition = SOFT_LIMIT_FORWARD_RADIAN;
-    }
-    else if (targetPosition <= SOFT_LIMIT_REVERSE_RADIAN) {
-      targetPosition = SOFT_LIMIT_REVERSE_RADIAN;
-    }
+    double currentPosition = getEncoderCounts();//Math.IEEEremainder(getEncoderCounts(), (2 * Math.PI));
 
     SmartDashboard.putNumber("turretPos", currentPosition);
     SmartDashboard.putNumber("turretTgt", targetPosition);
@@ -218,8 +221,10 @@ public class TurretS extends SubsystemBase implements Loggable {
     double acceleration = (totalVelocity - lastTotalVelocity) / 0.02;
     lastTotalVelocity = totalVelocity;
     double voltage =
-      turretFF.calculate(totalVelocity, acceleration);
-    sparkMax.setVoltage(voltage);
+    MathUtil.clamp(
+      turretFF.calculate(totalVelocity, acceleration), -1.5, 1.5);
+    
+    sparkMax.setVoltage(voltageLimiter.calculate(voltage));
   }
 
   public void simulationPeriodic() {
@@ -259,6 +264,10 @@ public class TurretS extends SubsystemBase implements Loggable {
 
   @Override
   public void periodic() {
+    if(SmartDashboard.getBoolean("requestTurrReset", false)){
+      resetEncoder(Math.PI);
+      SmartDashboard.putBoolean("requestTurrReset", false);
+    }
   }
 
 }

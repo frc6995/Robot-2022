@@ -102,7 +102,7 @@ public class NavigationManager implements Loggable{
     }
 
     public Transform2d getTOFAdjustedRobotToHubTransform() {
-        return getRobotToHubTransform().plus(timeOfFlightAdjuster.getHubTOFAdjustment()); // TODO implement adjustment
+        return getRobotToHubTransform()/*.plus(timeOfFlightAdjuster.getHubTOFAdjustment())*/; // TODO implement adjustment
     }
 
     public Transform2d getLastTOFAdjustedRobotToHubTransform() {
