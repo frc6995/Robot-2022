@@ -1,24 +1,33 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
 package frc.robot;
 
+import java.util.List;
+
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.RunCommand;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
-import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.commands.ShooterC;
+import frc.robot.commands.MainCommandFactory;
+import frc.robot.commands.ShooterTestC;
+import frc.robot.commands.auto.AutoCommandFactory;
+import frc.robot.commands.drivebase.DrivebaseCommandFactory;
+import frc.robot.commands.shooter.ShooterCommandFactory;
+import frc.robot.commands.turret.TurretCommandFactory;
 import frc.robot.subsystems.DrivebaseS;
+import frc.robot.subsystems.IntakeS;
+import frc.robot.subsystems.LimelightS;
+import frc.robot.subsystems.MidtakeS;
 import frc.robot.subsystems.ShooterS;
 import frc.robot.subsystems.TurretS;
-import frc.robot.commands.turret.TurretCommandFactory;
-
+import frc.robot.util.OdometryManager;
+import io.github.oblarg.oblog.annotations.Config;
+import io.github.oblarg.oblog.annotations.Log;
 
 /**
  * This class is where the bulk of the robot should be declared. Since
@@ -30,30 +39,41 @@ import frc.robot.commands.turret.TurretCommandFactory;
  * subsystems, commands, and button mappings) should be declared here.
  */
 public class RobotContainer {
-  // The robot's subsystems and commands are defined here...
-  /**
-   * The container for the robot. Contains subsystems, OI devices, and commands.
-   */
-  private XboxController driverController;
-  private Command xboxDriveCommand;
-  private Command xboxShooterCommand;
+
+  private CommandXboxController driverController;
+
+  @Log
+  public Field2d field = new Field2d();
+  // Subsystems
   private DrivebaseS drivebaseS;
+  private IntakeS intakeS;
+  private MidtakeS midtakeS;
   private ShooterS shooterS;
   private TurretS turretS;
+  @SuppressWarnings("unused")
+  private LimelightS limelightS;
 
-  
+  // Command
+  private Command xboxDriveCommand;
   private Command runTurretC;
   private Command turretHomingC;
   private Command turretTurningC;
+  private Command turretAimC;
+  private Command shooterSpinC;
+  @Log
+  @Config
+  private Command shooterTestC;
 
+  private Trigger targetDistanceInRangeTrigger;
+  private Trigger shooterReadyTrigger;
+  private Trigger turretReadyTrigger;
+  private Trigger ballReadyTrigger;
 
-  // Trigger definitions
-  private Trigger spinTurretTrigger;
-  private Trigger turretHomeTrigger;
-  private Trigger turretTurnTrigger;
+  private Trigger shootBallTrigger;
+
+  private OdometryManager odometryManager;
 
   public RobotContainer() {
-    // Configure the button bindings
     createControllers();
     createSubsystems();
     createCommands();
@@ -69,46 +89,96 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
+    Command runIntake = new FunctionalCommand(
+        () -> {
+          intakeS.deploy();
+        },
+        () -> {
+          intakeS.spin();
+        },
+        (interrupted) -> {
+          intakeS.stop();
+          intakeS.retract();
+        },
+        () -> false, intakeS);
 
-    new Trigger(driverController::getAButton).whileActiveOnce(xboxShooterCommand);
-    spinTurretTrigger = new Trigger(driverController::getBButton);
-    spinTurretTrigger.whileActiveOnce(runTurretC);
-    turretHomeTrigger = new Trigger(driverController::getXButton);
-    turretHomeTrigger.whenActive(turretHomingC);
-    turretTurnTrigger = new Trigger(driverController::getYButton);
-    turretTurnTrigger.whenActive(turretTurningC);
+    Command runMidtake = new FunctionalCommand(
+        () -> {
+        },
+        () -> {
+          midtakeS.spin(0.75);
+        },
+        (interrupted) -> {
+          midtakeS.stop();
+        },
+        () -> false, midtakeS);
+
+    targetDistanceInRangeTrigger = new Trigger(odometryManager::getDistanceInRange);
+    turretReadyTrigger = new Trigger(turretS::isAtTarget);
+    shooterReadyTrigger = new Trigger(shooterS::isAtTarget);
+    ballReadyTrigger = new Trigger(midtakeS::getIsTopBeamBroken); // TODO fix this logic
+
+    //targetDistanceInRangeTrigger.whileActiveContinuous(shooterSpinC);
+
+    shootBallTrigger = targetDistanceInRangeTrigger.and(turretReadyTrigger).and(shooterReadyTrigger).and(ballReadyTrigger);
+
+    shootBallTrigger.whenActive(runMidtake);
+    driverController.b().whileActiveOnce(runMidtake);
+    driverController.x().whileActiveOnce(shooterTestC);
+    //driverController.y().whenActive(turretTurningC);
+    driverController.y().whileActiveOnce(MainCommandFactory.createIntakeIndexCG(intakeS, midtakeS));
+    driverController.a().whileActiveOnce(runIntake);
   }
 
+  /**
+   * Instantiate the driver and operator controllers
+   */
   private void createControllers() {
-    driverController = new XboxController(Constants.USB_PORT_DRIVER_CONTROLLER);
+    driverController = new CommandXboxController(Constants.USB_PORT_DRIVER_CONTROLLER);
   }
 
+  /**
+   * Instantiate the commands
+   */
   private void createCommands() {
-    xboxDriveCommand = new RunCommand(
-      ()
-     -> {drivebaseS.curvatureDrive(
-       driverController.getRightTriggerAxis() - driverController.getLeftTriggerAxis(), 
-       driverController.getLeftX()
-       );
-      }
-    , drivebaseS);
+    xboxDriveCommand = DrivebaseCommandFactory.createCurvatureDriveC(
+        () -> {
+          return driverController.getRightTriggerAxis() - driverController.getLeftTriggerAxis();
+        },
+        driverController::getLeftX,
+        drivebaseS);
     drivebaseS.setDefaultCommand(xboxDriveCommand);
 
     runTurretC = TurretCommandFactory.createTurretManualC(
       driverController::getRightX, turretS);
 
-    turretS.setDefaultCommand(runTurretC);
-    
+    turretAimC = TurretCommandFactory.createTurretFollowC(odometryManager::getRotationOffset, turretS);
     turretHomingC = TurretCommandFactory.createTurretHomingC(turretS);
-
-    turretTurningC = TurretCommandFactory.createTurretTurnC(40, turretS);
+    turretS.setDefaultCommand(turretAimC);
     
+    shooterSpinC = ShooterCommandFactory.createShooterFollowC(
+          ()->{return ShooterS.getSpeedForDistance(odometryManager.getDistanceToCenter(), false);},
+          ()->{return ShooterS.getSpeedForDistance(odometryManager.getDistanceToCenter(), true);},
+          shooterS);
+    turretTurningC = TurretCommandFactory.createTurretTurnC(40, turretS);
+    shooterTestC = new ShooterTestC(shooterS);
+    //shooterS.setDefaultCommand(ShooterCommandFactory.createShooterIdleC(shooterS));
     SmartDashboard.putData(new InstantCommand(turretS::resetEncoder));
   }
 
+  /**
+   * Instantiate the subsystems
+   */
   private void createSubsystems() {
     drivebaseS = new DrivebaseS();
+
+    intakeS = new IntakeS();
+    midtakeS = new MidtakeS();
     turretS = new TurretS();
+    shooterS = new ShooterS();
+    odometryManager = new OdometryManager(drivebaseS::getRobotPose, turretS::getRotation2d, turretS::setTransformVelocity);
+    limelightS = new LimelightS(odometryManager,
+    (List<Pose2d> list)->{field.getObject("targetRing").setPoses(list);});
   }
 
   /**
@@ -118,6 +188,40 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     // An ExampleCommand will run in autonomous
-    return new WaitCommand(0);
+    return AutoCommandFactory.createTwoBallAutoCG(
+        3800,
+        1900,
+        0,
+        shooterS,
+        intakeS,
+        midtakeS,
+        turretS,
+        drivebaseS);
+  }
+
+  public void robotPeriodic() {
+
+
+    /*Field2d setup */
+    field.setRobotPose(drivebaseS.getRobotPose());
+    odometryManager.periodic();
+
+    field.getObject("target").setPose(new Pose2d(
+      odometryManager.getCurrentRobotPose().getTranslation().plus(
+        odometryManager.getRobotToHub().getTranslation().rotateBy(
+          odometryManager.getCurrentRobotPose().getRotation())),
+    Rotation2d.fromDegrees(0)));
+
+//     field.getObject("cameraTarget").setPose(
+//       odometryManager.getCurrentRobotPose().transformBy(
+//         odometryManager.getRobotToCamera()).transformBy(
+//           odometryManager.getCameraToHub()));
+    field.getObject("Turret").setPose(odometryManager.getCurrentRobotPose().transformBy(
+        odometryManager.getRobotToTurret()
+      )
+    );
+
+    field.getObject("camera").setPose(odometryManager.getCurrentRobotPose().transformBy(odometryManager.getRobotToCamera()));
+    
   }
 }

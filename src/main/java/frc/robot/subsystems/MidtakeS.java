@@ -1,20 +1,18 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
 package frc.robot.subsystems;
 
 import com.revrobotics.CANSparkMax;
-import com.revrobotics.ColorSensorV3;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+import com.revrobotics.ColorSensorV3;
 
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.I2C;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.I2C;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+
 /**
  * Takes balls from the intake and holds it and sends it to the shooter.
  * 
@@ -30,9 +28,12 @@ public class MidtakeS extends SubsystemBase {
   private DigitalInput beamBreakBottom = new DigitalInput(Constants.BEAM_BREAK_BOTTOM_PORT_NUMBER);
   private final ColorSensorV3 colorSensor = new ColorSensorV3(I2C.Port.kOnboard);
 
-
+  /**
+   * Create a new MidtakeS
+   */
   public MidtakeS() {
     frontSparkMax.restoreFactoryDefaults();
+    frontSparkMax.setInverted(true);
     backSparkMax.restoreFactoryDefaults();
   }
 
@@ -41,7 +42,7 @@ public class MidtakeS extends SubsystemBase {
    * 
    * @param frontSpeed the front speed
    */
-  public void setFrontSparkMaxSpeed(double frontSpeed) {
+  public void setFrontSpeed(double frontSpeed) {
     frontSparkMax.set(frontSpeed);
   }
 
@@ -50,7 +51,7 @@ public class MidtakeS extends SubsystemBase {
    * 
    * @param backSpeed the back speed
    */
-  public void setBackSparkMaxSpeed(double backSpeed) {
+  public void setBackSpeed(double backSpeed) {
     backSparkMax.set(backSpeed);
   }
 
@@ -58,8 +59,15 @@ public class MidtakeS extends SubsystemBase {
    * Spins both midtake motors at set speed.
    */
   public void spin() {
-    setFrontSparkMaxSpeed(Constants.MIDTAKE_FRONT_MOTOR_SPEED);
-    setBackSparkMaxSpeed(Constants.MIDTAKE_BACK_MOTOR_SPEED);
+    spin(Constants.MIDTAKE_FRONT_MOTOR_SPEED);
+  }
+
+  /**
+   * Spins both midtake motors at set speed.
+   */
+  public void spin(double speed) {
+    setFrontSpeed(speed);
+    setBackSpeed(speed);
   }
 
   /**
@@ -67,7 +75,7 @@ public class MidtakeS extends SubsystemBase {
    *
    */
   public boolean getIsTopBeamBroken() {
-    return beamBreakTop.get();
+    return !beamBreakTop.get();
   }
 
   /**
@@ -75,7 +83,7 @@ public class MidtakeS extends SubsystemBase {
    * 
    */
   public boolean getIsBottomBeamBroken() {
-    return beamBreakBottom.get();
+    return !beamBreakBottom.get();
   }
 
   /**
@@ -97,8 +105,18 @@ public class MidtakeS extends SubsystemBase {
     return colorSensor.getProximity() > Constants.COLOR_SENSOR_PROXIMITY_THRESHOLD;
   }
 
+  /**
+   * Stops the midtake.
+   */
+
+  public void stop() {
+    spin(0);
+  }
+
   @Override
   public void periodic() {
+    SmartDashboard.putBoolean("top beambreak", getIsTopBeamBroken());
+    SmartDashboard.putBoolean("bottom beambreak", getIsBottomBeamBroken());
     // This method will be called once per scheduler run
   }
 }

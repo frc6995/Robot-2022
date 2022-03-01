@@ -1,40 +1,39 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
 package frc.robot.commands;
 
-import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.ShooterS;
+import io.github.oblarg.oblog.Loggable;
+import io.github.oblarg.oblog.annotations.Config;
 
-public class ShooterC extends CommandBase {
+public class ShooterTestC extends CommandBase implements Loggable {
   /** Creates a new ShooterC. */
   private ShooterS shooter;
+  @Config
   private double frontTargetRPM;
+  @Config
   private double backTargetRPM;
-  
-  public ShooterC(ShooterS shooter, double frontTargetRPM, double backTargetRPM) {
+
+  public ShooterTestC(ShooterS shooter) {
     this.shooter = shooter;
-    SmartDashboard.putNumber("shooterFrontSpeed", frontTargetRPM);
-    SmartDashboard.putNumber("shooterBackSpeed", backTargetRPM);
     this.addRequirements(this.shooter);
+    SmartDashboard.putNumber("frontRPM", frontTargetRPM);
+    SmartDashboard.putNumber("backRPM", backTargetRPM);
     // Use addRequirements() here to declare subsystem dependencies.
+
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    frontTargetRPM = SmartDashboard.getNumber("shooterFrontSpeed", 0);
-    backTargetRPM = SmartDashboard.getNumber("shooterBackSpeed", 0);
+
+    frontTargetRPM = SmartDashboard.getNumber("frontRPM", 100);
+    backTargetRPM = SmartDashboard.getNumber("backRPM", 100);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    //this.shooter.setFrontSpeed(this.xboxController.getRightY()); 
-    //this.shooter.setBackSpeed(this.xboxController.getRightY());
     shooter.pidFrontSpeed(frontTargetRPM);
     shooter.pidBackSpeed(backTargetRPM);
   }
@@ -49,6 +48,6 @@ public class ShooterC extends CommandBase {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return shooter.frontAtTarget() && shooter.backAtTarget();
+    return false;
   }
 }
