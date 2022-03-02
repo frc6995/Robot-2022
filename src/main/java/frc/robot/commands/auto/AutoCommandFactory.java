@@ -8,6 +8,7 @@ import frc.robot.commands.drivebase.DrivebaseCommandFactory;
 import frc.robot.commands.turret.TurretCommandFactory;
 import frc.robot.subsystems.DrivebaseS;
 import frc.robot.subsystems.IntakeS;
+import frc.robot.subsystems.LimelightS;
 import frc.robot.subsystems.MidtakeS;
 import frc.robot.subsystems.ShooterS;
 import frc.robot.subsystems.TurretS;
@@ -33,18 +34,11 @@ public class AutoCommandFactory {
      * @param drivebaseS       the drivebase subsystem
      * @return the two ball auto command group
      */
-    public static Command createTwoBallAutoCG(double targetFrontSpeed, double targetBackSpeed, double targetAngle,
-            ShooterS shooterS, IntakeS intakeS, MidtakeS midtakeS, TurretS turretS, DrivebaseS drivebaseS) {
+    public static Command createTwoBallAutoCG(
+            ShooterS shooterS, IntakeS intakeS, MidtakeS midtakeS, TurretS turretS, LimelightS limelightS, DrivebaseS drivebaseS) {
                 return new ParallelCommandGroup(
                     // Spins up the front and back shooter motors to the set target speeds
-                    new InstantCommand(
-                        () -> {
-                            shooterS.pidFrontSpeed(targetFrontSpeed);
-                            shooterS.pidBackSpeed(targetBackSpeed);
-                        },
-                        shooterS)
-                                .andThen(
-                                        new WaitUntilCommand(shooterS::isAtTarget)),
+                    MainCommandFactory.createVisionSpinupAndAimC(limelightS, turretS, shooterS),
                 // Homes the turret
                 TurretCommandFactory.createTurretHomingC(turretS)
                         .andThen(
@@ -57,14 +51,14 @@ public class AutoCommandFactory {
                 // Drives at 25% speed for 7 seconds or until the color sensor detects a ball
                 // present
                 DrivebaseCommandFactory.createTimedDriveC(.25, 7, drivebaseS)
-                        .withInterrupt(midtakeS::getColorSensorDetectsBall),
+                        .withInterrupt(midtakeS.cargoEnteredTrigger),
                 // Intakes one ball, stores or rejects based on whether the color is correct
                 MainCommandFactory.createIntakeIndexCG(intakeS, midtakeS)
                         // Retracts intake
                         .andThen(intakeS::retract, intakeS))
                                 // Spins the midtake to feed the shooter
                                 .andThen(
-                                        new RunCommand(midtakeS::spin, midtakeS)
+                                        new RunCommand(midtakeS::load, midtakeS)
                                                 .withTimeout(10))
                                 .andThen(new InstantCommand(
                                         () -> {

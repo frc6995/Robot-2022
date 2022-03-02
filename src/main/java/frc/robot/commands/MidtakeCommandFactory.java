@@ -8,7 +8,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
-import edu.wpi.first.wpilibj2.command.Subsystem;
 import frc.robot.subsystems.MidtakeS;
 
 /** Contains command methods for the midtake */
@@ -19,13 +18,11 @@ public class MidtakeCommandFactory {
      * @param midtakeS
      * @return midtake run command
      */
-    public static Command getMidtakeRunCommand(MidtakeS midtakeS) {
+    public static Command createMidtakeRunC(MidtakeS midtakeS) {
         Command runMidtake = new FunctionalCommand(
                 () -> {
                 },
-                () -> {
-                    midtakeS.spin(0.75);
-                },
+                midtakeS::load,
                 (interrupted) -> {
                     midtakeS.stop();
                 },
@@ -39,10 +36,19 @@ public class MidtakeCommandFactory {
      * @param midtakeS
      * @return load midtake
      */
-    public static Command getLoadMidtake(MidtakeS midtakeS){
-        return new RunCommand(midtakeS::spin, midtakeS)
+    public static Command createMidtakeLoadC(MidtakeS midtakeS){
+        return new RunCommand(midtakeS::load, midtakeS);
+    }
+
+    public static Command createMidtakeIndexCG(MidtakeS midtakeS) {
+        return createMidtakeLoadC(midtakeS)
         .withInterrupt(() -> !midtakeS.getIsBottomBeamBroken())
-        .withInterrupt(midtakeS::getIsTopBeamBroken);
+        .withInterrupt(midtakeS::getIsTopBeamBroken)
+        .andThen(createMidtakeStopC(midtakeS));
+    }
+
+    public static Command createMidtakeFeedOneC(MidtakeS midtakeS) {
+        return createMidtakeFeedC(midtakeS).withInterrupt(midtakeS.cargoLeftTrigger);
     }
 
     /**
@@ -51,7 +57,11 @@ public class MidtakeCommandFactory {
      * @param midtakeS
      * @return stop midtake
      */
-    public static Command getStopMidtake(MidtakeS midtakeS){
+    public static Command createMidtakeStopC(MidtakeS midtakeS){
         return new InstantCommand(midtakeS::stop, midtakeS);
+    }
+
+    public static Command createMidtakeFeedC(MidtakeS midtakeS) {
+        return new RunCommand(midtakeS::feed, midtakeS);
     }
 }

@@ -144,16 +144,16 @@ public final class Constants {
     public static final double[] SHOOTER_FRONT_FF = { 0.16382, 0.12618, 0.0038694 };
 
     /** Proportional term for front shooter wheel */
-    public static final double SHOOTER_FRONT_P = 0; // 0.13714
+    public static final double SHOOTER_FRONT_P = 0.13714;
 
     /** Shooter back wheel feed forward */
     public static final double[] SHOOTER_BACK_FF = { 0.29066, 0.12829, 0.0050724 };
 
     /** Proportional term for back shooter wheel */
-    public static final double SHOOTER_BACK_P = 0; //0.19475
+    public static final double SHOOTER_BACK_P = 0.19475;
 
     /** Allowable error to still be on target */
-    public static final double SHOOTER_PID_ERROR = 0.5;
+    public static final double SHOOTER_PID_ERROR = 100; //rpm
 
     // Turret Constants
 
@@ -218,12 +218,19 @@ public final class Constants {
     public static final double COLOR_SENSOR_PROXIMITY_THRESHOLD = 250;
 
     /** Midtake front motor speed */
-    public static final double MIDTAKE_FRONT_MOTOR_SPEED = 0.3;
+    public static final double MIDTAKE_LOADING_SPEED = 0.3;
 
     /** Midtake back motor speed */
-    public static final double MIDTAKE_BACK_MOTOR_SPEED = 0.3;
+    public static final double MIDTAKE_FEEDING_SPEED = 0.6995;
 
     // Limelight Constants
+
+    /** How long to run filter */
+    public static final double LIMELIGHT_FILTER_TIME_CONSTANT = 0.1;
+
+    /** Time between each filter measurement */
+    public static final double LIMELIGHT_FILTER_PERIOD_CONSTANT = 0.02;
+    
     /** Degrees spanned by the diagonal of the camera's field of view */
     public static final double CAMERA_DIAG_FOV_DEGREES = 67.8;
 
@@ -301,7 +308,7 @@ public final class Constants {
     /**
      * The CAN ID of the climber motor
      */
-    public static final int CAN_ID_CLIMBER_MOTOR = 0;
+    public static final int CAN_ID_CLIMBER_MOTOR = 50;
     /**
      * The PID error of the climber
      */
@@ -325,7 +332,7 @@ public final class Constants {
     /**
      * The CAN ID of the back climb motor
      */
-    public static final int CAN_ID_BACK_CLIMB_MOTOR = 1;
+    public static final int CAN_ID_BACK_CLIMB_MOTOR = 51;
     /**
      * The proportional constant for the back climber
      */

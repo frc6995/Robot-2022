@@ -1,34 +1,37 @@
 package frc.robot.subsystems;
 
+import static frc.robot.Constants.CAN_ID_TURRET;
+import static frc.robot.Constants.NEO_REVOLUTIONS_PER_TURRET_REVOLUTION;
+import static frc.robot.Constants.SOFT_LIMIT_FORWARD_RADIAN;
+import static frc.robot.Constants.SOFT_LIMIT_REVERSE_RADIAN;
+import static frc.robot.Constants.TURRET_D;
+import static frc.robot.Constants.TURRET_DEADBAND;
+import static frc.robot.Constants.TURRET_FF;
+import static frc.robot.Constants.TURRET_HOMING_SPEED;
+import static frc.robot.Constants.TURRET_LIMIT_SWITCH_PORT;
+import static frc.robot.Constants.TURRET_MAX_SPEED;
+import static frc.robot.Constants.TURRET_P;
+import static frc.robot.Constants.TURRET_PID_ERROR;
+
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMax.SoftLimitDirection;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.RelativeEncoder;
-import com.revrobotics.SparkMaxRelativeEncoder;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.filter.SlewRateLimiter;
-import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N2;
 import edu.wpi.first.math.system.plant.LinearSystemId;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.simulation.LinearSystemSim;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
-import static frc.robot.Constants.*;
-
-import javax.swing.text.Position;
-
 import frc.robot.util.SimEncoder;
 import io.github.oblarg.oblog.Loggable;
 import io.github.oblarg.oblog.annotations.Log;
@@ -51,10 +54,9 @@ public class TurretS extends SubsystemBase implements Loggable {
 
   @Log
   private double omega = 0;
-  private double lastTotalVelocity = 0;
 
   private SimEncoder turretSimEncoder = new SimEncoder();
-  private SlewRateLimiter voltageLimiter = new SlewRateLimiter(0.1);
+  private SlewRateLimiter velocityLimiter = new SlewRateLimiter(1);
   // Open-loop drive in turret radians per second
   private SimpleMotorFeedforward turretFF = new SimpleMotorFeedforward(
 
@@ -125,18 +127,25 @@ public class TurretS extends SubsystemBase implements Loggable {
   /**
    * Sets the turn speed of the turret
    * 
-   * @param speed The turn speed of the turret
+   * @param speed The turn speed of the turret [-1..1]
    */
-  public void turnSpeed(double speed) {
+  public void turnSpeedOpenLoop(double speed) {
     sparkMax.setVoltage(turretFF.calculate(speed * TURRET_MAX_SPEED));
+  }
 
+  /**
+   * Set the velocity of the turret 
+   */
+  public void turnVelocityOpenLoop(double velocity) {
+    velocity = MathUtil.clamp(velocity, -TURRET_MAX_SPEED, TURRET_MAX_SPEED);
+    setVelocity(velocity);
   }
 
   /**
    * Turns the turret towards the homing switch at a safe speed.
    */
    public void turnHoming() {
-     turnSpeed(TURRET_HOMING_SPEED);
+     turnSpeedOpenLoop(TURRET_HOMING_SPEED);
    }
 
   /**
@@ -163,6 +172,13 @@ public class TurretS extends SubsystemBase implements Loggable {
     else {
       turretSimEncoder.setPosition(radians);
     }
+  }
+
+  public void setVelocity(double velocity) {
+    sparkMax.setVoltage(
+      MathUtil.clamp(
+        velocityLimiter.calculate(turretFF.calculate(velocity)), -1.5, 1.5)
+    );
   }
 
   /**
@@ -217,14 +233,7 @@ public class TurretS extends SubsystemBase implements Loggable {
     SmartDashboard.putNumber("turretPos", currentPosition);
     SmartDashboard.putNumber("turretTgt", targetPosition);
     double pidVelocity = turretPID.calculate(currentPosition, targetPosition); //radians per sec
-    double totalVelocity = pidVelocity + omega;
-    double acceleration = (totalVelocity - lastTotalVelocity) / 0.02;
-    lastTotalVelocity = totalVelocity;
-    double voltage =
-    MathUtil.clamp(
-      turretFF.calculate(totalVelocity, acceleration), -1.5, 1.5);
-    
-    sparkMax.setVoltage(voltageLimiter.calculate(voltage));
+    setVelocity(pidVelocity);
   }
 
   public void simulationPeriodic() {
@@ -239,7 +248,10 @@ public class TurretS extends SubsystemBase implements Loggable {
 
     turretSim.update(0.02);
     double newPosition = turretSim.getOutput().get(0, 0);
+    newPosition = newPosition + Math.PI;
     SmartDashboard.putNumber("turretSimPos", newPosition);
+    newPosition = MathUtil.clamp(newPosition, SOFT_LIMIT_REVERSE_RADIAN, SOFT_LIMIT_FORWARD_RADIAN);
+
     turretSimEncoder.setPosition(newPosition);
   }
   /**

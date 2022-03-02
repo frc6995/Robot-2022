@@ -4,6 +4,8 @@
 
 package frc.robot.commands;
 
+import java.util.function.BooleanSupplier;
+
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -18,7 +20,7 @@ public class IntakeCommandFactory {
      * @param intakeS
      * @return run intake command
      */
-    public static Command getIntakeRunCommand(IntakeS intakeS) {
+    public static Command createIntakeRunC(IntakeS intakeS) {
         Command runIntake = new FunctionalCommand(
                 () -> {
                     intakeS.deploy();
@@ -41,7 +43,7 @@ public class IntakeCommandFactory {
      * @param intakeS
      * @return intake deploy
      */
-    public static Command getIntakeDeploy(IntakeS intakeS){
+    public static Command createIntakeDeployC(IntakeS intakeS){
         return new InstantCommand(intakeS::deploy, intakeS);
     }
 
@@ -51,7 +53,7 @@ public class IntakeCommandFactory {
      * @param intakeS
      * @return intake spin
      */
-    public static Command getIntakeSpin(IntakeS intakeS){
+    public static Command createIntakeSpinC(IntakeS intakeS){
         return new RunCommand(intakeS::spin, intakeS);
     }
 
@@ -61,7 +63,7 @@ public class IntakeCommandFactory {
      * @param intakeS
      * @return intake stop
      */
-    public static Command getIntakeStop(IntakeS intakeS){
+    public static Command createIntakeStopC(IntakeS intakeS){
         return new InstantCommand(intakeS::stop, intakeS);
     }
 
@@ -71,7 +73,23 @@ public class IntakeCommandFactory {
      * @param intakeS
      * @return intake retract
      */
-    public static Command getIntakeRetract(IntakeS intakeS){
+    public static Command createIntakeRetractC(IntakeS intakeS){
         return new InstantCommand(intakeS::retract, intakeS);
+    }
+
+    public static Command createIntakeUntilPickupCG(IntakeS intakeS, BooleanSupplier isBallPickedUp) {
+        return // Deploy intake, then
+        IntakeCommandFactory.createIntakeDeployC(intakeS).andThen(
+            IntakeCommandFactory.createIntakeSpinC(intakeS)
+            .withInterrupt(isBallPickedUp)
+        ).andThen(IntakeCommandFactory.createIntakeStopC(intakeS));
+    }
+
+    public static Command createIntakeStopAndRetractCG(IntakeS intakeS) {
+        return new InstantCommand(
+            () -> {
+                intakeS.stop();
+                intakeS.retract();
+            }, intakeS);
     }
 }

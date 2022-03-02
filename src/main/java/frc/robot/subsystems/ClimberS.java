@@ -4,8 +4,6 @@
 
 package frc.robot.subsystems;
 
-import javax.xml.namespace.QName;
-
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkMaxRelativeEncoder;
@@ -47,14 +45,14 @@ public class ClimberS extends SubsystemBase {
    * Extends the climber at a speed of 0.1
    */
   public void extend() {
-    sparkMax.set(0.1);
+    sparkMax.setVoltage(0.1 * 12);
   }
 
   /**
    * Retracts the climber at a speed of -0.1
    */
   public void retract() {
-    sparkMax.set(-0.1);
+    sparkMax.setVoltage(-0.1 * 12);
   }
 
   /**
@@ -70,7 +68,7 @@ public class ClimberS extends SubsystemBase {
    * Stops the motor
    */
   public void stopMotor() {
-    sparkMax.set(0);
+    sparkMax.setVoltage(0);
   }
 
   /**
@@ -87,7 +85,7 @@ public class ClimberS extends SubsystemBase {
     if (target < Constants.CLIMBER_SOFT_LIMIT_BACK) {
       target = Constants.CLIMBER_SOFT_LIMIT_BACK;
     }
-    sparkMax.set(MathUtil.clamp(climberPID.calculate(this.getEncoderCounts(), target), -1, 1));
+    sparkMax.setVoltage(MathUtil.clamp(climberPID.calculate(this.getEncoderCounts(), target), -1, 1) * 12);
   }
 
   /**
@@ -133,13 +131,13 @@ public class ClimberS extends SubsystemBase {
    * Sets back spark max speed to 0.1.
    */
   public void extendArmTwo() {
-    backSparkMax.set(0.1);
+    backSparkMax.setVoltage(0.1 * 12);
   }
   /**
    * Set back spark max speed to -0.1.
    */
-  public void restractArmTwo() {
-    backSparkMax.set(-0.1);
+  public void retractArmTwo() {
+    backSparkMax.setVoltage(-0.1 * 12);
   }
   /**
    * Get encoder counts for 2nd spark max.
@@ -154,7 +152,7 @@ public class ClimberS extends SubsystemBase {
    * Stops the motor
    */
   public void stopMotorArmTwo() {
-    backSparkMax.set(0);
+    backSparkMax.setVoltage(0);
   }
   /**
    * Set rotations for motor.
@@ -168,7 +166,7 @@ public class ClimberS extends SubsystemBase {
     if (target < Constants.CLIMBER_SOFT_LIMIT_BACK) {
       target = Constants.CLIMBER_SOFT_LIMIT_BACK;
     }
-    backSparkMax.set(MathUtil.clamp(climberPIDTwo.calculate(this.getEncoderCountsArmTwo(), target), -1, 1));
+    backSparkMax.setVoltage(MathUtil.clamp(climberPIDTwo.calculate(this.getEncoderCountsArmTwo(), target), -1, 1) * 12);
   }
 
   @Override

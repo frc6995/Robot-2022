@@ -21,8 +21,8 @@ import org.photonvision.PhotonUtils;
 import org.photonvision.PhotonVersion;
 import org.photonvision.common.hardware.VisionLEDMode;
 import org.photonvision.targeting.PhotonTrackedTarget;
-import org.photonvision.targeting.TargetCorner;
 
+import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
@@ -32,8 +32,10 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.Constants;
 import frc.robot.util.SimCamera;
 import frc.robot.util.pose.NavigationManager;
+import io.github.oblarg.oblog.Loggable;
 import io.github.oblarg.oblog.annotations.Log;
 
 /**
@@ -42,7 +44,7 @@ import io.github.oblarg.oblog.annotations.Log;
  * @author Valentine King
  */
 
-public class LimelightS extends SubsystemBase {
+public class LimelightS extends SubsystemBase implements Loggable {
   NavigationManager navigationManager;
   Supplier<Rotation2d> turretAngleSupplier;
   PhotonCamera limelight = new PhotonCamera("gloworm");
@@ -52,6 +54,14 @@ public class LimelightS extends SubsystemBase {
   SimCamera limelightSimVisionSystem;
   Trigger hasSteadyTarget = new Trigger(() -> limelight.getLatestResult().hasTargets()).debounce(0.5);
 
+  LinearFilter xOffsetFilter = LinearFilter.singlePoleIIR(Constants.LIMELIGHT_FILTER_TIME_CONSTANT, Constants.LIMELIGHT_FILTER_PERIOD_CONSTANT);
+  LinearFilter distanceFilter = LinearFilter.singlePoleIIR(Constants.LIMELIGHT_FILTER_TIME_CONSTANT, Constants.LIMELIGHT_FILTER_PERIOD_CONSTANT);
+  @Log
+  private double filteredXOffsetRadians = 0;
+  @Log
+  private double filteredDistanceMeters = 0;
+  private double lastValidDistance = 0;
+  public final Trigger hasTargetTrigger = new Trigger(this::hasTarget);
   /** Creates a new LimelightS. */
   public LimelightS(NavigationManager navigationManager,
       Consumer<List<Pose2d>> addFieldVisionTargets) {
@@ -97,6 +107,8 @@ public class LimelightS extends SubsystemBase {
     limelight.setDriverMode(driverMode);
   }
 
+
+
   /**
    * Turns on or off the LEDs.
    * 
@@ -104,6 +116,26 @@ public class LimelightS extends SubsystemBase {
    */
   public void setLED(boolean LED) {
     limelight.setLED(LED ? VisionLEDMode.kOn : VisionLEDMode.kOff);
+  }
+
+  public void ledsOn() {
+    setLED(true);
+  }
+
+  public void ledsOff() {
+    setLED(false);
+  }
+
+  public boolean hasTarget(){
+    return limelight.getLatestResult().hasTargets();
+  }
+
+  public double getFilteredXOffset() {
+    return filteredXOffsetRadians;
+  }
+
+  public double getFilteredDistance() {
+    return filteredDistanceMeters;
   }
 
   /**
@@ -120,12 +152,25 @@ public class LimelightS extends SubsystemBase {
       limelightSimVisionSystem.processFrame(navigationManager.getCurrentRobotPose());
     }
 
-    PhotonTrackedTarget target = limelight.getLatestResult().hasTargets()
-        ? limelight.getLatestResult().getBestTarget()
-        : new PhotonTrackedTarget(0, 0, 0, 0, new Transform2d(), new ArrayList<TargetCorner>());
-    
-    if (hasSteadyTarget.get()) {
-      navigationManager.addVisionMeasurement(target);
-    }
+    if (hasTarget()) {
+      PhotonTrackedTarget target = limelight.getLatestResult().getBestTarget();
+      double distance = PhotonUtils.calculateDistanceToTargetMeters(
+        CAMERA_HEIGHT_METERS,
+        TARGET_HEIGHT_METERS,
+        CAMERA_PITCH_RADIANS,
+        Units.degreesToRadians(target.getPitch())) + Constants.CAMERA_CENTER_OFFSET + Constants.HUB_RADIUS_METERS;
+
+      filteredXOffsetRadians = xOffsetFilter.calculate(Units.degreesToRadians(-target.getYaw()));
+      filteredDistanceMeters = distanceFilter.calculate(distance);
+      lastValidDistance = distance;
+
+      if (hasSteadyTarget.get()) {
+        navigationManager.addVisionMeasurement(target);
+      }
+    } else {
+      filteredXOffsetRadians = xOffsetFilter.calculate(0); // Because this is used in a limited range mechanism (turret), reduce error to zero
+      filteredDistanceMeters = distanceFilter.calculate(lastValidDistance);
+    }  
+
   }
 }

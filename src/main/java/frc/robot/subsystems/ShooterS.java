@@ -8,12 +8,14 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.simulation.FlywheelSim;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.util.SimEncoder;
+
 import static frc.robot.Constants.*;
-import frc.robot.Robot;
 import io.github.oblarg.oblog.Loggable;
 import io.github.oblarg.oblog.annotations.Log;
 
@@ -52,6 +54,9 @@ public class ShooterS extends SubsystemBase implements Loggable {
     SHOOTER_BACK_FF[0],
     SHOOTER_BACK_FF[1],
     SHOOTER_BACK_FF[2]);
+
+  private SimEncoder frontSimEncoder = new SimEncoder();
+  private SimEncoder backSimEncoder = new SimEncoder();
     private FlywheelSim backSim = new FlywheelSim(
       LinearSystemId.identifyVelocitySystem(
         SHOOTER_BACK_FF[1], 
@@ -69,8 +74,6 @@ public class ShooterS extends SubsystemBase implements Loggable {
 
     frontEncoder = frontSparkMax.getEncoder();
     backEncoder = backSparkMax.getEncoder();
-
-
     frontPID.setTolerance(SHOOTER_PID_ERROR, 0);
     backPID.setTolerance(SHOOTER_PID_ERROR, 0);
 
@@ -99,7 +102,12 @@ public class ShooterS extends SubsystemBase implements Loggable {
    */
   @Log
   public double getFrontEncoderSpeed() {
-    return frontEncoder.getVelocity();
+    if(RobotBase.isReal()) {
+      return frontEncoder.getVelocity();
+    } else {
+      return frontSimEncoder.getVelocity();
+    }
+
 
   }
 
@@ -110,7 +118,13 @@ public class ShooterS extends SubsystemBase implements Loggable {
    */
   @Log
   public double getBackEncoderSpeed() {
-    return backEncoder.getVelocity();
+    if (RobotBase.isReal()) {
+      return backEncoder.getVelocity();
+    }
+    else {
+      return backSimEncoder.getVelocity();
+    }
+
   }
 
   /**
@@ -141,8 +155,8 @@ public class ShooterS extends SubsystemBase implements Loggable {
   public void pidFrontSpeed(double frontTargetRPM) {
     SmartDashboard.putNumber("frontTargetRPM", frontTargetRPM);
     frontSparkMax.setVoltage(
-        /*frontPID.calculate(getFrontEncoderSpeed() / 60.0, frontTargetRPM / 60.0)
-            + */frontFF.calculate(frontTargetRPM / 60.0));
+        frontPID.calculate(getFrontEncoderSpeed() / 60.0, frontTargetRPM / 60.0)
+            + frontFF.calculate(frontTargetRPM / 60.0));
 
   }
 
@@ -154,7 +168,7 @@ public class ShooterS extends SubsystemBase implements Loggable {
   public void pidBackSpeed(double backTargetRPM) {
     SmartDashboard.putNumber("backTargetRPM", backTargetRPM);
     backSparkMax.setVoltage(
-        /*backPID.calculate(getBackEncoderSpeed() / 60.0, backTargetRPM / 60.0) + */backFF.calculate(backTargetRPM / 60.0));
+        backPID.calculate(getBackEncoderSpeed() / 60.0, backTargetRPM / 60.0) + backFF.calculate(backTargetRPM / 60.0));
   }
 
   /**
@@ -229,7 +243,7 @@ public class ShooterS extends SubsystemBase implements Loggable {
     frontSim.update(0.02);
     backSim.update(0.02);
 
-    frontEncoderVelocityRPM = frontSim.getAngularVelocityRPM();
-    backEncoderVelocityRPM = backSim.getAngularVelocityRPM();
+    frontSimEncoder.setVelocity(frontSim.getAngularVelocityRPM());
+    backSimEncoder.setVelocity(backSim.getAngularVelocityRPM());
   }
 }

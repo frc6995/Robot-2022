@@ -61,8 +61,8 @@ public class IntakeS extends SubsystemBase {
      * @param speed the speed
      */
     public void spin(double speed) {
-        intakeLeadMotor.set(speed);
-        intakeFollowerMotor.set(speed);
+        intakeLeadMotor.setVoltage(speed * 12);
+        intakeFollowerMotor.setVoltage(speed * 12);
     }
 
     /**

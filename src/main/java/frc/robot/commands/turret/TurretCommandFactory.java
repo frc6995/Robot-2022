@@ -7,6 +7,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import frc.robot.Constants;
+import frc.robot.subsystems.LimelightS;
 import frc.robot.subsystems.TurretS;
 
 /** The factory class that creates all Turret commands. */
@@ -79,6 +80,17 @@ public class TurretCommandFactory {
         .withName("TurretFollowC");
     }
 
+    public static Command createTurretVisionC(LimelightS limelightS, TurretS turretS) {
+        return new FunctionalCommand(limelightS::ledsOn,
+        ()->{
+            turretS.turnVelocityOpenLoop(limelightS.getFilteredXOffset() * Constants.TURRET_P);
+        },
+        (interrupted)->{
+            turretS.stopMotor();
+            limelightS.ledsOff();
+        }, ()->false, turretS);
+    }
+
     /**
      * Creates a TurretManualC, which turns the turret at a speed given by
      * `speedSupplier` [-1..1].
@@ -92,7 +104,7 @@ public class TurretCommandFactory {
                 () -> {
                 },
                 () -> {
-                    turretS.turnSpeed(speedSupplier.getAsDouble());
+                    turretS.turnSpeedOpenLoop(speedSupplier.getAsDouble());
                 },
                 interrupted -> {
                     turretS.stopMotor();

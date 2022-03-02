@@ -52,21 +52,22 @@ public class NavigationManager implements Loggable{
         m_turretTransformVelocityConsumer = turretTransformVelocityConsumer;
 
         hubTransformEstimator = new HubTransformEstimator(m_poseSupplier);
-        visionHubTransformAdjuster = new VisionHubTransformAdjuster(m_robotToTurretSupplier, hubTransformEstimator::setCorrectedRobotToHubTransform);
+        visionHubTransformAdjuster = new VisionHubTransformAdjuster(m_robotToTurretSupplier, (transform)->{}/* hubTransformEstimator::setCorrectedRobotToHubTransform */);
         timeOfFlightAdjuster = new TimeOfFlightAdjuster(m_drivebaseVelocitySupplier, this::getRobotToHubTransform);
 
         lastTOFAdjustedRobotToHubTransform = getTOFAdjustedRobotToHubTransform();
     }
 
     public void update() {
-        lastTOFAdjustedRobotToHubTransform = getTOFAdjustedRobotToHubTransform();
+        //lastTOFAdjustedRobotToHubTransform = getTOFAdjustedRobotToHubTransform();
         hubTransformEstimator.update();
+        lastTOFAdjustedRobotToHubTransform = getTOFAdjustedRobotToHubTransform();
         visionHubTransformAdjuster.update();
-        timeOfFlightAdjuster.update();
+        //timeOfFlightAdjuster.update();
 
-        m_turretTransformVelocityConsumer.accept(
-            (getDirection(getTOFAdjustedRobotToHubTransform()).getRadians()
-                - getDirection(lastTOFAdjustedRobotToHubTransform).getRadians()) / 0.02);
+        m_turretTransformVelocityConsumer.accept(0.0);
+           /* (getDirection(getTOFAdjustedRobotToHubTransform()).getRadians()
+                - getDirection(lastTOFAdjustedRobotToHubTransform).getRadians()) / 0.02);*/
     }
 
     //Setters
