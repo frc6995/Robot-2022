@@ -8,7 +8,9 @@ import com.revrobotics.RelativeEncoder;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.I2C;
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -22,25 +24,36 @@ import io.github.oblarg.oblog.annotations.Log;
  * @authors Jonas An and Ben Su
  */
 public class MidtakeS extends SubsystemBase implements Loggable{
+  private GenericHID simSensorInput = new GenericHID(5);
   /** Creates a new IntakeS. */
+  @Log(methodName = "getAppliedOutput", name = "frontVolts")
   private CANSparkMax frontSparkMax = new CANSparkMax(Constants.CAN_ID_MIDTAKE_FRONT,
       MotorType.kBrushless);
   private RelativeEncoder frontSparkMaxEncoder = frontSparkMax.getEncoder();
+  @Log(methodName = "getAppliedOutput", name = "backVolts")
   private CANSparkMax backSparkMax = new CANSparkMax(Constants.CAN_ID_MIDTAKE_BACK,
       MotorType.kBrushless);
   private RelativeEncoder backSparkMaxEncoder = backSparkMax.getEncoder();
   private DigitalInput beamBreakTop = new DigitalInput(Constants.BEAM_BREAK_TOP_PORT_NUMBER);
+  @Log
   private boolean lastBeamBreakTopBroken = getIsTopBeamBroken();
+
   private DigitalInput beamBreakBottom = new DigitalInput(Constants.BEAM_BREAK_BOTTOM_PORT_NUMBER);
+  private boolean beamBreakBottomBroken = false;
+  @Log
   private boolean lastBeamBreakBottomBroken = getIsBottomBeamBroken();
   private final ColorSensorV3 colorSensor = new ColorSensorV3(I2C.Port.kOnboard);
 
   public final Trigger goingForwardTrigger = new Trigger(this::getIsGoingBackward).negate();
+  // this is an ugly hack to keep it true long enough for commands to pick it up
+  @Log(methodName = "getAsBoolean", name = "cargoEnteredTrigger")
   public final Trigger cargoEnteredTrigger = new Trigger(this::getDidCargoEnter);
+  @Log(methodName = "getAsBoolean", name = "cargoLeftTrigger")
   public final Trigger cargoLeftTrigger = new Trigger(this::getDidCargoLeave);
 
   private int cargoIn = 0;
   private int cargoOut = 0;
+  private boolean beamBreakTopBroken;
 
   /**
    * Create a new MidtakeS
@@ -94,7 +107,7 @@ public class MidtakeS extends SubsystemBase implements Loggable{
    */
   @Log
   public boolean getIsTopBeamBroken() {
-    return !beamBreakTop.get();
+    return beamBreakTopBroken;
   }
 
   /**
@@ -103,7 +116,7 @@ public class MidtakeS extends SubsystemBase implements Loggable{
    */
   @Log
   public boolean getIsBottomBeamBroken() {
-    return !beamBreakBottom.get();
+    return beamBreakBottomBroken;
   }
 
   /**
@@ -113,10 +126,14 @@ public class MidtakeS extends SubsystemBase implements Loggable{
    */
   @Log
   public boolean getIsBallColorCorrect() {
-    Color detectedColor = colorSensor.getColor();
-    boolean isBallRed = detectedColor.red > detectedColor.blue;
-    boolean areWeRed = DriverStation.getAlliance() == Alliance.Red;
-    return isBallRed == areWeRed;
+    if(RobotBase.isReal()) {
+      Color detectedColor = colorSensor.getColor();
+      boolean isBallRed = detectedColor.red > detectedColor.blue;
+      boolean areWeRed = DriverStation.getAlliance() == Alliance.Red;
+      return isBallRed == areWeRed;
+    } else {
+      return !simSensorInput.getRawButton(4);
+    }
   }
 
   /**
@@ -124,7 +141,12 @@ public class MidtakeS extends SubsystemBase implements Loggable{
    */
   @Log
   public boolean getColorSensorDetectsBall() {
-    return colorSensor.getProximity() > Constants.COLOR_SENSOR_PROXIMITY_THRESHOLD;
+    if(RobotBase.isReal()) {
+      return colorSensor.getProximity() > Constants.COLOR_SENSOR_PROXIMITY_THRESHOLD;
+    }
+    else{
+      return simSensorInput.getRawButton(3);
+    }
   }
 
   /**
@@ -133,15 +155,17 @@ public class MidtakeS extends SubsystemBase implements Loggable{
 
 
   public boolean getIsGoingBackward() {
-    return frontSparkMaxEncoder.getVelocity() < -0.01 && backSparkMaxEncoder.getVelocity() < -0.01;
+    return frontSparkMax.getAppliedOutput() < -0.01 && backSparkMax.getAppliedOutput() < -0.01;
   }
 
+  @Log
   public boolean getDidCargoEnter() {
-    return lastBeamBreakBottomBroken && !getIsBottomBeamBroken() && !getIsGoingBackward();
+    return lastBeamBreakBottomBroken && !beamBreakBottomBroken;
   }
-  
+
+  @Log  
   public boolean getDidCargoLeave() {
-    return lastBeamBreakTopBroken && !getIsTopBeamBroken() && !getIsGoingBackward();
+    return lastBeamBreakTopBroken && !beamBreakTopBroken;
   }
 
   /**
@@ -152,13 +176,13 @@ public class MidtakeS extends SubsystemBase implements Loggable{
     spin(0);
   }
 
-  public void resetCargoCount(int storedCargo) {
-    cargoIn = storedCargo;
-    cargoOut = 0;
+  public void resetCargoCount(int cargoOut, int storedCargo) {
+    cargoIn = cargoOut + storedCargo;
+    this.cargoOut = cargoOut;
   }
 
   public void resetCargoCount() {
-    resetCargoCount(0);
+    resetCargoCount(0, 0);
   }
 
   @Log
@@ -175,13 +199,27 @@ public class MidtakeS extends SubsystemBase implements Loggable{
   public void periodic() {
     // This method will be called once per scheduler run
     // If the midtake is driving toward the shooter and the bottom sensor is falling
+    if(DriverStation.isDisabled()) {
+      stop();
+    }
     if(getDidCargoEnter()) { 
       cargoIn++;
     }
     if(getDidCargoLeave()) { 
       cargoOut++;
     }
-    lastBeamBreakBottomBroken = getIsBottomBeamBroken();
-    lastBeamBreakTopBroken = getIsTopBeamBroken();
+    
+
+    lastBeamBreakBottomBroken = beamBreakBottomBroken;
+    lastBeamBreakTopBroken = beamBreakTopBroken;
+
+    if(RobotBase.isReal()) {
+      beamBreakBottomBroken = !beamBreakBottom.get();
+      beamBreakTopBroken = !beamBreakTop.get();
+    }
+    else {
+      beamBreakBottomBroken =  simSensorInput.getRawButton(1);
+      beamBreakTopBroken = simSensorInput.getRawButton(2);
+    }
   }
 }

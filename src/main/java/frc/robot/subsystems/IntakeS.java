@@ -8,6 +8,8 @@ import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import io.github.oblarg.oblog.Loggable;
+import io.github.oblarg.oblog.annotations.Log;
 
 /**
  * The intake subsystem, which extends and spins to pull balls over the bumper
@@ -15,7 +17,8 @@ import frc.robot.Constants;
  * 
  * @author Ben Su, Jeremiah Shue
  */
-public class IntakeS extends SubsystemBase {
+public class IntakeS extends SubsystemBase implements Loggable {
+    @Log(methodName = "getAppliedOutput", name = "inputVolts")
     private final CANSparkMax intakeLeadMotor = new CANSparkMax(Constants.CAN_ID_INTAKE_LEAD_MOTOR,
             MotorType.kBrushless);
     private final CANSparkMax intakeFollowerMotor = new CANSparkMax(Constants.CAN_ID_INTAKE_FOLLOWER_MOTOR,
@@ -33,7 +36,10 @@ public class IntakeS extends SubsystemBase {
         intakeFollowerMotor.setInverted(true);
         // intakeFollowerMotor.follow(intakeLeadMotor, true);
     }
-
+    @Log
+    public boolean isDeployed() {
+        return doubleSolenoid.get() == Value.kForward;
+    }
     /**
      * Extends the intake.
      */

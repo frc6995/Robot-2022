@@ -83,7 +83,10 @@ public class TurretCommandFactory {
     public static Command createTurretVisionC(LimelightS limelightS, TurretS turretS) {
         return new FunctionalCommand(limelightS::ledsOn,
         ()->{
-            turretS.turnVelocityOpenLoop(limelightS.getFilteredXOffset() * Constants.TURRET_P);
+            if (limelightS.hasTarget()) {
+                turretS.turnVelocityOpenLoop(limelightS.getFilteredXOffset() * Constants.TURRET_P);
+            }
+            
         },
         (interrupted)->{
             turretS.stopMotor();

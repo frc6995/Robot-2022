@@ -85,6 +85,12 @@ public class IntakeCommandFactory {
         ).andThen(IntakeCommandFactory.createIntakeStopC(intakeS));
     }
 
+    public static Command createIntakeDeployAndRunCG(IntakeS intakeS) {
+        return IntakeCommandFactory.createIntakeDeployC(intakeS).andThen(
+            IntakeCommandFactory.createIntakeSpinC(intakeS)
+        );
+    }
+
     public static Command createIntakeStopAndRetractCG(IntakeS intakeS) {
         return new InstantCommand(
             () -> {

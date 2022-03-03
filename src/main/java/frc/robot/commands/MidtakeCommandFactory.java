@@ -7,7 +7,9 @@ package frc.robot.commands;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.RepeatCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.subsystems.MidtakeS;
 
 /** Contains command methods for the midtake */
@@ -41,10 +43,17 @@ public class MidtakeCommandFactory {
     }
 
     public static Command createMidtakeIndexCG(MidtakeS midtakeS) {
-        return createMidtakeLoadC(midtakeS)
-        .withInterrupt(() -> !midtakeS.getIsBottomBeamBroken())
-        .withInterrupt(midtakeS::getIsTopBeamBroken)
-        .andThen(createMidtakeStopC(midtakeS));
+        return new RepeatCommand(
+            new WaitUntilCommand(midtakeS::getIsBottomBeamBroken)
+            .andThen(
+                createMidtakeLoadC(midtakeS)
+                .withInterrupt(()->!midtakeS.getIsBottomBeamBroken())
+                .withInterrupt(midtakeS::getIsTopBeamBroken)
+            )
+            .andThen(
+                createMidtakeStopC(midtakeS)
+            )
+        );
     }
 
     public static Command createMidtakeFeedOneC(MidtakeS midtakeS) {

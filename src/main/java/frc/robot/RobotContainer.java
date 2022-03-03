@@ -20,6 +20,7 @@ import frc.robot.commands.ShooterTestC;
 import frc.robot.commands.auto.AutoCommandFactory;
 import frc.robot.commands.climber.ClimberCommandFactory;
 import frc.robot.commands.drivebase.DrivebaseCommandFactory;
+import frc.robot.commands.shooter.ShooterCommandFactory;
 import frc.robot.commands.turret.TurretCommandFactory;
 import frc.robot.subsystems.ClimberS;
 import frc.robot.subsystems.DrivebaseS;
@@ -61,17 +62,15 @@ public class RobotContainer {
   private Command xboxDriveCommand;
   private Command runTurretC;
   private Command turretManualC;
-  private Command turretTurningC;
   private Command turretAimC;
   private Command shooterSpinC;
   private Command visionSpinAndAimC;
-  private Command runMidtakeC;
   private Command midtakeFeedC;
   private Command midtakeFeedOneC;
+  private Command midtakeIndexCG;
   private Command runIntakeC;
   private Command climberForwardC;
   private Command climberBackC;
-  private Command intakeIndexCG;
   @Log
   @Config
   private Command shooterTestC;
@@ -144,12 +143,11 @@ public class RobotContainer {
     turretManualC = TurretCommandFactory.createTurretManualC(driverController::getRightX, turretS);
     turretS.setDefaultCommand(turretManualC);
     
-    shooterSpinC = MainCommandFactory.createShooterDistanceSpinupC(limelightS::getFilteredDistance, shooterS);
-    turretTurningC = TurretCommandFactory.createTurretTurnC(0, turretS);
+    shooterSpinC = ShooterCommandFactory.createShooterDistanceSpinupC(limelightS::getFilteredDistance, shooterS);
     shooterTestC = new ShooterTestC(shooterS);
-    intakeIndexCG = MainCommandFactory.createIntakeIndexCG(intakeS, midtakeS);
-    runIntakeC = IntakeCommandFactory.createIntakeRunC(intakeS);
-    runMidtakeC = MidtakeCommandFactory.createMidtakeRunC(midtakeS);
+    runIntakeC = IntakeCommandFactory.createIntakeDeployAndRunCG(intakeS);
+    midtakeIndexCG = MidtakeCommandFactory.createMidtakeIndexCG(midtakeS);
+    midtakeS.setDefaultCommand(midtakeIndexCG);
     midtakeFeedC = MidtakeCommandFactory.createMidtakeFeedC(midtakeS);
     midtakeFeedOneC = MidtakeCommandFactory.createMidtakeFeedOneC(midtakeS);
 
@@ -179,17 +177,10 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
-    shootBallTrigger.whenActive(midtakeFeedOneC);
-
-    //The index CG will cancel if either bumper is pressed (signifying time to feed to the shooter.)
-    driverController.a().and(
-      driverController.rightBumper().negate()
-    ).and(
-      driverController.leftBumper().negate()
-    )
-    /*driverController.a()*/.whileActiveContinuous(intakeIndexCG).whenInactive(IntakeCommandFactory.createIntakeStopAndRetractCG(intakeS));
+    driverController.a().whileActiveContinuous(runIntakeC).whenInactive(IntakeCommandFactory.createIntakeStopAndRetractCG(intakeS));
     driverController.x().whileActiveContinuous(visionSpinAndAimC);
     //driverController.rightBumper() does (midtakeFeedOneC) when ready to fire.
+    shootBallTrigger.whenActive(midtakeFeedOneC);
     //driverController.leftBumper() feeds whenever the shooter RPM is above 1000;
     driverController.leftBumper().and(new Trigger(()->(shooterS.getFrontEncoderSpeed() > 1000))).whileActiveContinuous(midtakeFeedC);
     
@@ -217,13 +208,13 @@ public class RobotContainer {
     /*Field2d setup */
     if(RobotBase.isSimulation()) {
       field.setRobotPose(new Pose2d(
-        MathUtil.clamp(navigationManager.getCurrentRobotPose().getX(), 0, Units.feetToMeters(54)),
-        MathUtil.clamp(navigationManager.getCurrentRobotPose().getY(), 0, Units.feetToMeters(27)),
-        navigationManager.getCurrentRobotPose().getRotation()
+        MathUtil.clamp(drivebaseS.getRobotPose().getX(), 0, Units.feetToMeters(54)),
+        MathUtil.clamp(drivebaseS.getRobotPose().getY(), 0, Units.feetToMeters(27)),
+        drivebaseS.getRobotPose().getRotation()
       ));
     }
     else {
-      field.setRobotPose(navigationManager.getCurrentRobotPose());
+      field.setRobotPose(drivebaseS.getRobotPose());
     }
 
 
@@ -232,9 +223,9 @@ public class RobotContainer {
 /*     field.getObject("estRobot").setPose(
       navigationManager.getEstimatedRobotPose());
 
-    field.getObject("tofTarget").setPose(navigationManager.getCurrentRobotPose().transformBy(navigationManager.getTOFAdjustedRobotToHubTransform()));
+    field.getObject("tofTarget").setPose(drivebaseS.getRobotPose().transformBy(navigationManager.getTOFAdjustedRobotToHubTransform()));
 
-    field.getObject("target").setPose(navigationManager.getCurrentRobotPose().transformBy(navigationManager.getRobotToHubTransform()));
+    field.getObject("target").setPose(drivebaseS.getRobotPose().transformBy(navigationManager.getRobotToHubTransform()));
        */
     field.getObject("Turret").setPose(field.getRobotPose().transformBy(
       new Transform2d(new Translation2d(), turretS.getRobotToTurretRotation())
@@ -242,7 +233,7 @@ public class RobotContainer {
       )
     );
 
-    //field.getObject("camera").setPose(navigationManager.getCurrentRobotPose().transformBy(navigationManager.getRobotToCameraTransform()));
+    //field.getObject("camera").setPose(drivebaseS.getRobotPose().transformBy(navigationManager.getRobotToCameraTransform()));
     
   }
 }

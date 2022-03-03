@@ -48,15 +48,27 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
 
   //Sim stuff
   private DifferentialDrivetrainSim m_driveSim;
+  @Log(methodName = "getPosition", name = "getSimRightPosition")
   private SimEncoder m_rightEncoder = new SimEncoder();
+  @Log(methodName = "getPosition", name = "getSimLeftPosition")
   private SimEncoder m_leftEncoder = new SimEncoder();
+  private Rotation2d m_simHeading = new Rotation2d();
   private Rotation2d m_gyroSim = new Rotation2d();
+  private Rotation2d m_initialHeading;
 
 
   /** Creates a new DrivebaseS. */
   public DrivebaseS() {
     frontRight.restoreFactoryDefaults();
     frontLeft.restoreFactoryDefaults();
+    frontRight.getEncoder().setPositionConversionFactor(DRIVEBASE_METERS_PER_WHEEL_ROTATION 
+    / DRIVEBASE_ENCODER_ROTATIONS_PER_WHEEL_ROTATION);
+    frontRight.getEncoder().setVelocityConversionFactor(DRIVEBASE_METERS_PER_WHEEL_ROTATION 
+    / DRIVEBASE_ENCODER_ROTATIONS_PER_WHEEL_ROTATION / 60);
+    frontLeft.getEncoder().setPositionConversionFactor(DRIVEBASE_METERS_PER_WHEEL_ROTATION 
+    / DRIVEBASE_ENCODER_ROTATIONS_PER_WHEEL_ROTATION);
+    frontLeft.getEncoder().setVelocityConversionFactor(DRIVEBASE_METERS_PER_WHEEL_ROTATION 
+    / DRIVEBASE_ENCODER_ROTATIONS_PER_WHEEL_ROTATION / 60);
     backRight.restoreFactoryDefaults();
     backLeft.restoreFactoryDefaults();
     frontRight.setIdleMode(IdleMode.kBrake);
@@ -66,19 +78,19 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
     backLeft.follow(frontLeft, false);
 
     if (RobotBase.isSimulation()) {
-			m_gyroSim = new Rotation2d();
+      m_gyroSim = new Rotation2d();
       m_driveSim = new DifferentialDrivetrainSim(
         DRIVEBASE_PLANT,
         DRIVEBASE_GEARBOX,
-        DRIVEBASE_ENCODER_ROTATIONS_PER_WHEEL_ROTATION,
+        DRIVEBASE_METERS_PER_WHEEL_ROTATION,
         DRIVEBASE_TRACKWIDTH,
-        DRIVEBASE_WHEEL_DIAMETER / 2.0,
+        1 / 2.0, // wheel radius is half of an encoder position unit.
         DRIVEBASE_SIM_ENCODER_STD_DEV);
 
 		}
 
-    odometry.resetPosition(START_POSE, getRotation2d());
-
+    resetRobotPose(START_POSE);
+    m_initialHeading = START_POSE.getRotation();
   }
 
   /**
@@ -93,6 +105,15 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
 
   @Log(methodName = "getRadians", name = "gyroHeading")
   public Rotation2d getRotation2d() {
+    if(RobotBase.isReal()) {
+      return navX.getRotation2d();
+    }
+    else {
+      return m_gyroSim;
+    }
+  }
+
+  public Rotation2d getEstimatedHeading() {
     return odometry.getPoseMeters().getRotation();
   }
 
@@ -147,12 +168,9 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
     // This method will be called once per scheduler run
     if (RobotBase.isReal()) {
       odometry.update(navX.getRotation2d(), 
-      frontLeft.getEncoder().getPosition() 
-      * DRIVEBASE_METERS_PER_WHEEL_ROTATION 
-      / DRIVEBASE_ENCODER_ROTATIONS_PER_WHEEL_ROTATION,
+      frontLeft.getEncoder().getPosition(),
       frontRight.getEncoder().getPosition()
-      * DRIVEBASE_METERS_PER_WHEEL_ROTATION 
-      / DRIVEBASE_ENCODER_ROTATIONS_PER_WHEEL_ROTATION);
+      );
     }
     else {
       odometry.update(m_gyroSim, m_leftEncoder.getPosition(), m_rightEncoder.getPosition());
@@ -176,7 +194,8 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
 		m_rightEncoder.setPosition(m_driveSim.getRightPositionMeters());
 		m_rightEncoder.setVelocity(m_driveSim.getRightVelocityMetersPerSecond());
 
-		m_gyroSim = m_driveSim.getHeading();
+		m_simHeading = m_driveSim.getHeading();
+    m_gyroSim = m_simHeading.minus(m_initialHeading);
 	}
 
   public DifferentialDriveWheelSpeeds getWheelSpeeds() {
@@ -190,7 +209,7 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
   @Log
   public double getLeftVelocity() {
     if(RobotBase.isReal()) {
-      return drivebaseEncoderRotationsToMeters(frontLeft.getEncoder().getVelocity() / 60.0);
+      return frontLeft.getEncoder().getVelocity();
     }
     else {
       return m_leftEncoder.getVelocity();
@@ -200,7 +219,7 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
   @Log
   public double getRightVelocity() {
     if(RobotBase.isReal()) {
-      return drivebaseEncoderRotationsToMeters(frontRight.getEncoder().getVelocity() / 60.0);
+      return frontRight.getEncoder().getVelocity();
     }
     else {
       return m_rightEncoder.getVelocity();
@@ -229,8 +248,11 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
   }
 
   public void resetRobotPose(Pose2d pose) {
+    odometry.resetPosition(pose, getRotation2d());
+    m_driveSim.setPose(
+      odometry.getPoseMeters()
+    );
     resetEncoders(); 
-    odometry.resetPosition(pose, navX.getRotation2d());
        
   }
 

@@ -19,6 +19,8 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.RelativeEncoder;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.Nat;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.filter.SlewRateLimiter;
@@ -170,7 +172,12 @@ public class TurretS extends SubsystemBase implements Loggable {
       sparkMaxEncoder.setPosition(radians);
     }
     else {
+      System.out.println("turret reset to " + radians);
       turretSimEncoder.setPosition(radians);
+      Matrix<N2, N1> newState = new Matrix<N2, N1>(Nat.N2(), Nat.N1());
+      newState.set(0, 0, radians);
+      newState.set(1, 0, 0);
+      turretSim.setState(newState);
     }
   }
 
@@ -276,6 +283,9 @@ public class TurretS extends SubsystemBase implements Loggable {
 
   @Override
   public void periodic() {
+    if(DriverStation.isDisabled()) {
+      stopMotor();
+    }
     if(SmartDashboard.getBoolean("requestTurrReset", false)){
       resetEncoder(Math.PI);
       SmartDashboard.putBoolean("requestTurrReset", false);
