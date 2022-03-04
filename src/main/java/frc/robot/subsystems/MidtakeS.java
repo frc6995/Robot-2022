@@ -2,19 +2,17 @@ package frc.robot.subsystems;
 
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
-import com.revrobotics.ColorSensorV3;
 import com.revrobotics.RelativeEncoder;
 
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.GenericHID;
-import edu.wpi.first.wpilibj.I2C;
 import edu.wpi.first.wpilibj.RobotBase;
-import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants;
+import frc.robot.util.color.PicoColorSensor;
 import io.github.oblarg.oblog.Loggable;
 import io.github.oblarg.oblog.annotations.Log;
 
@@ -42,10 +40,9 @@ public class MidtakeS extends SubsystemBase implements Loggable{
   private boolean beamBreakBottomBroken = false;
   @Log
   private boolean lastBeamBreakBottomBroken = getIsBottomBeamBroken();
-  private final ColorSensorV3 colorSensor = new ColorSensorV3(I2C.Port.kOnboard);
+  private final PicoColorSensor colorSensor = new PicoColorSensor();
 
   public final Trigger goingForwardTrigger = new Trigger(this::getIsGoingBackward).negate();
-  // this is an ugly hack to keep it true long enough for commands to pick it up
   @Log(methodName = "getAsBoolean", name = "cargoEnteredTrigger")
   public final Trigger cargoEnteredTrigger = new Trigger(this::getDidCargoEnter);
   @Log(methodName = "getAsBoolean", name = "cargoLeftTrigger")
@@ -126,14 +123,15 @@ public class MidtakeS extends SubsystemBase implements Loggable{
    */
   @Log
   public boolean getIsBallColorCorrect() {
-    if(RobotBase.isReal()) {
-      Color detectedColor = colorSensor.getColor();
-      boolean isBallRed = detectedColor.red > detectedColor.blue;
-      boolean areWeRed = DriverStation.getAlliance() == Alliance.Red;
-      return isBallRed == areWeRed;
-    } else {
-      return !simSensorInput.getRawButton(4);
-    }
+    // if(RobotBase.isReal()) {
+    //   PicoColorSensor.RawColor detectedColor = colorSensor.getRawColor0();
+    //   boolean isBallRed = detectedColor.red > detectedColor.blue;
+    //   boolean areWeRed = DriverStation.getAlliance() == Alliance.Red;
+    //   return isBallRed == areWeRed;
+    // } else {
+    //   return !simSensorInput.getRawButton(4);
+    // }
+    return true;
   }
 
   /**
@@ -142,17 +140,12 @@ public class MidtakeS extends SubsystemBase implements Loggable{
   @Log
   public boolean getColorSensorDetectsBall() {
     if(RobotBase.isReal()) {
-      return colorSensor.getProximity() > Constants.COLOR_SENSOR_PROXIMITY_THRESHOLD;
+      return colorSensor.getProximity0() > Constants.COLOR_SENSOR_PROXIMITY_THRESHOLD;
     }
     else{
       return simSensorInput.getRawButton(3);
     }
   }
-
-  /**
-   * Returns true only when the top beam break has just become unbroken and the midtake is feeding toward the shooter.
-   */
-
 
   public boolean getIsGoingBackward() {
     return frontSparkMax.getAppliedOutput() < -0.01 && backSparkMax.getAppliedOutput() < -0.01;
