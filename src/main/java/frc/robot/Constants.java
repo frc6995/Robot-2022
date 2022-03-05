@@ -34,16 +34,16 @@ public final class Constants {
      * Battery
      */
     /** Can ids for the front left drive motor */
-    public static final int CAN_ID_FRONT_LEFT_DRIVE_MOTOR = 10;
+    public static final int CAN_ID_FRONT_LEFT_DRIVE_MOTOR = 13;
 
     /** Can ids for the front right drive motor */
-    public static final int CAN_ID_FRONT_RIGHT_DRIVE_MOTOR = 12;
+    public static final int CAN_ID_FRONT_RIGHT_DRIVE_MOTOR = 14;
 
     /** Can ids for the back left drive motor */
-    public static final int CAN_ID_BACK_LEFT_DRIVE_MOTOR = 14;
+    public static final int CAN_ID_BACK_LEFT_DRIVE_MOTOR = 12;
 
     /** Can ids for the back right drive motor */
-    public static final int CAN_ID_BACK_RIGHT_DRIVE_MOTOR = 13;
+    public static final int CAN_ID_BACK_RIGHT_DRIVE_MOTOR = 10;
 
     /** USB port of xbox controller for driver */
     public static final int USB_PORT_DRIVER_CONTROLLER = 0;
@@ -189,13 +189,13 @@ public final class Constants {
     public static final double TURRET_DEADBAND = 0.02;
 
     /** Feedforward for the turret */
-    public static final double[] TURRET_FF = {0.39505, 0.56397, 0.030497}; // for velocity in turret radians per second
+    public static final double[] TURRET_FF = {0.27/*0.39505*/, 0.56397, 0.030497}; // for velocity in turret radians per second
 
     /** Proportional term for the turret */
-    public static final double TURRET_P = 2.243;
+    public static final double TURRET_P = 3;
 
     /** Derivative term for the turret */
-    public static final double TURRET_D = 1.0032;
+    public static final double TURRET_D = 1.5;
 
     /** The maximum manual-drive angular velocity of the turret in radians per second */
     public static final double TURRET_MAX_SPEED = 1;
