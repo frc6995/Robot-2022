@@ -58,7 +58,7 @@ public class TurretS extends SubsystemBase implements Loggable {
   private double omega = 0;
 
   private SimEncoder turretSimEncoder = new SimEncoder();
-  private SlewRateLimiter velocityLimiter = new SlewRateLimiter(1);
+  private SlewRateLimiter velocityLimiter = new SlewRateLimiter(6.28);
   // Open-loop drive in turret radians per second
   private SimpleMotorFeedforward turretFF = new SimpleMotorFeedforward(
 
@@ -139,7 +139,7 @@ public class TurretS extends SubsystemBase implements Loggable {
    * Set the velocity of the turret 
    */
   public void turnVelocityOpenLoop(double velocity) {
-    velocity = MathUtil.clamp(velocity, -TURRET_MAX_SPEED, TURRET_MAX_SPEED);
+    //velocity = MathUtil.clamp(velocity, -TURRET_MAX_SPEED, TURRET_MAX_SPEED);
     setVelocity(velocity);
   }
 
@@ -183,9 +183,12 @@ public class TurretS extends SubsystemBase implements Loggable {
 
   public void setVelocity(double velocity) {
     sparkMax.setVoltage(
-      MathUtil.clamp(
-        velocityLimiter.calculate(turretFF.calculate(velocity)), -1.5, 1.5)
+        /*velocityLimiter.calculate*/(turretFF.calculate(velocity))
     );
+  }
+
+  public void setVoltage(double voltage) {
+    sparkMax.setVoltage(voltage);
   }
 
   /**

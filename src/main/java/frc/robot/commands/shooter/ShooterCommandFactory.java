@@ -14,12 +14,12 @@ public class ShooterCommandFactory {
         return createShooterFollowC(
             ()->{
               return ShooterInterpolatingTable.get(
-                 distance.getAsDouble()/*NomadMathUtil.getDistance(navigationManager.getTOFAdjustedRobotToHubTransform())*/
+                 distance.getAsDouble()
               ).frontWheelRpm;
             },
             ()->{
               return ShooterInterpolatingTable.get(
-                distance.getAsDouble()/*NomadMathUtil.getDistance(navigationManager.getTOFAdjustedRobotToHubTransform())*/
+                distance.getAsDouble()
               ).backWheelRpm;
             },
             shooterS);

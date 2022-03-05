@@ -8,7 +8,6 @@ import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.RamseteCommand;
 import frc.robot.Constants;
 import frc.robot.subsystems.DrivebaseS;
-import frc.robot.util.pose.NavigationManager;
 
 /** Factory class to create drive commands */
 public class DrivebaseCommandFactory {
@@ -33,7 +32,8 @@ public class DrivebaseCommandFactory {
         interrupted -> {
           drivebaseS.stopAll();
         },
-        () -> false, drivebaseS)
+        () -> false,
+        drivebaseS)
             .withName("CurvatureDriveC");
   }
 
@@ -56,10 +56,10 @@ public class DrivebaseCommandFactory {
             .withName("DriveTimedC");
   }
 
-  public static Command createRamseteC(Trajectory trajectory, NavigationManager navigationManager, DrivebaseS drivebaseS) {
+  public static Command createRamseteC(Trajectory trajectory, DrivebaseS drivebaseS) {
     return new RamseteCommand(
         trajectory,
-        navigationManager::getEstimatedRobotPose,
+        drivebaseS::getRobotPose,
         drivebaseS.ramseteController,
         Constants.DRIVEBASE_KINEMATICS,
         drivebaseS::tankDriveVelocity,

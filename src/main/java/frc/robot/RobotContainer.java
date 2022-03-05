@@ -29,7 +29,6 @@ import frc.robot.subsystems.LimelightS;
 import frc.robot.subsystems.MidtakeS;
 import frc.robot.subsystems.ShooterS;
 import frc.robot.subsystems.TurretS;
-import frc.robot.util.pose.NavigationManager;
 import io.github.oblarg.oblog.annotations.Config;
 import io.github.oblarg.oblog.annotations.Log;
 
@@ -75,14 +74,11 @@ public class RobotContainer {
   @Config
   private Command shooterTestC;
 
-  private Trigger targetDistanceInRangeTrigger;
   private Trigger shooterReadyTrigger;
   private Trigger turretReadyTrigger;
   private Trigger ballReadyTrigger;
 
   private Trigger shootBallTrigger;
-
-  private NavigationManager navigationManager;
 
 
   public RobotContainer() {
@@ -114,14 +110,7 @@ public class RobotContainer {
     turretS = new TurretS();
     shooterS = new ShooterS();
     climberS = new ClimberS();
-    navigationManager = new NavigationManager(
-      drivebaseS::getRobotPose,
-      drivebaseS::getRotation2d,
-      drivebaseS::getChassisSpeeds,
-      turretS::getRobotToTurretRotation,
-      turretS::setTransformVelocity);
-    navigationManager.setVisionEnabled(false);
-    limelightS = new LimelightS(navigationManager,
+    limelightS = new LimelightS(
     (list)->{field.getObject("targetRing").setPoses(list);});
   }
 
@@ -137,10 +126,12 @@ public class RobotContainer {
         drivebaseS);
     drivebaseS.setDefaultCommand(xboxDriveCommand);
 
+
+
     visionSpinAndAimC = MainCommandFactory.createVisionSpinupAndAimC(limelightS, turretS, shooterS);
 
     turretAimC = TurretCommandFactory.createTurretVisionC(limelightS, turretS);
-    turretManualC = TurretCommandFactory.createTurretManualC(driverController::getRightX, turretS);
+    turretManualC = TurretCommandFactory.createTurretManualC(()->-operatorController.getRightX(), turretS);
     turretS.setDefaultCommand(turretManualC);
     
     shooterSpinC = ShooterCommandFactory.createShooterDistanceSpinupC(limelightS::getFilteredDistance, shooterS);
@@ -156,7 +147,6 @@ public class RobotContainer {
   }
 
   public void createTriggers() {
-    targetDistanceInRangeTrigger = new Trigger(()->NavigationManager.getDistanceInRange(limelightS.getFilteredDistance()));
     turretReadyTrigger = new Trigger(()->{return Math.abs(limelightS.getFilteredXOffset()) < 0.1;});
     shooterReadyTrigger = new Trigger(shooterS::isAtTarget);
     ballReadyTrigger = new Trigger(()->{return midtakeS.getStoredCargo() > 0;});
@@ -177,15 +167,24 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
-    driverController.a().whileActiveContinuous(runIntakeC).whenInactive(IntakeCommandFactory.createIntakeStopAndRetractCG(intakeS));
-    driverController.x().whileActiveContinuous(visionSpinAndAimC);
+    driverController.a().whileActiveContinuous(runIntakeC).whenInactive(IntakeCommandFactory.createIntakeStopAndRetractCG(intakeS));    // //driverController.x().whileActiveContinuous(turretAimC);
+    operatorController.rightBumper().whenActive(
+      TurretCommandFactory.createTurretAdjustC( Units.degreesToRadians(-5),
+      turretS)
+    );
+    operatorController.leftBumper().whenActive(
+      TurretCommandFactory.createTurretAdjustC( Units.degreesToRadians(5),
+      turretS)
+    );
+    
     //driverController.rightBumper() does (midtakeFeedOneC) when ready to fire.
     shootBallTrigger.whenActive(midtakeFeedOneC);
-    //driverController.leftBumper() feeds whenever the shooter RPM is above 1000;
-    driverController.leftBumper().and(new Trigger(()->(shooterS.getFrontEncoderSpeed() > 1000))).whileActiveContinuous(midtakeFeedC);
+    operatorController.x().whileActiveOnce(new ShooterTestC(shooterS));
+    // //driverController.leftBumper() feeds whenever the shooter RPM is above 1000;
+    operatorController.y().and(new Trigger(()->(shooterS.getFrontEncoderSpeed() > 1000))).whileActiveOnce(midtakeFeedC).whenInactive(MidtakeCommandFactory.createMidtakeStopC(midtakeS));
     
-    operatorController.a().whileActiveOnce(climberForwardC);
-    operatorController.b().whileActiveOnce(climberBackC);
+    //operatorController.a().whileActiveOnce(climberForwardC);
+    //operatorController.b().whileActiveOnce(climberBackC);
   }
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
@@ -203,37 +202,26 @@ public class RobotContainer {
   }
 
   public void robotPeriodic() {
-    navigationManager.update();
     
-    /*Field2d setup */
-    if(RobotBase.isSimulation()) {
-      field.setRobotPose(new Pose2d(
-        MathUtil.clamp(drivebaseS.getRobotPose().getX(), 0, Units.feetToMeters(54)),
-        MathUtil.clamp(drivebaseS.getRobotPose().getY(), 0, Units.feetToMeters(27)),
-        drivebaseS.getRobotPose().getRotation()
-      ));
-    }
-    else {
-      field.setRobotPose(drivebaseS.getRobotPose());
-    }
+    // /*Field2d setup */
+    // if(RobotBase.isSimulation()) {
+    //   field.setRobotPose(new Pose2d(
+    //     MathUtil.clamp(drivebaseS.getRobotPose().getX(), 0, Units.feetToMeters(54)),
+    //     MathUtil.clamp(drivebaseS.getRobotPose().getY(), 0, Units.feetToMeters(27)),
+    //     drivebaseS.getRobotPose().getRotation()
+    //   ));
+    // }
+    // else {
+    //   field.setRobotPose(drivebaseS.getRobotPose());
+    // }
 
 
-    
+    // field.getObject("Turret").setPose(field.getRobotPose().transformBy(
+    //   new Transform2d(new Translation2d(), turretS.getRobotToTurretRotation())
 
-/*     field.getObject("estRobot").setPose(
-      navigationManager.getEstimatedRobotPose());
+    //   )
+    // );
 
-    field.getObject("tofTarget").setPose(drivebaseS.getRobotPose().transformBy(navigationManager.getTOFAdjustedRobotToHubTransform()));
-
-    field.getObject("target").setPose(drivebaseS.getRobotPose().transformBy(navigationManager.getRobotToHubTransform()));
-       */
-    field.getObject("Turret").setPose(field.getRobotPose().transformBy(
-      new Transform2d(new Translation2d(), turretS.getRobotToTurretRotation())
-
-      )
-    );
-
-    //field.getObject("camera").setPose(drivebaseS.getRobotPose().transformBy(navigationManager.getRobotToCameraTransform()));
     
   }
 }

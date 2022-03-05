@@ -1,11 +1,13 @@
 package frc.robot.commands.turret;
 
+import java.util.Set;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
+import edu.wpi.first.wpilibj2.command.Subsystem;
 import frc.robot.Constants;
 import frc.robot.subsystems.LimelightS;
 import frc.robot.subsystems.TurretS;
@@ -57,6 +59,43 @@ public class TurretCommandFactory {
                         .withName("TurretTurnC");
     }
 
+    public static Command createTurretAdjustC(double angle, TurretS turretS) {
+        return new Command() {
+            private Rotation2d setpoint;
+
+            @Override
+            public void initialize() {
+                // TODO Auto-generated method stub
+                Command.super.initialize();
+                setpoint = new Rotation2d(turretS.getEncoderCounts() + angle);
+            }
+
+            @Override
+            public void execute() {
+                turretS.setTurretAngle(setpoint);
+            }
+
+            @Override
+            public boolean isFinished() {
+                return turretS.isAtTarget();
+            }
+            
+            @Override
+            public void end(boolean interrupted) {
+                turretS.stopMotor();
+            }
+
+            @Override
+            public Set<Subsystem> getRequirements() {
+                // TODO Auto-generated method stub
+                return Set.of(turretS);
+            }
+
+            
+        } .withTimeout(0.5);
+    }
+
+
     /**
      * Creates a TurretFollowC, which uses PID to point the turret to the given
      * angle, where the robot front is 0;
@@ -84,7 +123,10 @@ public class TurretCommandFactory {
         return new FunctionalCommand(limelightS::ledsOn,
         ()->{
             if (limelightS.hasTarget()) {
-                turretS.turnVelocityOpenLoop(limelightS.getFilteredXOffset() * Constants.TURRET_P);
+                turretS.setVoltage(limelightS.getFilteredXOffset()* 4 * Constants.TURRET_FF[1]);
+            }
+            else {
+                turretS.stopMotor();
             }
             
         },

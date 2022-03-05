@@ -8,6 +8,7 @@ import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.RamseteController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
@@ -71,9 +72,10 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
     / DRIVEBASE_ENCODER_ROTATIONS_PER_WHEEL_ROTATION / 60);
     backRight.restoreFactoryDefaults();
     backLeft.restoreFactoryDefaults();
-    frontRight.setIdleMode(IdleMode.kBrake);
-    frontLeft.setIdleMode(IdleMode.kBrake);
-    frontRight.setInverted(true);
+    frontRight.setIdleMode(IdleMode.kCoast);
+    frontLeft.setIdleMode(IdleMode.kCoast);
+    frontLeft.setInverted(true);
+    backLeft.setInverted(true);
     backRight.follow(frontRight, false);
     backLeft.follow(frontLeft, false);
 
@@ -122,8 +124,8 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
    * Forward back is from 1 to -1, turn is from 1 to -1
    */
   public void curvatureDrive(double fwdBack, double turn) {
-    fwdBack = deadbandJoysticks(fwdBack);
-    turn = deadbandJoysticks(turn);
+    fwdBack = MathUtil.applyDeadband(fwdBack, 0.02);
+    turn = MathUtil.applyDeadband(turn, 0.02);
     fwdBack = fwdBackLimiter.calculate(fwdBack);
     turn = turnLimiter.calculate(turn);
     boolean quickTurn = false;
@@ -144,8 +146,8 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
   public void tankDrive(double left, double right) {
     SmartDashboard.putNumber("leftSpeed", left);
     SmartDashboard.putNumber("rightSpeed", right);
-    frontLeft.setVoltage(left * RobotController.getInputVoltage());
-    frontRight.setVoltage(right * RobotController.getInputVoltage());
+    frontLeft.setVoltage(left * 6);
+    frontRight.setVoltage(right * 6);
   }
 
   public void tankDriveVelocity(double leftVelocityMPS, double rightVelocityMPS) {
@@ -249,9 +251,12 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
 
   public void resetRobotPose(Pose2d pose) {
     odometry.resetPosition(pose, getRotation2d());
-    m_driveSim.setPose(
-      odometry.getPoseMeters()
-    );
+    if(RobotBase.isSimulation()) {
+      m_driveSim.setPose(
+        odometry.getPoseMeters()
+      );
+    }
+
     resetEncoders(); 
        
   }

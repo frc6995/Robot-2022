@@ -59,6 +59,7 @@ public class MidtakeS extends SubsystemBase implements Loggable{
     frontSparkMax.restoreFactoryDefaults();
     frontSparkMax.setInverted(true);
     backSparkMax.restoreFactoryDefaults();
+    
   }
 
   /**

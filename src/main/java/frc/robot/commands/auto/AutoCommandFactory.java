@@ -9,6 +9,8 @@ import frc.robot.commands.IntakeCommandFactory;
 import frc.robot.commands.MainCommandFactory;
 import frc.robot.commands.MidtakeCommandFactory;
 import frc.robot.commands.drivebase.DrivebaseCommandFactory;
+import frc.robot.commands.shooter.ShooterCommandFactory;
+import frc.robot.commands.turret.TurretCommandFactory;
 import frc.robot.subsystems.DrivebaseS;
 import frc.robot.subsystems.IntakeS;
 import frc.robot.subsystems.LimelightS;
@@ -61,8 +63,8 @@ public class AutoCommandFactory {
                                         MidtakeCommandFactory.createMidtakeFeedOneC(midtakeS))                        
                                 .andThen(
                                         MidtakeCommandFactory.createMidtakeFeedOneC(midtakeS))
-                        ), 
-                        MainCommandFactory.createVisionSpinupAndAimC(limelightS, turretS, shooterS)
+                        ),
+                        ShooterCommandFactory.createShooterDistanceSpinupC(()->4, shooterS)
                 )
                 .andThen(
                         new InstantCommand(

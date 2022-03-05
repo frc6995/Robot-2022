@@ -34,7 +34,6 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants;
 import frc.robot.util.SimCamera;
-import frc.robot.util.pose.NavigationManager;
 import io.github.oblarg.oblog.Loggable;
 import io.github.oblarg.oblog.annotations.Log;
 
@@ -45,13 +44,12 @@ import io.github.oblarg.oblog.annotations.Log;
  */
 
 public class LimelightS extends SubsystemBase implements Loggable {
-  NavigationManager navigationManager;
   Supplier<Rotation2d> turretAngleSupplier;
   PhotonCamera limelight = new PhotonCamera("gloworm");
 
 
   // Sim stuff
-  SimCamera limelightSimVisionSystem;
+  //SimCamera limelightSimVisionSystem;
   Trigger hasSteadyTarget = new Trigger(() -> limelight.getLatestResult().hasTargets()).debounce(0.5);
 
   LinearFilter xOffsetFilter = LinearFilter.singlePoleIIR(Constants.LIMELIGHT_FILTER_TIME_CONSTANT, Constants.LIMELIGHT_FILTER_PERIOD_CONSTANT);
@@ -63,39 +61,36 @@ public class LimelightS extends SubsystemBase implements Loggable {
   private double lastValidDistance = 0;
   public final Trigger hasTargetTrigger = new Trigger(this::hasTarget);
   /** Creates a new LimelightS. */
-  public LimelightS(NavigationManager navigationManager,
-      Consumer<List<Pose2d>> addFieldVisionTargets) {
+  public LimelightS(      Consumer<List<Pose2d>> addFieldVisionTargets) {
         NetworkTableInstance.getDefault().getTable("photonvision").getEntry("version").setString(
           PhotonVersion.versionString
         );
-        this.navigationManager = navigationManager;
-    this.turretAngleSupplier = ()->navigationManager.getRobotToTurretTransform().getRotation();
 
-    if (!RobotBase.isReal()) {
-      limelightSimVisionSystem = new SimCamera(
-          "gloworm",
-          CAMERA_DIAG_FOV_DEGREES, Units.radiansToDegrees(CAMERA_PITCH_RADIANS),
-          new Transform2d(
-              new Translation2d(
-                  CAMERA_CENTER_OFFSET, Rotation2d.fromDegrees(0)),
-              new Rotation2d()),
-          CAMERA_HEIGHT_METERS, 4, CAMERA_HORIZ_RES, CAMERA_VERT_RES, 5);
-      // Set up the target ring
-      ArrayList<Pose2d> targetPoseList = new ArrayList<>();
-      for (int i = 0; i < TAPE_STRIP_COUNT; i++) {
+  //   if (!RobotBase.isReal()) {
+  //     limelightSimVisionSystem = new SimCamera(
+  //         "gloworm",
+  //         CAMERA_DIAG_FOV_DEGREES, Units.radiansToDegrees(CAMERA_PITCH_RADIANS),
+  //         new Transform2d(
+  //             new Translation2d(
+  //                 CAMERA_CENTER_OFFSET, Rotation2d.fromDegrees(0)),
+  //             new Rotation2d()),
+  //         CAMERA_HEIGHT_METERS, 4, CAMERA_HORIZ_RES, CAMERA_VERT_RES, 5);
+  //     // Set up the target ring
+  //     ArrayList<Pose2d> targetPoseList = new ArrayList<>();
+  //     for (int i = 0; i < TAPE_STRIP_COUNT; i++) {
 
-        Pose2d targetPose = HUB_CENTER_POSE
-            .transformBy(
-                new Transform2d(
-                    new Translation2d(
-                        HUB_RADIUS_METERS,
-                        Rotation2d.fromDegrees(360.0 * i / TAPE_STRIP_COUNT)),
-                    Rotation2d.fromDegrees(360.0 * i / TAPE_STRIP_COUNT)));
-        targetPoseList.add(targetPose);
-      } 
+  //       Pose2d targetPose = HUB_CENTER_POSE
+  //           .transformBy(
+  //               new Transform2d(
+  //                   new Translation2d(
+  //                       HUB_RADIUS_METERS,
+  //                       Rotation2d.fromDegrees(360.0 * i / TAPE_STRIP_COUNT)),
+  //                   Rotation2d.fromDegrees(360.0 * i / TAPE_STRIP_COUNT)));
+  //       targetPoseList.add(targetPose);
+  //     } 
       
-      addFieldVisionTargets.accept(targetPoseList);
-    }
+  //     addFieldVisionTargets.accept(targetPoseList);
+  //   }
   }
 
   /**
@@ -129,11 +124,11 @@ public class LimelightS extends SubsystemBase implements Loggable {
   public boolean hasTarget(){
     return limelight.getLatestResult().hasTargets();
   }
-
+  @Log
   public double getFilteredXOffset() {
     return filteredXOffsetRadians;
   }
-
+  @Log
   public double getFilteredDistance() {
     return filteredDistanceMeters;
   }
@@ -143,34 +138,29 @@ public class LimelightS extends SubsystemBase implements Loggable {
    */
   @Override
   public void periodic() {
-    Transform2d cameraToRobotTrans = navigationManager.getRobotToCameraTransform().inverse();
-    if (!RobotBase.isReal()) {
-    limelightSimVisionSystem.moveCamera(
-      cameraToRobotTrans,
-      CAMERA_HEIGHT_METERS,
-      Units.radiansToDegrees(CAMERA_PITCH_RADIANS));
-      limelightSimVisionSystem.processFrame(navigationManager.getCurrentRobotPose());
-    }
-
-    if (hasTarget()) {
+    if ( limelight.getLatestResult().hasTargets()) {
       PhotonTrackedTarget target = limelight.getLatestResult().getBestTarget();
-      double distance = PhotonUtils.calculateDistanceToTargetMeters(
-        CAMERA_HEIGHT_METERS,
-        TARGET_HEIGHT_METERS,
-        CAMERA_PITCH_RADIANS,
-        Units.degreesToRadians(target.getPitch())) + Constants.CAMERA_CENTER_OFFSET + Constants.HUB_RADIUS_METERS;
-
-      filteredXOffsetRadians = xOffsetFilter.calculate(Units.degreesToRadians(-target.getYaw()));
-      filteredDistanceMeters = distanceFilter.calculate(distance);
-      lastValidDistance = distance;
-
-      if (hasSteadyTarget.get()) {
-        navigationManager.addVisionMeasurement(target);
+      if(target!=null) {
+        double distance = PhotonUtils.calculateDistanceToTargetMeters(
+          CAMERA_HEIGHT_METERS,
+          TARGET_HEIGHT_METERS,
+          CAMERA_PITCH_RADIANS,
+          Units.degreesToRadians(target.getPitch())) + Constants.CAMERA_CENTER_OFFSET + Constants.HUB_RADIUS_METERS;
+  
+        filteredXOffsetRadians = xOffsetFilter.calculate(Units.degreesToRadians(-target.getYaw()));
+        filteredDistanceMeters = distanceFilter.calculate(distance);
+        lastValidDistance = distance;
       }
-    } else {
-      filteredXOffsetRadians = xOffsetFilter.calculate(0); // Because this is used in a limited range mechanism (turret), reduce error to zero
-      filteredDistanceMeters = distanceFilter.calculate(lastValidDistance);
-    }  
+       else {
 
+        filteredXOffsetRadians = 0; //xOffsetFilter.calculate(0); // Because this is used in a limited range mechanism (turret), reduce error to zero
+        filteredDistanceMeters = distanceFilter.calculate(lastValidDistance);
+      }  
+
+    }
+    else {
+      filteredXOffsetRadians = 0; //xOffsetFilter.calculate(0); // Because this is used in a limited range mechanism (turret), reduce error to zero
+      filteredDistanceMeters = distanceFilter.calculate(lastValidDistance);
+    }
   }
 }

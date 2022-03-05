@@ -44,7 +44,10 @@ public class MidtakeCommandFactory {
 
     public static Command createMidtakeIndexCG(MidtakeS midtakeS) {
         return new RepeatCommand(
-            new WaitUntilCommand(midtakeS::getIsBottomBeamBroken)
+            new WaitUntilCommand(midtakeS::getIsBottomBeamBroken).alongWith(
+                new WaitUntilCommand(()->!midtakeS.getIsTopBeamBroken())
+            )
+            
             .andThen(
                 createMidtakeLoadC(midtakeS)
                 .withInterrupt(()->!midtakeS.getIsBottomBeamBroken())

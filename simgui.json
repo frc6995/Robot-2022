@@ -170,6 +170,7 @@
         {
           "axis": [
             {
+              "autoFit": true,
               "lockMin": true
             }
           ],

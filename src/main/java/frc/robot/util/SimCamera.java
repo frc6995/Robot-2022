@@ -98,7 +98,7 @@ public class SimCamera {
         this.camHorizFOVDegrees = camDiagFOVDegrees * cameraResWidth / hypotPixels;
         this.camVertFOVDegrees = camDiagFOVDegrees * cameraResHeight / hypotPixels;
         
-        NetworkTableInstance.getDefault().getTable("photonvision").getEntry("version").setString(PhotonVersion.versionString);
+        //NetworkTableInstance.getDefault().getTable("photonvision").getEntry("version").setString(PhotonVersion.versionString);
         cam = new SimPhotonCamera(camName);
     }
 

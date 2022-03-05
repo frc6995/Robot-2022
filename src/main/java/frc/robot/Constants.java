@@ -135,10 +135,10 @@ public final class Constants {
     
    // Shooter Constants
     /** Can ids for front shooter motor */
-    public static final int CAN_ID_FRONT_SHOOTER_MOTOR = 41;
+    public static final int CAN_ID_FRONT_SHOOTER_MOTOR = 40;
 
     /** Can id for back shooter motor */
-    public static final int CAN_ID_BACK_SHOOTER_MOTOR = 40;
+    public static final int CAN_ID_BACK_SHOOTER_MOTOR = 41;
 
     /** Shooter front wheel feed forward */
     public static final double[] SHOOTER_FRONT_FF = { 0.16382, 0.12618, 0.0038694 };
