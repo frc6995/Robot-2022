@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.IntakeCommandFactory;
@@ -131,12 +132,12 @@ public class RobotContainer {
     visionSpinAndAimC = MainCommandFactory.createVisionSpinupAndAimC(limelightS, turretS, shooterS);
 
     turretAimC = TurretCommandFactory.createTurretVisionC(limelightS, turretS);
-    turretManualC = TurretCommandFactory.createTurretManualC(()->-operatorController.getRightX(), turretS);
+    turretManualC = TurretCommandFactory.createTurretManualC(()->-operatorController.getLeftX(), turretS);
     turretS.setDefaultCommand(turretManualC);
     
     shooterSpinC = ShooterCommandFactory.createShooterDistanceSpinupC(limelightS::getFilteredDistance, shooterS);
     shooterTestC = new ShooterTestC(shooterS);
-    runIntakeC = IntakeCommandFactory.createIntakeDeployAndRunCG(intakeS);
+    runIntakeC = IntakeCommandFactory.createIntakeToggleRunC(intakeS);
     midtakeIndexCG = MidtakeCommandFactory.createMidtakeIndexCG(midtakeS);
     midtakeS.setDefaultCommand(midtakeIndexCG);
     midtakeFeedC = MidtakeCommandFactory.createMidtakeFeedC(midtakeS);
@@ -167,7 +168,7 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
-    driverController.a().whileActiveContinuous(runIntakeC).whenInactive(IntakeCommandFactory.createIntakeStopAndRetractCG(intakeS));    // //driverController.x().whileActiveContinuous(turretAimC);
+    driverController.a().toggleWhenActive(runIntakeC);
     operatorController.rightBumper().whenActive(
       TurretCommandFactory.createTurretAdjustC( Units.degreesToRadians(-5),
       turretS)
@@ -179,12 +180,25 @@ public class RobotContainer {
     
     //driverController.rightBumper() does (midtakeFeedOneC) when ready to fire.
     shootBallTrigger.whenActive(midtakeFeedOneC);
-    operatorController.x().whileActiveOnce(new ShooterTestC(shooterS));
+    //operatorController.a().toggleWhenActive(new ShooterTestC(shooterS));
+    new Trigger(()->{return (operatorController.getRightTriggerAxis() >= 0.5);}).whileActiveContinuous(visionSpinAndAimC);
+    //operatorController.a().toggleWhenActive(shooterSpinC);
     // //driverController.leftBumper() feeds whenever the shooter RPM is above 1000;
     operatorController.y().and(new Trigger(()->(shooterS.getFrontEncoderSpeed() > 1000))).whileActiveOnce(midtakeFeedC).whenInactive(MidtakeCommandFactory.createMidtakeStopC(midtakeS));
     
     //operatorController.a().whileActiveOnce(climberForwardC);
     //operatorController.b().whileActiveOnce(climberBackC);
+  }
+
+  public void disableAll() {
+    CommandScheduler.getInstance().cancelAll();
+    shooterS.stop();
+    turretS.stopMotor();
+    intakeS.stop();
+    intakeS.retract();
+    midtakeS.stop();
+    drivebaseS.stopAll();
+
   }
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.

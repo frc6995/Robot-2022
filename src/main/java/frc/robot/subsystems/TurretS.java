@@ -14,6 +14,7 @@ import static frc.robot.Constants.TURRET_P;
 import static frc.robot.Constants.TURRET_PID_ERROR;
 
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMax.SoftLimitDirection;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.RelativeEncoder;
@@ -80,6 +81,7 @@ public class TurretS extends SubsystemBase implements Loggable {
     sparkMax.setSoftLimit(SoftLimitDirection.kForward, (float) SOFT_LIMIT_FORWARD_RADIAN);
     sparkMax.setSoftLimit(SoftLimitDirection.kReverse, (float) SOFT_LIMIT_REVERSE_RADIAN);
     turretPID.setTolerance(TURRET_PID_ERROR, 0);
+    sparkMax.setIdleMode(IdleMode.kBrake);
     sparkMax.setSmartCurrentLimit(20, 20, 0);
     turretPID.setIntegratorRange(0, 0);
     SmartDashboard.putBoolean("requestTurrReset", false);

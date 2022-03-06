@@ -59,7 +59,7 @@ public final class Constants {
 
 
     /** Slew limit for drivebase forward back motors */
-    public static final double DRIVEBASE_FWD_BACK_SLEW_LIMIT = 1; // 0 to 100% in one second.
+    public static final double DRIVEBASE_FWD_BACK_SLEW_LIMIT = 2.0; // 0 to 100% in one second.
 
     /** Drivebase encoder rotations per wheel rotation. */
     public static final double DRIVEBASE_ENCODER_ROTATIONS_PER_WHEEL_ROTATION = (28.0/20.0) * (64.0/12.0);
@@ -264,7 +264,7 @@ public final class Constants {
     public static final int DOUBLE_SOLENOID_INTAKE_PORT_RETRACT = 0;
 
     /** Speed at which the intake motor moves */
-    public static final double INTAKE_SPEED = 0.25;
+    public static final double INTAKE_SPEED = 0.75;
 
     /** Speed at which the intake ejects balls */
     public static final double INTAKE_EJECT_SPEED = -0.5;

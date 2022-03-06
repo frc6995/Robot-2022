@@ -49,7 +49,7 @@ public class AutoCommandFactory {
                                 // Spins up the front and back shooter motors to the set target speeds
                                 // Drives at 25% speed for 7 seconds or until the color sensor detects a ball
                                 // present
-                                DrivebaseCommandFactory.createTimedDriveC(.1, 2.5, drivebaseS)
+                                DrivebaseCommandFactory.createTimedDriveC(.3, 2.5, drivebaseS)
                                         .withInterrupt(midtakeS::getIsBottomBeamBroken),
                                 new ParallelDeadlineGroup(
                                         IntakeCommandFactory.createIntakeDeployAndRunCG(intakeS)
@@ -59,12 +59,11 @@ public class AutoCommandFactory {
                                         MidtakeCommandFactory.createMidtakeIndexCG(midtakeS)
                                 )                       
                                 // Spins the midtake to feed the shooter
-                                .andThen(
-                                        MidtakeCommandFactory.createMidtakeFeedOneC(midtakeS))                        
-                                .andThen(
-                                        MidtakeCommandFactory.createMidtakeFeedOneC(midtakeS))
+                                .andThen( new WaitCommand(3)).andThen(
+                                        MidtakeCommandFactory.createMidtakeFeedC(midtakeS))
                         ),
-                        ShooterCommandFactory.createShooterDistanceSpinupC(()->4, shooterS)
+                        TurretCommandFactory.createTurretVisionC(limelightS, turretS),
+                        ShooterCommandFactory.createShooterDistanceSpinupC(limelightS::getFilteredDistance, shooterS)
                 )
                 .andThen(
                         new InstantCommand(

@@ -91,6 +91,21 @@ public class IntakeCommandFactory {
         );
     }
 
+    public static Command createIntakeToggleRunC(IntakeS intakeS) {
+        return new FunctionalCommand(
+            ()->{intakeS.deploy();
+            },
+            ()->{intakeS.spin();},
+            
+            (interrupted) -> {
+                intakeS.stop();
+                intakeS.retract();
+            },
+            ()->{return false;},
+            intakeS
+        );
+    }
+
     public static Command createIntakeStopAndRetractCG(IntakeS intakeS) {
         return new InstantCommand(
             () -> {
