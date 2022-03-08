@@ -13,6 +13,8 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.IntakeCommandFactory;
 import frc.robot.commands.MainCommandFactory;
@@ -69,8 +71,8 @@ public class RobotContainer {
   private Command midtakeFeedOneC;
   private Command midtakeIndexCG;
   private Command runIntakeC;
-  private Command climberForwardC;
-  private Command climberBackC;
+  private Command climberRetractTwoC;
+  private Command climberExtendTwoC;
   @Log
   @Config
   private Command shooterTestC;
@@ -143,8 +145,8 @@ public class RobotContainer {
     midtakeFeedC = MidtakeCommandFactory.createMidtakeFeedC(midtakeS);
     midtakeFeedOneC = MidtakeCommandFactory.createMidtakeFeedOneC(midtakeS);
 
-    climberBackC = ClimberCommandFactory.createClimberBackC(climberS);
-    climberForwardC = ClimberCommandFactory.createClimberForwardC(climberS);
+    climberExtendTwoC = ClimberCommandFactory.createClimberExtendArmTwoC(climberS);
+    climberRetractTwoC = ClimberCommandFactory.createClimberRetractArmTwoC(climberS);
   }
 
   public void createTriggers() {
@@ -169,7 +171,11 @@ public class RobotContainer {
    */
   private void configureButtonBindings() {
     driverController.a().toggleWhenActive(runIntakeC);
-    operatorController.rightBumper().whenActive(
+    driverController.b().whileActiveOnce(IntakeCommandFactory.createIntakeEjectC(intakeS));
+    driverController.x().whileActiveOnce(
+      MidtakeCommandFactory.createMidtakeReverseC(midtakeS)
+      .alongWith(IntakeCommandFactory.createIntakeEjectC(intakeS)));
+    driverController.rightBumper().whenActive(
       TurretCommandFactory.createTurretAdjustC( Units.degreesToRadians(-5),
       turretS)
     );
@@ -181,13 +187,13 @@ public class RobotContainer {
     //driverController.rightBumper() does (midtakeFeedOneC) when ready to fire.
     shootBallTrigger.whenActive(midtakeFeedOneC);
     //operatorController.a().toggleWhenActive(new ShooterTestC(shooterS));
-    new Trigger(()->{return (operatorController.getRightTriggerAxis() >= 0.5);}).whileActiveContinuous(visionSpinAndAimC);
+    new Trigger(()->{return (operatorController.getRightTriggerAxis() >= 0.5);}).whileActiveContinuous(turretAimC.alongWith(shooterTestC));
     //operatorController.a().toggleWhenActive(shooterSpinC);
     // //driverController.leftBumper() feeds whenever the shooter RPM is above 1000;
-    operatorController.y().and(new Trigger(()->(shooterS.getFrontEncoderSpeed() > 1000))).whileActiveOnce(midtakeFeedC).whenInactive(MidtakeCommandFactory.createMidtakeStopC(midtakeS));
+    operatorController.y()/*.and(new Trigger(()->(shooterS.getFrontEncoderSpeed() > 1000)))*/.whileActiveOnce(midtakeFeedC).whenInactive(MidtakeCommandFactory.createMidtakeStopC(midtakeS));
     
-    //operatorController.a().whileActiveOnce(climberForwardC);
-    //operatorController.b().whileActiveOnce(climberBackC);
+    operatorController.back().whileActiveOnce(new RunCommand(climberS::spinTwo, climberS)).whenInactive(new InstantCommand(climberS::stopMotorArmTwo, climberS));
+    operatorController.start().whileActiveOnce(climberRetractTwoC);
   }
 
   public void disableAll() {

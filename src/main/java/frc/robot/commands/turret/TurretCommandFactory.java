@@ -123,7 +123,7 @@ public class TurretCommandFactory {
         return new FunctionalCommand(limelightS::ledsOn,
         ()->{
             if (limelightS.hasTarget()) {
-                turretS.setVoltage(limelightS.getFilteredXOffset()* 4 * Constants.TURRET_FF[1]);
+                turretS.setVoltage(limelightS.getFilteredXOffset()* 7 * Constants.TURRET_FF[1]);
             }
             else {
                 turretS.stopMotor();

@@ -10,9 +10,9 @@ public class ShooterTestC extends CommandBase implements Loggable {
   /** Creates a new ShooterC. */
   private ShooterS shooter;
   @Config
-  private double frontTargetRPM = 3000;
+  private double frontTargetRPM = 5000;
   @Config
-  private double backTargetRPM = 2700;
+  private double backTargetRPM = 3000;
 
   public ShooterTestC(ShooterS shooter) {
     this.shooter = shooter;

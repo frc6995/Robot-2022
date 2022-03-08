@@ -221,7 +221,7 @@ public final class Constants {
     public static final double MIDTAKE_LOADING_SPEED = 0.3;
 
     /** Midtake back motor speed */
-    public static final double MIDTAKE_FEEDING_SPEED = 0.6995;
+    public static final double MIDTAKE_FEEDING_SPEED = 0.8;
 
     // Limelight Constants
 

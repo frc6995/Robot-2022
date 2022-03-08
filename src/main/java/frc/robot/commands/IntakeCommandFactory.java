@@ -37,6 +37,23 @@ public class IntakeCommandFactory {
 
     }
 
+    public static Command createIntakeEjectC(IntakeS intakeS) {
+        Command runIntake = new FunctionalCommand(
+                () -> {
+                    intakeS.deploy();
+                },
+                () -> {
+                    intakeS.eject();
+                },
+                (interrupted) -> {
+                    intakeS.stop();
+                    intakeS.retract();
+                },
+                () -> false, intakeS);
+        return runIntake;
+
+    }
+
     /**
      * Deploys the intake
      * 

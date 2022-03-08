@@ -32,6 +32,18 @@ public class MidtakeCommandFactory {
         return runMidtake;
     }
 
+    public static Command createMidtakeReverseC(MidtakeS midtakeS) {
+        Command runMidtake = new FunctionalCommand(
+                () -> {
+                },
+                ()->{midtakeS.spin(-0.3);},
+                (interrupted) -> {
+                    midtakeS.stop();
+                },
+                () -> false, midtakeS);
+        return runMidtake;
+    }
+
     /**
      * Spins the mitake. Gets interrupted when the bottom beam is clear or when the top beam is broken
      * 

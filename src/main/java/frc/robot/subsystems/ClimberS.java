@@ -35,10 +35,19 @@ public class ClimberS extends SubsystemBase {
     sparkMax.enableSoftLimit(SoftLimitDirection.kReverse, true);
     sparkMax.setSoftLimit(SoftLimitDirection.kForward, Constants.CLIMBER_SOFT_LIMIT_FORWARD);
     sparkMax.setSoftLimit(SoftLimitDirection.kReverse, Constants.CLIMBER_SOFT_LIMIT_BACK);
+    backSparkMax.restoreFactoryDefaults();
+    // backSparkMax.enableSoftLimit(SoftLimitDirection.kForward, true);
+    // backSparkMax.enableSoftLimit(SoftLimitDirection.kReverse, true);
+    // backSparkMax.setSoftLimit(SoftLimitDirection.kForward, Constants.CLIMBER_SOFT_LIMIT_FORWARD);
+    // backSparkMax.setSoftLimit(SoftLimitDirection.kReverse, Constants.CLIMBER_SOFT_LIMIT_BACK);
     climberPID.setTolerance(Constants.CLIMBER_PID_ERROR, 0);
     climberPID.setIntegratorRange(0, 0);
     climberPIDTwo.setTolerance(Constants.CLIMBER_PID_ERROR, 0);
     climberPIDTwo.setIntegratorRange(0, 0);
+  }
+
+  public void spinTwo() {
+    backSparkMax.setVoltage(10);
   }
 
   /**
