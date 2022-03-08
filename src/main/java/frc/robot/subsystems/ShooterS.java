@@ -155,8 +155,8 @@ public class ShooterS extends SubsystemBase implements Loggable {
   public void pidFrontSpeed(double frontTargetRPM) {
     SmartDashboard.putNumber("frontTargetRPM", frontTargetRPM);
     frontSparkMax.setVoltage(
-        /*frontPID.calculate(getFrontEncoderSpeed() / 60.0, frontTargetRPM / 60.0)
-            + */frontFF.calculate(frontTargetRPM / 60.0));
+        /*frontPID.calculate(getFrontEncoderSpeed() / 60.0, frontTargetRPM / 60.0) + */
+        frontFF.calculate(frontTargetRPM / 60.0));
 
   }
 
@@ -168,7 +168,8 @@ public class ShooterS extends SubsystemBase implements Loggable {
   public void pidBackSpeed(double backTargetRPM) {
     SmartDashboard.putNumber("backTargetRPM", backTargetRPM);
     backSparkMax.setVoltage(
-        /*backPID.calculate(getBackEncoderSpeed() / 60.0, backTargetRPM / 60.0) + */backFF.calculate(backTargetRPM / 60.0));
+        /*backPID.calculate(getBackEncoderSpeed() / 60.0, backTargetRPM / 60.0) + */
+        backFF.calculate(backTargetRPM / 60.0));
   }
 
   /**
