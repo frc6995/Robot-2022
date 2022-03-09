@@ -8,55 +8,32 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.subsystems.ClimberS;
+import frc.robot.util.command.RunEndCommand;
 
 /** Add your docs here. */
 public class ClimberCommandFactory {
-    public static Command createClimberBackC(ClimberS climber) {
-        return new FunctionalCommand(
-            climber::climberDown,
-            ()->{},
-            (interrupted)->{climber.climberOff();},
-            ()->false,
-            climber);
+    public static Command createClimberBackC(ClimberS climberS) {
+        return new RunEndCommand(climberS::tiltBackward, climberS::tiltStop, climberS);
     }
 
-    public static Command createClimberExtendArmTwoC(ClimberS climber) {
-        return new FunctionalCommand(
-            ()->{},
-            ()->{climber.setClimberRotations(9);},
-            (interrupted)->{climber.stopMotorArmTwo();},
-            climber::atTarget,
-            climber);
+    public static Command createClimberForwardC(ClimberS climberS) {
+        return new RunEndCommand(climberS::tiltForward, climberS::tiltStop, climberS);
     }
 
-    public static Command createClimberExtendC(ClimberS climber) {
-        return new FunctionalCommand(
-            ()->{},
-            ()->{climber.setClimberRotations(9);},
-            (interrupted)->{climber.stopMotor();},
-            climber::atTarget,
-            climber);
+    public static Command createClimberExtendFrontC(ClimberS climberS) {
+        return new RunEndCommand(climberS::extendFront, climberS::stopFront, climberS);
     }
 
-    public static Command createClimberFoldDownC(ClimberS climber) {
-        return new InstantCommand(climber::climberDown);
+    public static Command createClimberRetractFrontC(ClimberS climberS) {
+        return new RunEndCommand(climberS::retractFront, climberS::stopFront, climberS);
     }
 
-    public static Command createClimberFoldUpC(ClimberS climber) {
-        return new InstantCommand(climber::climberUp);
+    public static Command createClimberRetractBackC(ClimberS climberS) {
+        return new RunEndCommand(climberS::retractBack, climberS::stopBack, climberS);
     }
 
-    public static Command createClimberForwardC(ClimberS climber) {
-        return new FunctionalCommand(climber::climberUp,
-        ()->{},
-        (interrupted) -> {climber.climberOff();}, ()->false, climber);
+    public static Command createClimberExtendBackC(ClimberS climberS) {
+        return new RunEndCommand(climberS::extendBack, climberS::stopBack, climberS);
     }
 
-    public static Command createClimberRetractArmTwoC(ClimberS climber) {
-        return new FunctionalCommand(()->{}, ()->{climber.setClimberRotations(0);}, (interrupted) -> {climber.stopMotorArmTwo();}, climber::atTarget, climber);
-    }
-
-    public static Command createClimberRetractC(ClimberS climber) {
-        return new FunctionalCommand(()->{}, ()->{climber.setClimberRotations(0);}, (interrupted) -> {climber.stopMotor();}, climber::atTarget, climber);
-    }
 }

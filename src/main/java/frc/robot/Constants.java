@@ -316,19 +316,28 @@ public final class Constants {
     /**
      * The max amount of rotations extending the climber
      */
-    public static final int CLIMBER_SOFT_LIMIT_FORWARD = 20;
+    public static final int CLIMBER_FRONT_SOFT_LIMIT_FORWARD = 5;
     /**
      * The maximum a mount of rotations retracting the climber
      */
-    public static final int CLIMBER_SOFT_LIMIT_BACK = -1;
+    public static final int CLIMBER_FRONT_SOFT_LIMIT_BACK = 0;
+
+        /**
+     * The max amount of rotations extending the climber
+     */
+    public static final double CLIMBER_BACK_SOFT_LIMIT_FORWARD = 370.0;
+    /**
+     * The maximum a mount of rotations retracting the climber
+     */
+    public static final double CLIMBER_BACK_SOFT_LIMIT_BACK = 0.0;
     /**
      * The port number of the double solenoid when it folds the climber up
      */
-    public static final int DOUBLE_SOLENOID_CLIMBER_UP = 2;
+    public static final int DOUBLE_SOLENOID_CLIMBER_FORWARD = 3;
     /**
      * The port number of the double solenoid when it folds the climber down
      */
-    public static final int DOUBLE_SOLENOID_CLIMBER_DOWN = 3;
+    public static final int DOUBLE_SOLENOID_CLIMBER_BACK = 2;
     /**
      * The CAN ID of the back climb motor
      */

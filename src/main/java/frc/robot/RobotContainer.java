@@ -48,6 +48,7 @@ public class RobotContainer {
 
   private CommandXboxController driverController;
   private CommandXboxController operatorController;
+  private CommandXboxController climberController;
 
   @Log
   public Field2d field = new Field2d();
@@ -100,6 +101,7 @@ public class RobotContainer {
   private void createControllers() {
     driverController = new CommandXboxController(Constants.USB_PORT_DRIVER_CONTROLLER);
     operatorController = new CommandXboxController(Constants.USB_PORT_OPERATOR_CONTROLLER);
+    climberController = new CommandXboxController(3);
   }
 
   /**
@@ -144,9 +146,6 @@ public class RobotContainer {
     midtakeS.setDefaultCommand(midtakeIndexCG);
     midtakeFeedC = MidtakeCommandFactory.createMidtakeFeedC(midtakeS);
     midtakeFeedOneC = MidtakeCommandFactory.createMidtakeFeedOneC(midtakeS);
-
-    climberExtendTwoC = ClimberCommandFactory.createClimberExtendArmTwoC(climberS);
-    climberRetractTwoC = ClimberCommandFactory.createClimberRetractArmTwoC(climberS);
   }
 
   public void createTriggers() {
@@ -192,8 +191,16 @@ public class RobotContainer {
     // //driverController.leftBumper() feeds whenever the shooter RPM is above 1000;
     operatorController.y()/*.and(new Trigger(()->(shooterS.getFrontEncoderSpeed() > 1000)))*/.whileActiveOnce(midtakeFeedC).whenInactive(MidtakeCommandFactory.createMidtakeStopC(midtakeS));
     
-    operatorController.back().whileActiveOnce(new RunCommand(climberS::spinTwo, climberS)).whenInactive(new InstantCommand(climberS::stopMotorArmTwo, climberS));
-    operatorController.start().whileActiveOnce(climberRetractTwoC);
+    climberController.pov.left().whileActiveContinuous(ClimberCommandFactory.createClimberBackC(climberS));
+    climberController.pov.right().whileActiveContinuous(ClimberCommandFactory.createClimberForwardC(climberS));
+
+    climberController.pov.up().whileActiveContinuous(ClimberCommandFactory.createClimberExtendBackC(climberS));
+    climberController.pov.down().whileActiveContinuous(ClimberCommandFactory.createClimberRetractBackC(climberS));
+
+    climberController.y().whileActiveContinuous(ClimberCommandFactory.createClimberExtendFrontC(climberS));
+    climberController.a().whileActiveContinuous(ClimberCommandFactory.createClimberRetractFrontC(climberS));
+
+
   }
 
   public void disableAll() {
