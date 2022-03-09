@@ -217,11 +217,14 @@ public final class Constants {
     /** Proximity threshold on the color sensor for detecting a ball*/
     public static final double COLOR_SENSOR_PROXIMITY_THRESHOLD = 250;
 
-    /** Midtake front motor speed */
+    /** Midtake loading speed */
     public static final double MIDTAKE_LOADING_SPEED = 0.3;
 
-    /** Midtake back motor speed */
+    /** Midtake feeding speed */
     public static final double MIDTAKE_FEEDING_SPEED = 0.8;
+
+    /** Midtake crawling speed, default behavior if no ball is detected. */
+    public static final double MIDTAKE_CRAWL_SPEED = 0.1;
 
     // Limelight Constants
 
@@ -330,6 +333,8 @@ public final class Constants {
      * The maximum a mount of rotations retracting the climber
      */
     public static final double CLIMBER_BACK_SOFT_LIMIT_BACK = 0.0;
+
+    public static final double CLIMBER_BACK_HOLDING_FF = 1;
     /**
      * The port number of the double solenoid when it folds the climber up
      */
@@ -354,5 +359,7 @@ public final class Constants {
      * The derivative constant for the back climber
      */
     public static final int BACK_CLIMBER_D_CONSTANT = 0;
+
+    
 
 }

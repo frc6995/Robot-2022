@@ -51,7 +51,7 @@ public class MidtakeS extends SubsystemBase implements Loggable{
   private int cargoIn = 0;
   private int cargoOut = 0;
   private boolean beamBreakTopBroken;
-
+  
   /**
    * Create a new MidtakeS
    */
@@ -87,8 +87,20 @@ public class MidtakeS extends SubsystemBase implements Loggable{
     spin(Constants.MIDTAKE_LOADING_SPEED);
   }
 
+  public void reverse() {
+    spin(-Constants.MIDTAKE_LOADING_SPEED);
+  }
+
   public void feed() {
     spin(Constants.MIDTAKE_FEEDING_SPEED);
+  }
+
+  public void crawl() {
+    spin(Constants.MIDTAKE_CRAWL_SPEED);
+  }
+
+  public void stop() {
+    spin(0);
   }
 
   /**
@@ -162,13 +174,7 @@ public class MidtakeS extends SubsystemBase implements Loggable{
     return lastBeamBreakTopBroken && !beamBreakTopBroken;
   }
 
-  /**
-   * Stops the midtake.
-   */
 
-  public void stop() {
-    spin(0);
-  }
 
   public void resetCargoCount(int cargoOut, int storedCargo) {
     cargoIn = cargoOut + storedCargo;

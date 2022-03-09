@@ -39,6 +39,8 @@ public class ClimberS extends SubsystemBase implements Loggable {
   public Command resetBackToExtended = new InstantCommand(()->sparkMaxEncoderTwo.setPosition(Constants.CLIMBER_BACK_SOFT_LIMIT_FORWARD)).withName("resetBackToExtended");
   @Log
   public Command resetBackToRetracted= new InstantCommand(()->sparkMaxEncoderTwo.setPosition(Constants.CLIMBER_BACK_SOFT_LIMIT_BACK)).withName("resetBackToRetracted");
+
+  public boolean activateBackFF = false;
   /** Creates a new ClimberS. */
   public ClimberS() {
     
@@ -60,15 +62,19 @@ public class ClimberS extends SubsystemBase implements Loggable {
   }
 
   public void extendBack() {
-    backSparkMax.setVoltage(3);
+    backSparkMax.setVoltage(9);
   }
 
   public void retractBack() {
-    backSparkMax.setVoltage(-3);
+    backSparkMax.setVoltage(-9);
   }
 
   public void stopBack() {
     backSparkMax.setVoltage(0);
+  }
+
+  public void holdBack() {
+    backSparkMax.setVoltage(Constants.CLIMBER_BACK_HOLDING_FF);
   }
 
   public void extendFront() {
@@ -98,5 +104,8 @@ public class ClimberS extends SubsystemBase implements Loggable {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+    if(backSparkMax.getEncoder().getVelocity() < 10) {
+      holdBack();
+    }
   }
 }

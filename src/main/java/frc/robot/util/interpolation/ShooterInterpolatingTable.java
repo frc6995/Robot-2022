@@ -20,9 +20,7 @@ public class ShooterInterpolatingTable {
     private static final TreeMap<Double, ShotParameter> map = new TreeMap<>(
         Map.ofEntries(
             entry(2.9, new ShotParameter(3000, 3000, 1.0)),
-            entry(3.5, new ShotParameter(3000, 2000, 1.0)),
-            entry(3.8, new ShotParameter(3000, 2500, 1.0)),
-            entry(4.2, new ShotParameter(3000, 2700, 1.0))
+            entry(4.0, new ShotParameter(5000, 4000, 1.0))
         )
     );
 

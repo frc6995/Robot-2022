@@ -142,7 +142,7 @@ public class RobotContainer {
     shooterSpinC = ShooterCommandFactory.createShooterDistanceSpinupC(limelightS::getFilteredDistance, shooterS);
     shooterTestC = new ShooterTestC(shooterS);
     runIntakeC = IntakeCommandFactory.createIntakeToggleRunC(intakeS);
-    midtakeIndexCG = MidtakeCommandFactory.createMidtakeIndexCG(midtakeS);
+    midtakeIndexCG = MidtakeCommandFactory.createMidtakeLowIndexCG(midtakeS);
     midtakeS.setDefaultCommand(midtakeIndexCG);
     midtakeFeedC = MidtakeCommandFactory.createMidtakeFeedC(midtakeS);
     midtakeFeedOneC = MidtakeCommandFactory.createMidtakeFeedOneC(midtakeS);
@@ -189,13 +189,25 @@ public class RobotContainer {
     new Trigger(()->{return (operatorController.getRightTriggerAxis() >= 0.5);}).whileActiveContinuous(turretAimC.alongWith(shooterTestC));
     //operatorController.a().toggleWhenActive(shooterSpinC);
     // //driverController.leftBumper() feeds whenever the shooter RPM is above 1000;
-    operatorController.y()/*.and(new Trigger(()->(shooterS.getFrontEncoderSpeed() > 1000)))*/.whileActiveOnce(midtakeFeedC).whenInactive(MidtakeCommandFactory.createMidtakeStopC(midtakeS));
+    operatorController.y()/*.and(new Trigger(()->(shooterS.getFrontEncoderSpeed() > 1000)))*/.whileActiveOnce(midtakeFeedOneC.andThen(MidtakeCommandFactory.createMidtakePostShotC(midtakeS))).whenInactive(MidtakeCommandFactory.createMidtakeStopC(midtakeS));
     
-    climberController.pov.left().whileActiveContinuous(ClimberCommandFactory.createClimberBackC(climberS));
-    climberController.pov.right().whileActiveContinuous(ClimberCommandFactory.createClimberForwardC(climberS));
+    climberController.pov.left()
+    .or(climberController.pov.downLeft())
+    .or(climberController.pov.upLeft())
+    .whileActiveContinuous(ClimberCommandFactory.createClimberBackC(climberS));
+    climberController.pov.right()
+    .or(climberController.pov.downRight())
+    .or(climberController.pov.upRight())
+    .whileActiveContinuous(ClimberCommandFactory.createClimberForwardC(climberS));
 
-    climberController.pov.up().whileActiveContinuous(ClimberCommandFactory.createClimberExtendBackC(climberS));
-    climberController.pov.down().whileActiveContinuous(ClimberCommandFactory.createClimberRetractBackC(climberS));
+    climberController.pov.up()
+    .or(climberController.pov.upLeft())
+    .or(climberController.pov.upRight())
+    .whileActiveContinuous(ClimberCommandFactory.createClimberExtendBackC(climberS));
+    climberController.pov.down()
+    .or(climberController.pov.downLeft())
+    .or(climberController.pov.downRight())
+    .whileActiveContinuous(ClimberCommandFactory.createClimberRetractBackC(climberS));
 
     climberController.y().whileActiveContinuous(ClimberCommandFactory.createClimberExtendFrontC(climberS));
     climberController.a().whileActiveContinuous(ClimberCommandFactory.createClimberRetractFrontC(climberS));

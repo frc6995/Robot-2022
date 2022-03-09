@@ -56,7 +56,7 @@ public class AutoCommandFactory {
                                         .withInterrupt(midtakeS::getIsBottomBeamBroken)
                                         .andThen(IntakeCommandFactory.createIntakeStopAndRetractCG(intakeS))
                                         .andThen(new WaitCommand(0.5)),
-                                        MidtakeCommandFactory.createMidtakeIndexCG(midtakeS)
+                                        MidtakeCommandFactory.createMidtakeLowIndexCG(midtakeS)
                                 )                       
                                 // Spins the midtake to feed the shooter
                                 .andThen( new WaitCommand(3)).andThen(
