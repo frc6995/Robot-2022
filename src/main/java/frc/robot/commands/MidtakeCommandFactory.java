@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.PerpetualCommand;
 import edu.wpi.first.wpilibj2.command.RepeatCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
@@ -64,7 +65,7 @@ public class MidtakeCommandFactory {
     public static Command createMidtakeLowIndexCG(MidtakeS midtakeS) {
         return new RepeatCommand(
             new WaitUntilCommand(midtakeS::getIsBottomBeamBroken).alongWith(
-                new WaitUntilCommand(()->!midtakeS.getIsTopBeamBroken())
+                new WaitUntilCommand(midtakeS::getIsTopBeamClear)
             )
             .andThen(
                 createMidtakeLoadC(midtakeS)
@@ -80,34 +81,10 @@ public class MidtakeCommandFactory {
      * @return
      */
     public static Command createMidtakeReadyIntakeCG(MidtakeS midtakeS) {
-        return new ConditionalCommand(
-            createMidtakeReverseC(midtakeS)
-            .withInterrupt(midtakeS::getIsBottomBeamBroken),
-            new InstantCommand(),
-            midtakeS::getIsTopBeamBroken
-        );
+        return createMidtakeReverseC(midtakeS)
+            .withInterrupt(midtakeS::getIsBottomBeamBroken)
+            .withTimeout(1.0);
     }
-
-    /**
-     * Backs up the midtake to recover a ball that is forward of the top beam break.
-     * 
-     * To be run after a shot. The MidtakeArmCG will bring the ball back to the firing position before a shot.
-     * @param midtakeS
-     * @return
-     */
-    public static Command createMidtakePostShotC(MidtakeS midtakeS) {
-        return new ConditionalCommand(
-            createMidtakeReverseC(midtakeS)
-            .withInterrupt(
-                ()->!midtakeS.getIsTopBeamBroken()
-            ).withTimeout(1.0),
-            new InstantCommand(),
-            midtakeS::getIsTopBeamBroken
-        );
-    }
-
-
-
 
     public static Command createMidtakeArmC(MidtakeS midtakeS) {
         /*
@@ -115,8 +92,14 @@ public class MidtakeCommandFactory {
         It ensures the next ball to fire is stopped below the top beam break, but just barely breaking it.
         If no ball is actually in the intake, it will try to arm for roughly a second before timing
         */
-        return new RepeatCommand(
-            createMidtakeLoadC(midtakeS)
+        return new ConditionalCommand( // If the top beam is broken
+            createMidtakeReverseC(midtakeS) // back up until it's not.
+            .withInterrupt(midtakeS::getIsTopBeamClear)
+            .withTimeout(1.0),
+            new InstantCommand(),
+            midtakeS::getIsTopBeamBroken)
+        .andThen(
+            createMidtakeCrawlC(midtakeS)
             .withInterrupt(midtakeS::getIsTopBeamBroken)
             .withTimeout(1.0)
         );
@@ -128,13 +111,14 @@ public class MidtakeCommandFactory {
      * @return
      */
     public static Command createMidtakeFeedOneC(MidtakeS midtakeS) {
-
         return createMidtakeFeedC(midtakeS)
-            .withInterrupt(()->!midtakeS.getIsTopBeamBroken())
-            .withTimeout(0.15)
-        .andThen(
-            createMidtakeStopC(midtakeS)
-        );
+            .withInterrupt(midtakeS::getIsTopBeamClear)
+            .withTimeout(0.1).andThen(createMidtakeReverseC(midtakeS).withTimeout(0.2));
+    }
+
+    public static Command createMidtakeShootOneC(MidtakeS midtakeS) {
+        return createMidtakeFeedOneC(midtakeS)
+        .andThen(createMidtakeArmC(midtakeS));
     }
     /**
      * By default, the midtake will perpetually drive slowly towards the top except when the top beam is broken,
@@ -142,11 +126,15 @@ public class MidtakeCommandFactory {
      * @param midtakeS
      * @return
      */
-    public static Command createMidtakeDefaultC(MidtakeS midtakeS) {
+    public static Command createMidtakeIdleC(MidtakeS midtakeS) {
         return new ConditionalCommand(
             new InstantCommand(),
             createMidtakeCrawlC(midtakeS).withInterrupt(midtakeS::getIsTopBeamBroken),
             midtakeS::getIsTopBeamBroken
         );
+    }
+
+    public static Command createMidtakeDefaultC(MidtakeS midtakeS) {
+        return createMidtakeArmC(midtakeS).andThen(new RepeatCommand(createMidtakeIdleC(midtakeS)));
     }
 }

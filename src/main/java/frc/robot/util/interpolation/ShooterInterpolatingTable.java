@@ -13,14 +13,17 @@ public class ShooterInterpolatingTable {
     /* Private constructor because this is a utility class */
     private ShooterInterpolatingTable() {}
 
-    public static final double MIN_DISTANCE = 2.9;
-    public static final double MAX_DISTANCE = 5.2;
+    public static final double MIN_DISTANCE = 2.3;
+    public static final double MAX_DISTANCE = 5.4;
 
     // Interpolating tree map
     private static final TreeMap<Double, ShotParameter> map = new TreeMap<>(
         Map.ofEntries(
-            entry(2.9, new ShotParameter(3000, 3000, 1.0)),
-            entry(4.0, new ShotParameter(5000, 4000, 1.0))
+            entry(2.3, new ShotParameter(1300, 2800, 1.0)),
+            entry(2.78, new ShotParameter(1300, 2800, 1.0)),
+            entry(3.3, new ShotParameter(1500, 3000, 1.0)),
+            entry(3.8, new ShotParameter(1700, 3200, 1.0)),
+            entry(5.4, new ShotParameter(2300, 4500, 1.0))
         )
     );
 

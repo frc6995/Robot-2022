@@ -40,7 +40,7 @@ public class AutoCommandFactory {
             ShooterS shooterS, IntakeS intakeS, MidtakeS midtakeS, TurretS turretS, LimelightS limelightS, DrivebaseS drivebaseS) {
         return new InstantCommand(
                 ()->{
-                        midtakeS.resetCargoCount(0, 1);
+
                         drivebaseS.resetRobotPose(drivebaseS.START_POSE);
                 }
         ).andThen(
@@ -50,10 +50,10 @@ public class AutoCommandFactory {
                                 // Drives at 25% speed for 7 seconds or until the color sensor detects a ball
                                 // present
                                 DrivebaseCommandFactory.createTimedDriveC(.3, 2.5, drivebaseS)
-                                        .withInterrupt(midtakeS::getIsBottomBeamBroken),
+                                        .withInterrupt(midtakeS::getIsMidtakeFull),
                                 new ParallelDeadlineGroup(
                                         IntakeCommandFactory.createIntakeDeployAndRunCG(intakeS)
-                                        .withInterrupt(midtakeS::getIsBottomBeamBroken)
+                                        .withInterrupt(midtakeS::getIsMidtakeFull)
                                         .andThen(IntakeCommandFactory.createIntakeStopAndRetractCG(intakeS))
                                         .andThen(new WaitCommand(0.5)),
                                         MidtakeCommandFactory.createMidtakeLowIndexCG(midtakeS)

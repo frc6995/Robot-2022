@@ -4,7 +4,9 @@ import java.util.Set;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.Subsystem;
@@ -106,7 +108,7 @@ public class TurretCommandFactory {
      */
     public static Command createTurretFollowC(Supplier<Rotation2d> angle, TurretS turretS) {
         return new FunctionalCommand(
-            ()->{}, 
+            ()->{turretS.resetPID();}, 
             ()->{
                 turretS.setTurretAngle(angle.get());
             },
@@ -123,7 +125,12 @@ public class TurretCommandFactory {
         return new FunctionalCommand(limelightS::ledsOn,
         ()->{
             if (limelightS.hasTarget()) {
-                turretS.setVoltage(limelightS.getFilteredXOffset()* 7 * Constants.TURRET_FF[1]);
+                double voltage = limelightS.getFilteredXOffset();
+                voltage = MathUtil.applyDeadband(voltage, Units.degreesToRadians(1));
+                voltage *= 2;
+                voltage += Constants.TURRET_FF[0] * Math.copySign(1, voltage);
+                
+                turretS.setVoltage(voltage);
             }
             else {
                 turretS.stopMotor();

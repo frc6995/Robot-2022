@@ -42,16 +42,14 @@ public class MidtakeS extends SubsystemBase implements Loggable{
   private boolean lastBeamBreakBottomBroken = getIsBottomBeamBroken();
   private final PicoColorSensor colorSensor = new PicoColorSensor();
 
-  public final Trigger goingForwardTrigger = new Trigger(this::getIsGoingBackward).negate();
-  @Log(methodName = "getAsBoolean", name = "cargoEnteredTrigger")
-  public final Trigger cargoEnteredTrigger = new Trigger(this::getDidCargoEnter);
-  @Log(methodName = "getAsBoolean", name = "cargoLeftTrigger")
-  public final Trigger cargoLeftTrigger = new Trigger(this::getDidCargoLeave);
+  public final Trigger topBeamBreakTrigger = new Trigger(this::getIsTopBeamBroken);
+  public final Trigger bottomBeamBreakTrigger = new Trigger(this::getIsBottomBeamBroken);
+  public final Trigger midtakeStoppedTrigger = new Trigger(this::getIsStopped);
 
   private int cargoIn = 0;
   private int cargoOut = 0;
   private boolean beamBreakTopBroken;
-  
+
   /**
    * Create a new MidtakeS
    */
@@ -120,6 +118,10 @@ public class MidtakeS extends SubsystemBase implements Loggable{
     return beamBreakTopBroken;
   }
 
+  public boolean getIsTopBeamClear() {
+    return !beamBreakTopBroken;
+  }
+
   /**
    * Returns whether the bottom Beam Break sensor is triggered
    * 
@@ -129,6 +131,31 @@ public class MidtakeS extends SubsystemBase implements Loggable{
     return beamBreakBottomBroken;
   }
 
+  public boolean getIsBottomBeamClear() {
+    return !beamBreakBottomBroken;
+  }
+
+  @Log
+  public int getBallCount() {
+    if(!beamBreakBottomBroken && !beamBreakTopBroken) {
+      return 0;
+    }
+    else if (beamBreakBottomBroken ^ beamBreakTopBroken) {
+      return 1;
+    }
+    else if (beamBreakBottomBroken && beamBreakTopBroken) {
+      return 2;
+    }
+    else {
+      return -1;
+    }
+  }
+
+  @Log
+  public boolean getIsMidtakeFull(){
+    return getBallCount() == 2;
+  }
+
   /**
    * Returns whether the color of the ball is the same as your team color
    * 
@@ -136,15 +163,15 @@ public class MidtakeS extends SubsystemBase implements Loggable{
    */
   @Log
   public boolean getIsBallColorCorrect() {
-    // if(RobotBase.isReal()) {
-    //   PicoColorSensor.RawColor detectedColor = colorSensor.getRawColor0();
-    //   boolean isBallRed = detectedColor.red > detectedColor.blue;
-    //   boolean areWeRed = DriverStation.getAlliance() == Alliance.Red;
-    //   return isBallRed == areWeRed;
-    // } else {
-    //   return !simSensorInput.getRawButton(4);
-    // }
-    return true;
+    if(RobotBase.isReal()) {
+      // PicoColorSensor.RawColor detectedColor = colorSensor.getRawColor0();
+      // boolean isBallRed = detectedColor.red > detectedColor.blue;
+      // boolean areWeRed = DriverStation.getAlliance() == Alliance.Red;
+      // return isBallRed == areWeRed;
+      return true;
+    } else {
+      return !simSensorInput.getRawButton(4);
+    }
   }
 
   /**
@@ -160,8 +187,8 @@ public class MidtakeS extends SubsystemBase implements Loggable{
     }
   }
 
-  public boolean getIsGoingBackward() {
-    return frontSparkMax.getAppliedOutput() < -0.01 && backSparkMax.getAppliedOutput() < -0.01;
+  public boolean getIsStopped() {
+    return frontSparkMax.getAppliedOutput() <= 0.05 && backSparkMax.getAppliedOutput() <= 0.05;
   }
 
   @Log
@@ -172,27 +199,6 @@ public class MidtakeS extends SubsystemBase implements Loggable{
   @Log  
   public boolean getDidCargoLeave() {
     return lastBeamBreakTopBroken && !beamBreakTopBroken;
-  }
-
-
-
-  public void resetCargoCount(int cargoOut, int storedCargo) {
-    cargoIn = cargoOut + storedCargo;
-    this.cargoOut = cargoOut;
-  }
-
-  public void resetCargoCount() {
-    resetCargoCount(0, 0);
-  }
-
-  @Log
-  public int getStoredCargo() {
-    return cargoIn - cargoOut;
-  }
-
-  @Log
-  public int getCargoOutCount() {
-    return cargoOut;
   }
 
   @Override

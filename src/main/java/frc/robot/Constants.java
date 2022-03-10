@@ -141,13 +141,13 @@ public final class Constants {
     public static final int CAN_ID_BACK_SHOOTER_MOTOR = 41;
 
     /** Shooter front wheel feed forward */
-    public static final double[] SHOOTER_FRONT_FF = { 0.16382, 0.12618, 0.0038694 };
+    public static final double[] SHOOTER_FRONT_FF = { 0.18114, 0.1298, 0.01253 };
 
     /** Proportional term for front shooter wheel */
     public static final double SHOOTER_FRONT_P = 0.13714;
 
     /** Shooter back wheel feed forward */
-    public static final double[] SHOOTER_BACK_FF = { 0.29066, 0.12829, 0.0050724 };
+    public static final double[] SHOOTER_BACK_FF = { 0.41933, 0.13317, 0.0042113 };
 
     /** Proportional term for back shooter wheel */
     public static final double SHOOTER_BACK_P = 0.19475;
@@ -180,7 +180,7 @@ public final class Constants {
     public static final double SOFT_LIMIT_REVERSE_RADIAN = Units.degreesToRadians(180-110);
 
     /** Number of degrees of allowable error for turret */
-    public static final double TURRET_PID_ERROR = Units.degreesToRadians(5);
+    public static final double TURRET_PID_ERROR = Units.degreesToRadians(30);
 
     /** Speed at which the turret should go back to home */
     public static final double TURRET_HOMING_SPEED = -0.1;
@@ -189,13 +189,13 @@ public final class Constants {
     public static final double TURRET_DEADBAND = 0.02;
 
     /** Feedforward for the turret */
-    public static final double[] TURRET_FF = {0.27/*0.39505*/, 0.56397, 0.030497}; // for velocity in turret radians per second
+    public static final double[] TURRET_FF = {0.15/*0.39505*/, 0.56397, 0.030497}; // for velocity in turret radians per second
 
     /** Proportional term for the turret */
-    public static final double TURRET_P = 3;
+    public static final double TURRET_P = 5;
 
     /** Derivative term for the turret */
-    public static final double TURRET_D = 1.5;
+    public static final double TURRET_D = 0;
 
     /** The maximum manual-drive angular velocity of the turret in radians per second */
     public static final double TURRET_MAX_SPEED = 1;
@@ -238,7 +238,7 @@ public final class Constants {
     public static final double CAMERA_DIAG_FOV_DEGREES = 67.8;
 
     /** Height of the camera off the ground in meters */
-    public static final double CAMERA_HEIGHT_METERS = Units.inchesToMeters(37); //37 inches
+    public static final double CAMERA_HEIGHT_METERS = Units.inchesToMeters(38); //37 inches
 
     /** Offset of the camera from the center of the turret in meters */
     public static final double CAMERA_CENTER_OFFSET = Units.inchesToMeters(9.5); 
@@ -333,6 +333,8 @@ public final class Constants {
      * The maximum a mount of rotations retracting the climber
      */
     public static final double CLIMBER_BACK_SOFT_LIMIT_BACK = 0.0;
+
+    public static final double CLIMBER_BACK_LIFT_POSITION = 120;
 
     public static final double CLIMBER_BACK_HOLDING_FF = 1;
     /**

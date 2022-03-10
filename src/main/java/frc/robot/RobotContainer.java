@@ -1,5 +1,6 @@
 package frc.robot;
 
+import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -10,6 +11,7 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.CommandXboxController;
@@ -32,6 +34,8 @@ import frc.robot.subsystems.LimelightS;
 import frc.robot.subsystems.MidtakeS;
 import frc.robot.subsystems.ShooterS;
 import frc.robot.subsystems.TurretS;
+import frc.robot.util.NomadMathUtil;
+import frc.robot.util.pose.NavigationManager;
 import io.github.oblarg.oblog.annotations.Config;
 import io.github.oblarg.oblog.annotations.Log;
 
@@ -68,9 +72,10 @@ public class RobotContainer {
   private Command turretAimC;
   private Command shooterSpinC;
   private Command visionSpinAndAimC;
+  private Command odometrySpinAndAimC;
   private Command midtakeFeedC;
   private Command midtakeFeedOneC;
-  private Command midtakeIndexCG;
+  private Command midtakeDefaultC;
   private Command runIntakeC;
   private Command climberRetractTwoC;
   private Command climberExtendTwoC;
@@ -78,11 +83,21 @@ public class RobotContainer {
   @Config
   private Command shooterTestC;
 
+  private NavigationManager navigationManager;
+
+  @Log(methodName = "get")
   private Trigger shooterReadyTrigger;
+  @Log(methodName = "get")
   private Trigger turretReadyTrigger;
+  @Log(methodName = "get")
   private Trigger ballReadyTrigger;
 
+  @Log(methodName = "get")
   private Trigger shootBallTrigger;
+  @Log(methodName = "get")
+  private Trigger dumpWrongBallTrigger;
+
+  private Trigger huddleModeTrigger;
 
 
   public RobotContainer() {
@@ -91,6 +106,9 @@ public class RobotContainer {
     createCommands();
     createTriggers();
     configureButtonBindings();
+
+
+    //CameraServer.startAutomaticCapture();
   }
 
 
@@ -115,7 +133,10 @@ public class RobotContainer {
     turretS = new TurretS();
     shooterS = new ShooterS();
     climberS = new ClimberS();
+    navigationManager = new NavigationManager(drivebaseS::getRobotPose,
+    turretS::getRobotToTurretRotation);
     limelightS = new LimelightS(
+      navigationManager,
     (list)->{field.getObject("targetRing").setPoses(list);});
   }
 
@@ -134,30 +155,47 @@ public class RobotContainer {
 
 
     visionSpinAndAimC = MainCommandFactory.createVisionSpinupAndAimC(limelightS, turretS, shooterS);
+    shooterS.setDefaultCommand(
+      MainCommandFactory.createShooterDefaultC(
+        navigationManager, shooterS
+      ));
 
     turretAimC = TurretCommandFactory.createTurretVisionC(limelightS, turretS);
     turretManualC = TurretCommandFactory.createTurretManualC(()->-operatorController.getLeftX(), turretS);
-    turretS.setDefaultCommand(turretManualC);
+    turretS.setDefaultCommand(MainCommandFactory.createTurretDefaultC(navigationManager, turretS)/*turretManualC*/);
     
     shooterSpinC = ShooterCommandFactory.createShooterDistanceSpinupC(limelightS::getFilteredDistance, shooterS);
     shooterTestC = new ShooterTestC(shooterS);
-    runIntakeC = IntakeCommandFactory.createIntakeToggleRunC(intakeS);
-    midtakeIndexCG = MidtakeCommandFactory.createMidtakeLowIndexCG(midtakeS);
-    midtakeS.setDefaultCommand(midtakeIndexCG);
+    runIntakeC = MainCommandFactory.createIntakeCG(midtakeS, intakeS);
+    midtakeDefaultC = MidtakeCommandFactory.createMidtakeDefaultC(midtakeS);
+    midtakeS.setDefaultCommand(midtakeDefaultC);
     midtakeFeedC = MidtakeCommandFactory.createMidtakeFeedC(midtakeS);
     midtakeFeedOneC = MidtakeCommandFactory.createMidtakeFeedOneC(midtakeS);
   }
 
   public void createTriggers() {
-    turretReadyTrigger = new Trigger(()->{return Math.abs(limelightS.getFilteredXOffset()) < 0.1;});
+    turretReadyTrigger = new Trigger(turretS::isAtTarget);
     shooterReadyTrigger = new Trigger(shooterS::isAtTarget);
-    ballReadyTrigger = new Trigger(()->{return midtakeS.getStoredCargo() > 0;});
+    ballReadyTrigger = midtakeS.topBeamBreakTrigger.and(new Trigger(midtakeS::getIsStopped));
+
+    huddleModeTrigger  = driverController.rightStick();
+    dumpWrongBallTrigger = 
+    new Trigger(midtakeS::getIsBallColorCorrect).negate();
 
     shootBallTrigger =
-      driverController.rightBumper()
-      .and(turretReadyTrigger)
-      .and(shooterReadyTrigger.debounce(0.2, DebounceType.kBoth))
-      .and(ballReadyTrigger);
+    new Trigger(()->{return (operatorController.getRightTriggerAxis() >= 0.5);})
+      .and(turretReadyTrigger.debounce(0.3))
+      .and(shooterReadyTrigger.debounce(0.2, DebounceType.kRising))
+      .and(ballReadyTrigger)
+      .and(
+        dumpWrongBallTrigger
+        .or(
+          huddleModeTrigger
+          .negate()
+        )
+      );
+    
+
   }
 
   /**
@@ -170,49 +208,33 @@ public class RobotContainer {
    */
   private void configureButtonBindings() {
     driverController.a().toggleWhenActive(runIntakeC);
-    driverController.b().whileActiveOnce(IntakeCommandFactory.createIntakeEjectC(intakeS));
-    driverController.x().whileActiveOnce(
-      MidtakeCommandFactory.createMidtakeReverseC(midtakeS)
-      .alongWith(IntakeCommandFactory.createIntakeEjectC(intakeS)));
-    driverController.rightBumper().whenActive(
-      TurretCommandFactory.createTurretAdjustC( Units.degreesToRadians(-5),
-      turretS)
-    );
-    operatorController.leftBumper().whenActive(
-      TurretCommandFactory.createTurretAdjustC( Units.degreesToRadians(5),
-      turretS)
-    );
-    
-    //driverController.rightBumper() does (midtakeFeedOneC) when ready to fire.
-    shootBallTrigger.whenActive(midtakeFeedOneC);
-    //operatorController.a().toggleWhenActive(new ShooterTestC(shooterS));
-    new Trigger(()->{return (operatorController.getRightTriggerAxis() >= 0.5);}).whileActiveContinuous(turretAimC.alongWith(shooterTestC));
-    //operatorController.a().toggleWhenActive(shooterSpinC);
-    // //driverController.leftBumper() feeds whenever the shooter RPM is above 1000;
-    operatorController.y()/*.and(new Trigger(()->(shooterS.getFrontEncoderSpeed() > 1000)))*/.whileActiveOnce(midtakeFeedOneC.andThen(MidtakeCommandFactory.createMidtakePostShotC(midtakeS))).whenInactive(MidtakeCommandFactory.createMidtakeStopC(midtakeS));
-    
-    climberController.pov.left()
-    .or(climberController.pov.downLeft())
-    .or(climberController.pov.upLeft())
+    huddleModeTrigger.whileActiveContinuous(IntakeCommandFactory.createIntakeStopAndRetractCG(intakeS));
+    // driverController.b().whileActiveOnce(IntakeCommandFactory.createIntakeEjectC(intakeS));
+    // driverController.x().whileActiveOnce(
+    //   MidtakeCommandFactory.createMidtakeReverseC(midtakeS)
+    //   .alongWith(IntakeCommandFactory.createIntakeEjectC(intakeS)));
+
+    // Hold down the right trigger to shoot when ready.
+    shootBallTrigger.whenActive(MidtakeCommandFactory.createMidtakeShootOneC(midtakeS));
+    dumpWrongBallTrigger.whileActiveContinuous(ShooterCommandFactory.createShooterIdleC(shooterS));
+
+    operatorController.pov.left()
+    .or(operatorController.pov.downLeft())
+    .or(operatorController.pov.upLeft())
     .whileActiveContinuous(ClimberCommandFactory.createClimberBackC(climberS));
-    climberController.pov.right()
-    .or(climberController.pov.downRight())
-    .or(climberController.pov.upRight())
+    operatorController.pov.right()
+    .or(operatorController.pov.downRight())
+    .or(operatorController.pov.upRight())
     .whileActiveContinuous(ClimberCommandFactory.createClimberForwardC(climberS));
 
-    climberController.pov.up()
-    .or(climberController.pov.upLeft())
-    .or(climberController.pov.upRight())
+    operatorController.pov.up()
+    .or(operatorController.pov.upLeft())
+    .or(operatorController.pov.upRight())
     .whileActiveContinuous(ClimberCommandFactory.createClimberExtendBackC(climberS));
-    climberController.pov.down()
-    .or(climberController.pov.downLeft())
-    .or(climberController.pov.downRight())
+    operatorController.pov.down()
+    .or(operatorController.pov.downLeft())
+    .or(operatorController.pov.downRight())
     .whileActiveContinuous(ClimberCommandFactory.createClimberRetractBackC(climberS));
-
-    climberController.y().whileActiveContinuous(ClimberCommandFactory.createClimberExtendFrontC(climberS));
-    climberController.a().whileActiveContinuous(ClimberCommandFactory.createClimberRetractFrontC(climberS));
-
-
   }
 
   public void disableAll() {
@@ -241,26 +263,32 @@ public class RobotContainer {
   }
 
   public void robotPeriodic() {
+
+    navigationManager.update();
     
-    // /*Field2d setup */
-    // if(RobotBase.isSimulation()) {
-    //   field.setRobotPose(new Pose2d(
-    //     MathUtil.clamp(drivebaseS.getRobotPose().getX(), 0, Units.feetToMeters(54)),
-    //     MathUtil.clamp(drivebaseS.getRobotPose().getY(), 0, Units.feetToMeters(27)),
-    //     drivebaseS.getRobotPose().getRotation()
-    //   ));
-    // }
-    // else {
-    //   field.setRobotPose(drivebaseS.getRobotPose());
-    // }
+    /*Field2d setup */
+    if(RobotBase.isSimulation()) {
+      field.setRobotPose(new Pose2d(
+        MathUtil.clamp(drivebaseS.getRobotPose().getX(), 0, Units.feetToMeters(54)),
+        MathUtil.clamp(drivebaseS.getRobotPose().getY(), 0, Units.feetToMeters(27)),
+        drivebaseS.getRobotPose().getRotation()
+      ));
+    }
+    else {
+      field.setRobotPose(drivebaseS.getRobotPose());
+    }
 
 
-    // field.getObject("Turret").setPose(field.getRobotPose().transformBy(
-    //   new Transform2d(new Translation2d(), turretS.getRobotToTurretRotation())
+    field.getObject("Turret").setPose(field.getRobotPose().transformBy(
+      new Transform2d(new Translation2d(), turretS.getRobotToTurretRotation())
+      )
+    );
 
-    //   )
-    // );
+    field.getObject("estRobot").setPose(navigationManager.getEstimatedRobotPose());
 
+    field.getObject("estTurret").setPose(navigationManager.getEstimatedRobotPose().transformBy(
+      new Transform2d(new Translation2d(), turretS.getRobotToTurretRotation())));
+    SmartDashboard.putNumber("estDist", NomadMathUtil.getDistance(navigationManager.getRobotToHubTransform()));
     
   }
 }

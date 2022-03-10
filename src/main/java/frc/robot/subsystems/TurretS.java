@@ -22,19 +22,20 @@ import com.revrobotics.RelativeEncoder;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.Nat;
-import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
-import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N2;
 import edu.wpi.first.math.system.plant.LinearSystemId;
+import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.simulation.LinearSystemSim;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import frc.robot.util.SimEncoder;
 import io.github.oblarg.oblog.Loggable;
 import io.github.oblarg.oblog.annotations.Log;
@@ -53,13 +54,12 @@ public class TurretS extends SubsystemBase implements Loggable {
   private RelativeEncoder sparkMaxEncoder = sparkMax.getEncoder();
   private DigitalInput limitSwitch = new DigitalInput(TURRET_LIMIT_SWITCH_PORT);
 
-  private PIDController turretPID = new PIDController(TURRET_P, 0, TURRET_D);
+  private ProfiledPIDController turretPID = new ProfiledPIDController(TURRET_P, 0, TURRET_D, new Constraints(Math.PI, 2));
 
   @Log
   private double omega = 0;
 
   private SimEncoder turretSimEncoder = new SimEncoder();
-  private SlewRateLimiter velocityLimiter = new SlewRateLimiter(6.28);
   // Open-loop drive in turret radians per second
   private SimpleMotorFeedforward turretFF = new SimpleMotorFeedforward(
 
@@ -223,6 +223,9 @@ public class TurretS extends SubsystemBase implements Loggable {
     
   }
 
+  public void resetPID() {
+    turretPID.reset(getEncoderCounts());
+  }
   /**
    * sets the speed of the turret from -1 to 1, ensures the position of the turret
    * is
@@ -238,14 +241,14 @@ public class TurretS extends SubsystemBase implements Loggable {
     }
 
     SmartDashboard.putNumber("targetUnadj", targetPosition);
-    targetPosition = MathUtil.clamp(targetPosition, SOFT_LIMIT_REVERSE_RADIAN, SOFT_LIMIT_FORWARD_RADIAN);
-    // now the target wraps at 0 or 2pi, giving a nice continuous range over the places the turret can actually be.
-    double currentPosition = getEncoderCounts();//Math.IEEEremainder(getEncoderCounts(), (2 * Math.PI));
+      targetPosition = MathUtil.clamp(targetPosition, SOFT_LIMIT_REVERSE_RADIAN, SOFT_LIMIT_FORWARD_RADIAN);
+      // now the target wraps at 0 or 2pi, giving a nice continuous range over the places the turret can actually be.
+      double currentPosition = getEncoderCounts();//Math.IEEEremainder(getEncoderCounts(), (2 * Math.PI));
 
-    SmartDashboard.putNumber("turretPos", currentPosition);
-    SmartDashboard.putNumber("turretTgt", targetPosition);
-    double pidVelocity = turretPID.calculate(currentPosition, targetPosition); //radians per sec
-    setVelocity(pidVelocity);
+      SmartDashboard.putNumber("turretPos", currentPosition);
+      SmartDashboard.putNumber("turretTgt", targetPosition);
+      double pidVelocity = turretPID.calculate(currentPosition, targetPosition); //radians per sec
+      setVelocity(pidVelocity);
   }
 
   public void simulationPeriodic() {
@@ -283,9 +286,9 @@ public class TurretS extends SubsystemBase implements Loggable {
    */
   @Log
   public boolean isAtTarget() {
-    return turretPID.atSetpoint();
+    return Math.abs(getError()) < Constants.TURRET_PID_ERROR;
   }
-
+  
   @Override
   public void periodic() {
     if(DriverStation.isDisabled()) {

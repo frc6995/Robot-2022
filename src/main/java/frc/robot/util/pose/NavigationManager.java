@@ -13,7 +13,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import frc.robot.util.NomadMathUtil;
 import frc.robot.util.interpolation.ShooterInterpolatingTable;
 import io.github.oblarg.oblog.Loggable;
 import io.github.oblarg.oblog.annotations.Config;
@@ -27,47 +27,28 @@ import static frc.robot.Constants.*;
 public class NavigationManager implements Loggable{
     private Supplier<Pose2d> m_poseSupplier;
     private Supplier<Rotation2d> m_drivebaseHeadingSupplier;
-    private Supplier<ChassisSpeeds> m_drivebaseVelocitySupplier;
     private Supplier<Rotation2d> m_robotToTurretSupplier;
-    private Consumer<Double> m_turretTransformVelocityConsumer;
 
-    // Previous values for numerical differentiation
-    private Transform2d lastTOFAdjustedRobotToHubTransform;
 
     private HubTransformEstimator hubTransformEstimator;
     private VisionHubTransformAdjuster visionHubTransformAdjuster;
-    private TimeOfFlightAdjuster timeOfFlightAdjuster;
 
 
     public NavigationManager(Supplier<Pose2d> poseSupplier,
-        Supplier<Rotation2d> drivebaseHeadingSupplier,
-        Supplier<ChassisSpeeds> drivebaseVelocitySupplier,
-        Supplier<Rotation2d> robotToTurretSupplier,
-        Consumer<Double> turretTransformVelocityConsumer
+        Supplier<Rotation2d> robotToTurretSupplier
         ) {
         m_poseSupplier = poseSupplier;
-        m_drivebaseHeadingSupplier = drivebaseHeadingSupplier;
-        m_drivebaseVelocitySupplier = drivebaseVelocitySupplier;
+        m_drivebaseHeadingSupplier = ()->poseSupplier.get().getRotation();
         m_robotToTurretSupplier = robotToTurretSupplier;
-        m_turretTransformVelocityConsumer = turretTransformVelocityConsumer;
 
         hubTransformEstimator = new HubTransformEstimator(m_poseSupplier);
-        visionHubTransformAdjuster = new VisionHubTransformAdjuster(m_robotToTurretSupplier, (transform)->{}/* hubTransformEstimator::setCorrectedRobotToHubTransform */);
-        timeOfFlightAdjuster = new TimeOfFlightAdjuster(m_drivebaseVelocitySupplier, this::getRobotToHubTransform);
-
-        lastTOFAdjustedRobotToHubTransform = getTOFAdjustedRobotToHubTransform();
+        visionHubTransformAdjuster = new VisionHubTransformAdjuster(m_robotToTurretSupplier, hubTransformEstimator::setCorrectedRobotToHubTransform);
     }
 
     public void update() {
-        //lastTOFAdjustedRobotToHubTransform = getTOFAdjustedRobotToHubTransform();
         hubTransformEstimator.update();
-        lastTOFAdjustedRobotToHubTransform = getTOFAdjustedRobotToHubTransform();
+        
         visionHubTransformAdjuster.update();
-        //timeOfFlightAdjuster.update();
-
-        m_turretTransformVelocityConsumer.accept(0.0);
-           /* (getDirection(getTOFAdjustedRobotToHubTransform()).getRadians()
-                - getDirection(lastTOFAdjustedRobotToHubTransform).getRadians()) / 0.02);*/
     }
 
     //Setters
@@ -91,7 +72,7 @@ public class NavigationManager implements Loggable{
 
     @Log
     public boolean getTargetDistanceInRange() {
-        return getDistanceInRange(getDistance(getTOFAdjustedRobotToHubTransform()));
+        return getDistanceInRange(getDistance(getRobotToHubTransform()));
     } 
 
     public Pose2d getCurrentRobotPose() {
@@ -102,20 +83,9 @@ public class NavigationManager implements Loggable{
         return hubTransformEstimator.getRobotToHubTransform();
     }
 
-    public Transform2d getTOFAdjustedRobotToHubTransform() {
-        return getRobotToHubTransform()/*.plus(timeOfFlightAdjuster.getHubTOFAdjustment())*/; 
-    }
-
-    public Transform2d getLastTOFAdjustedRobotToHubTransform() {
-        return lastTOFAdjustedRobotToHubTransform;
-    }
-
-    public Transform2d getRobotTOFAdjustment() {
-        return timeOfFlightAdjuster.getHubTOFAdjustment().inverse();
-    }
-
-    public Transform2d getHubTOFAdjustment() {
-        return timeOfFlightAdjuster.getHubTOFAdjustment();
+    @Log(methodName = "getRadians")
+    public Rotation2d getRobotToHubDirection() {
+        return NomadMathUtil.getDirection(getRobotToHubTransform());
     }
 
     public Transform2d getRobotToCameraTransform() {

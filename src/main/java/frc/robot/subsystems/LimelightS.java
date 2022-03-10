@@ -33,7 +33,9 @@ import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants;
+import frc.robot.util.NomadMathUtil;
 import frc.robot.util.SimCamera;
+import frc.robot.util.pose.NavigationManager;
 import io.github.oblarg.oblog.Loggable;
 import io.github.oblarg.oblog.annotations.Log;
 
@@ -49,7 +51,7 @@ public class LimelightS extends SubsystemBase implements Loggable {
 
 
   // Sim stuff
-  //SimCamera limelightSimVisionSystem;
+  SimCamera limelightSimVisionSystem;
   Trigger hasSteadyTarget = new Trigger(() -> limelight.getLatestResult().hasTargets()).debounce(0.5);
 
   LinearFilter xOffsetFilter = LinearFilter.singlePoleIIR(Constants.LIMELIGHT_FILTER_TIME_CONSTANT, Constants.LIMELIGHT_FILTER_PERIOD_CONSTANT);
@@ -60,37 +62,42 @@ public class LimelightS extends SubsystemBase implements Loggable {
   private double filteredDistanceMeters = 0;
   private double lastValidDistance = 0;
   public final Trigger hasTargetTrigger = new Trigger(this::hasTarget);
+
+  private NavigationManager navigationManager;
   /** Creates a new LimelightS. */
-  public LimelightS(      Consumer<List<Pose2d>> addFieldVisionTargets) {
+  public LimelightS(
+    NavigationManager navigationManager,
+    Consumer<List<Pose2d>> addFieldVisionTargets) {
         NetworkTableInstance.getDefault().getTable("photonvision").getEntry("version").setString(
           PhotonVersion.versionString
         );
+        this.navigationManager = navigationManager;
 
-  //   if (!RobotBase.isReal()) {
-  //     limelightSimVisionSystem = new SimCamera(
-  //         "gloworm",
-  //         CAMERA_DIAG_FOV_DEGREES, Units.radiansToDegrees(CAMERA_PITCH_RADIANS),
-  //         new Transform2d(
-  //             new Translation2d(
-  //                 CAMERA_CENTER_OFFSET, Rotation2d.fromDegrees(0)),
-  //             new Rotation2d()),
-  //         CAMERA_HEIGHT_METERS, 4, CAMERA_HORIZ_RES, CAMERA_VERT_RES, 5);
-  //     // Set up the target ring
-  //     ArrayList<Pose2d> targetPoseList = new ArrayList<>();
-  //     for (int i = 0; i < TAPE_STRIP_COUNT; i++) {
+    if (!RobotBase.isReal()) {
+      limelightSimVisionSystem = new SimCamera(
+          "gloworm",
+          CAMERA_DIAG_FOV_DEGREES, Units.radiansToDegrees(CAMERA_PITCH_RADIANS),
+          new Transform2d(
+              new Translation2d(
+                  CAMERA_CENTER_OFFSET, Rotation2d.fromDegrees(0)),
+              new Rotation2d()),
+          CAMERA_HEIGHT_METERS, 9000, CAMERA_HORIZ_RES, CAMERA_VERT_RES, 5);
+      // Set up the target ring
+      ArrayList<Pose2d> targetPoseList = new ArrayList<>();
+      for (int i = 0; i < TAPE_STRIP_COUNT; i++) {
 
-  //       Pose2d targetPose = HUB_CENTER_POSE
-  //           .transformBy(
-  //               new Transform2d(
-  //                   new Translation2d(
-  //                       HUB_RADIUS_METERS,
-  //                       Rotation2d.fromDegrees(360.0 * i / TAPE_STRIP_COUNT)),
-  //                   Rotation2d.fromDegrees(360.0 * i / TAPE_STRIP_COUNT)));
-  //       targetPoseList.add(targetPose);
-  //     } 
+        Pose2d targetPose = HUB_CENTER_POSE
+            .transformBy(
+                new Transform2d(
+                    new Translation2d(
+                        HUB_RADIUS_METERS,
+                        Rotation2d.fromDegrees(360.0 * i / TAPE_STRIP_COUNT)),
+                    Rotation2d.fromDegrees(360.0 * i / TAPE_STRIP_COUNT)));
+        targetPoseList.add(targetPose);
+      } 
       
-  //     addFieldVisionTargets.accept(targetPoseList);
-  //   }
+      addFieldVisionTargets.accept(targetPoseList);
+    }
   }
 
   /**
@@ -141,15 +148,21 @@ public class LimelightS extends SubsystemBase implements Loggable {
     if ( limelight.getLatestResult().hasTargets()) {
       PhotonTrackedTarget target = limelight.getLatestResult().getBestTarget();
       if(target!=null) {
-        double distance = PhotonUtils.calculateDistanceToTargetMeters(
+        double distance = NomadMathUtil.calculateDistanceToTargetMeters(
           CAMERA_HEIGHT_METERS,
           TARGET_HEIGHT_METERS,
           CAMERA_PITCH_RADIANS,
-          Units.degreesToRadians(target.getPitch())) + Constants.CAMERA_CENTER_OFFSET + Constants.HUB_RADIUS_METERS;
+          Units.degreesToRadians(target.getPitch()),
+          Units.degreesToRadians(
+            RobotBase.isReal() ? target.getYaw() : 0 // Sim camera doesn't need a perspective transform.
+          )) + Constants.CAMERA_CENTER_OFFSET + Constants.HUB_RADIUS_METERS;
   
         filteredXOffsetRadians = xOffsetFilter.calculate(Units.degreesToRadians(-target.getYaw()));
         filteredDistanceMeters = distanceFilter.calculate(distance);
         lastValidDistance = distance;
+
+        navigationManager.addVisionMeasurement(target);
+        
       }
        else {
 
@@ -162,5 +175,11 @@ public class LimelightS extends SubsystemBase implements Loggable {
       filteredXOffsetRadians = 0; //xOffsetFilter.calculate(0); // Because this is used in a limited range mechanism (turret), reduce error to zero
       filteredDistanceMeters = distanceFilter.calculate(lastValidDistance);
     }
+  }
+
+  @Override
+  public void simulationPeriodic() {
+      limelightSimVisionSystem.moveCamera(navigationManager.getRobotToCameraTransform().inverse(), Constants.CAMERA_HEIGHT_METERS, Units.radiansToDegrees(Constants.CAMERA_PITCH_RADIANS));
+      limelightSimVisionSystem.processFrame(navigationManager.getCurrentRobotPose());
   }
 }

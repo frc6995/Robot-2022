@@ -25,7 +25,7 @@ class HubTransformEstimator {
         poseSupplier = pose;
         m_robotToHubTranslation = new Transform2d(pose.get(), HUB_CENTER_POSE);
         m_robotToHubTranslation = new Transform2d(
-            m_robotToHubTranslation.getTranslation(), new Rotation2d());
+            m_robotToHubTranslation.getTranslation(), new Rotation2d(Math.PI));
         m_lastPose = poseSupplier.get();
     }
 

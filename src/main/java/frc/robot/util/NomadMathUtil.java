@@ -21,5 +21,15 @@ public class NomadMathUtil {
         return transform.getNorm();
     }
 
+    public static double calculateDistanceToTargetMeters(
+        double cameraHeightMeters,
+        double targetHeightMeters,
+        double cameraPitchRadians,
+        double targetPitchRadians,
+        double cameraYawRadians) {
+    return (targetHeightMeters - cameraHeightMeters)
+            / Math.tan(cameraPitchRadians + targetPitchRadians) / Math.cos(cameraYawRadians);
+}
+
     
 }

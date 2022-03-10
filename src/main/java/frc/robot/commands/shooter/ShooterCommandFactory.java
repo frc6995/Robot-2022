@@ -53,8 +53,8 @@ public class ShooterCommandFactory {
         return new FunctionalCommand(
             ()->{}, 
             ()->{
-                shooterS.pidFrontSpeed(3000);
-                shooterS.pidBackSpeed(3000);        
+                shooterS.pidFrontSpeed(1000);
+                shooterS.pidBackSpeed(1000);        
             },
             interrupted -> {},
             () -> false,
