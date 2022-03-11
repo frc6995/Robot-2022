@@ -28,6 +28,9 @@ public class NavigationManager implements Loggable{
     private Supplier<Pose2d> m_poseSupplier;
     private Supplier<Rotation2d> m_drivebaseHeadingSupplier;
     private Supplier<Rotation2d> m_robotToTurretSupplier;
+    private Consumer<Double> m_turretAngularVelocityConsumer;
+
+    private Rotation2d m_lastHeading;
 
 
     private HubTransformEstimator hubTransformEstimator;
@@ -35,11 +38,14 @@ public class NavigationManager implements Loggable{
 
 
     public NavigationManager(Supplier<Pose2d> poseSupplier,
-        Supplier<Rotation2d> robotToTurretSupplier
+        Supplier<Rotation2d> robotToTurretSupplier,
+        Consumer<Double> turretAngularVelocityConsumer
         ) {
         m_poseSupplier = poseSupplier;
         m_drivebaseHeadingSupplier = ()->poseSupplier.get().getRotation();
         m_robotToTurretSupplier = robotToTurretSupplier;
+        m_lastHeading = m_drivebaseHeadingSupplier.get();
+        m_turretAngularVelocityConsumer = turretAngularVelocityConsumer;
 
         hubTransformEstimator = new HubTransformEstimator(m_poseSupplier);
         visionHubTransformAdjuster = new VisionHubTransformAdjuster(m_robotToTurretSupplier, hubTransformEstimator::setCorrectedRobotToHubTransform);
@@ -49,6 +55,11 @@ public class NavigationManager implements Loggable{
         hubTransformEstimator.update();
         
         visionHubTransformAdjuster.update();
+        double omega = (m_drivebaseHeadingSupplier.get().getRadians() - m_lastHeading.getRadians()) / 0.02;
+
+        m_turretAngularVelocityConsumer.accept(omega);
+
+
     }
 
     //Setters
@@ -86,6 +97,11 @@ public class NavigationManager implements Loggable{
     @Log(methodName = "getRadians")
     public Rotation2d getRobotToHubDirection() {
         return NomadMathUtil.getDirection(getRobotToHubTransform());
+    }
+
+    @Log()
+    public double getRobotToHubDistance() {
+        return NomadMathUtil.getDistance(getRobotToHubTransform());
     }
 
     public Transform2d getRobotToCameraTransform() {

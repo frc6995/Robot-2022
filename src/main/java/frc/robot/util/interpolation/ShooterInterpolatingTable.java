@@ -14,7 +14,7 @@ public class ShooterInterpolatingTable {
     private ShooterInterpolatingTable() {}
 
     public static final double MIN_DISTANCE = 2.3;
-    public static final double MAX_DISTANCE = 5.4;
+    public static final double MAX_DISTANCE = 4.3;
 
     // Interpolating tree map
     private static final TreeMap<Double, ShotParameter> map = new TreeMap<>(

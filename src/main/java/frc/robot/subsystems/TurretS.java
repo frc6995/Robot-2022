@@ -29,6 +29,7 @@ import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N2;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
@@ -193,6 +194,25 @@ public class TurretS extends SubsystemBase implements Loggable {
     sparkMax.setVoltage(voltage);
   }
 
+  public boolean isTargetInRange (Rotation2d target) {
+    double targetRadians = modulus(target);
+
+    if(targetRadians > Constants.SOFT_LIMIT_FORWARD_RADIAN) {
+      return false;
+    }
+    else if(targetRadians < Constants.SOFT_LIMIT_REVERSE_RADIAN) {
+      return false;
+    }
+    return true;
+  }
+
+  public double modulus(Rotation2d rotation) {
+    double targetPosition = rotation.getRadians();
+    if(targetPosition < 0) {
+      targetPosition = 2*Math.PI + targetPosition;
+    }
+    return targetPosition;
+  }
   /**
    * Determines whether the turret is homed.
    * 
@@ -226,6 +246,10 @@ public class TurretS extends SubsystemBase implements Loggable {
   public void resetPID() {
     turretPID.reset(getEncoderCounts());
   }
+
+  public void setTurretAngle(Rotation2d target) {
+    setTurretAngle(target, 0);
+  }
   /**
    * sets the speed of the turret from -1 to 1, ensures the position of the turret
    * is
@@ -233,11 +257,20 @@ public class TurretS extends SubsystemBase implements Loggable {
    * 
    * @param target The desired angle, relative to the +x axis of the robot coordinate frame.
    */
-  public void setTurretAngle(Rotation2d target) {
+  public void setTurretAngle(Rotation2d target, double angleOffset) {
     // the given target switches from -pi to pi as it crosses the back of the robot, so we mod by 2pi
     double targetPosition = target.getRadians();
     if(targetPosition < 0) {
       targetPosition = 2*Math.PI + targetPosition;
+    }
+    // Clamp the angle offset so that at least one side can actually handle it.
+    angleOffset = MathUtil.clamp(angleOffset, 0, SOFT_LIMIT_FORWARD_RADIAN - Math.PI);
+
+    if(targetPosition + angleOffset > SOFT_LIMIT_FORWARD_RADIAN) {
+        targetPosition -= angleOffset;
+    } 
+    else {
+        targetPosition += angleOffset;
     }
 
     SmartDashboard.putNumber("targetUnadj", targetPosition);
@@ -269,14 +302,10 @@ public class TurretS extends SubsystemBase implements Loggable {
 
     turretSimEncoder.setPosition(newPosition);
   }
-  /**
-   * gets the position error
-   * 
-   * @return The position error
-   */
+
   @Log
-  public double getError() {
-    return turretPID.getPositionError();
+  public double getError(Rotation2d target) {
+    return modulus(getRobotToTurretRotation()) - modulus(target);
   }
 
   /**
@@ -285,8 +314,8 @@ public class TurretS extends SubsystemBase implements Loggable {
    * @return True if the turret is at the target angle
    */
   @Log
-  public boolean isAtTarget() {
-    return Math.abs(getError()) < Constants.TURRET_PID_ERROR;
+  public boolean isAtTarget(Rotation2d target) {
+    return Math.abs(getError(target)) < Constants.TURRET_PID_ERROR;
   }
   
   @Override

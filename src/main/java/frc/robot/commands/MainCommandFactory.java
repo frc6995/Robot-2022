@@ -58,6 +58,21 @@ public class MainCommandFactory {
     return ShooterCommandFactory.createShooterDistanceSpinupC(()->NomadMathUtil.getDistance(navigationManager.getRobotToHubTransform()), shooterS);
   }
 
+  public static Command createWrongBallC(NavigationManager navigationManager, TurretS turretS, ShooterS shooterS) {
+    return new ConditionalCommand(
+      TurretCommandFactory.createTurretWrongBallC(
+      navigationManager::getRobotToHubDirection,
+      navigationManager::getRobotToHubDistance, turretS)
+      .alongWith(createShooterDefaultC(navigationManager, shooterS)),
+      ShooterCommandFactory.createShooterIdleC(shooterS)
+      .alongWith(createTurretDefaultC(navigationManager, turretS)),
+      ()->{
+        return turretS.isTargetInRange(
+          navigationManager.getRobotToHubDirection()
+        );
+      });
+  }
+
   public static Command createTurretDefaultC(NavigationManager navigationManager, TurretS turretS) {
     return TurretCommandFactory.createTurretFollowC(
       ()->{

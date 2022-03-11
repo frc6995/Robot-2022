@@ -56,7 +56,7 @@ public class TurretCommandFactory {
                 interrupted -> {
                     turretS.stopMotor();
                 },
-                turretS::isAtTarget,
+                ()->turretS.isAtTarget(new Rotation2d(angle)),
                 turretS)
                         .withName("TurretTurnC");
     }
@@ -79,7 +79,7 @@ public class TurretCommandFactory {
 
             @Override
             public boolean isFinished() {
-                return turretS.isAtTarget();
+                return turretS.isAtTarget(setpoint);
             }
             
             @Override
@@ -111,6 +111,25 @@ public class TurretCommandFactory {
             ()->{turretS.resetPID();}, 
             ()->{
                 turretS.setTurretAngle(angle.get());
+            },
+            interrupted -> {
+                turretS.stopMotor();
+            },
+            () -> false,
+            turretS
+        )
+        .withName("TurretFollowC");
+    }
+
+    public static Command createTurretWrongBallC(Supplier<Rotation2d> hubAngle, Supplier<Double> hubDistance, TurretS turretS) {
+        return new FunctionalCommand(
+            ()->{turretS.resetPID();}, 
+            ()->{
+                double targetPosition = hubAngle.get().getRadians();
+                double distance = hubDistance.get();
+                double angleOffset = Math.atan2(Units.feetToMeters(4), distance);
+                turretS.setTurretAngle(new Rotation2d(targetPosition), angleOffset);
+
             },
             interrupted -> {
                 turretS.stopMotor();

@@ -165,6 +165,11 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
     tankDriveVelocity(0, 0);
   }
 
+  public boolean getIsStopped() {
+    return Math.abs(getLeftVelocity()) < 0.1
+    && Math.abs(getRightVelocity()) < 0.1;
+  }
+
   @Override
   public void periodic() {
     // This method will be called once per scheduler run

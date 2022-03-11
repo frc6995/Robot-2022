@@ -50,6 +50,8 @@ public class MidtakeS extends SubsystemBase implements Loggable{
   private int cargoOut = 0;
   private boolean beamBreakTopBroken;
 
+  @Log
+  private boolean isArmed = false;
   /**
    * Create a new MidtakeS
    */
@@ -83,18 +85,22 @@ public class MidtakeS extends SubsystemBase implements Loggable{
    */
   public void load() {
     spin(Constants.MIDTAKE_LOADING_SPEED);
+    isArmed = false;
   }
 
   public void reverse() {
     spin(-Constants.MIDTAKE_LOADING_SPEED);
+    isArmed = false;
   }
 
   public void feed() {
     spin(Constants.MIDTAKE_FEEDING_SPEED);
+    isArmed = false;
   }
 
   public void crawl() {
     spin(Constants.MIDTAKE_CRAWL_SPEED);
+    isArmed = false;
   }
 
   public void stop() {
@@ -187,6 +193,10 @@ public class MidtakeS extends SubsystemBase implements Loggable{
     }
   }
 
+  public boolean getIsWrongBallDetected() {
+    return getColorSensorDetectsBall() && ! getIsBallColorCorrect();
+  }
+
   public boolean getIsStopped() {
     return frontSparkMax.getAppliedOutput() <= 0.05 && backSparkMax.getAppliedOutput() <= 0.05;
   }
@@ -199,6 +209,14 @@ public class MidtakeS extends SubsystemBase implements Loggable{
   @Log  
   public boolean getDidCargoLeave() {
     return lastBeamBreakTopBroken && !beamBreakTopBroken;
+  }
+
+  public boolean getIsArmed() {
+    return isArmed;
+  }
+
+  public void reportArmed() {
+    isArmed = true;
   }
 
   @Override

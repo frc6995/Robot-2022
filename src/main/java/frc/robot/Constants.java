@@ -180,7 +180,7 @@ public final class Constants {
     public static final double SOFT_LIMIT_REVERSE_RADIAN = Units.degreesToRadians(180-110);
 
     /** Number of degrees of allowable error for turret */
-    public static final double TURRET_PID_ERROR = Units.degreesToRadians(30);
+    public static final double TURRET_PID_ERROR = Units.degreesToRadians(5);
 
     /** Speed at which the turret should go back to home */
     public static final double TURRET_HOMING_SPEED = -0.1;
@@ -192,10 +192,10 @@ public final class Constants {
     public static final double[] TURRET_FF = {0.15/*0.39505*/, 0.56397, 0.030497}; // for velocity in turret radians per second
 
     /** Proportional term for the turret */
-    public static final double TURRET_P = 5;
+    public static final double TURRET_P = 51.463;
 
     /** Derivative term for the turret */
-    public static final double TURRET_D = 0;
+    public static final double TURRET_D = 1.9948;
 
     /** The maximum manual-drive angular velocity of the turret in radians per second */
     public static final double TURRET_MAX_SPEED = 1;
@@ -325,6 +325,10 @@ public final class Constants {
      */
     public static final int CLIMBER_FRONT_SOFT_LIMIT_BACK = 0;
 
+    /**
+     * The current the back motor needs to pull for the climber to detect that it's lifting the robot.
+     */
+    public static final double CLIMBER_BACK_PULLING_CURRENT = 10;
         /**
      * The max amount of rotations extending the climber
      */

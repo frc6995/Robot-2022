@@ -39,7 +39,6 @@ public class ClimberS extends SubsystemBase implements Loggable {
   public Command resetBackToExtended = new InstantCommand(()->sparkMaxEncoderTwo.setPosition(Constants.CLIMBER_BACK_SOFT_LIMIT_FORWARD)).withName("resetBackToExtended");
   @Log
   public Command resetBackToRetracted= new InstantCommand(()->sparkMaxEncoderTwo.setPosition(Constants.CLIMBER_BACK_SOFT_LIMIT_BACK)).withName("resetBackToRetracted");
-
   /** Creates a new ClimberS. */
   public ClimberS() {
     

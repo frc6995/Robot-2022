@@ -102,6 +102,14 @@ public class MidtakeCommandFactory {
             createMidtakeCrawlC(midtakeS)
             .withInterrupt(midtakeS::getIsTopBeamBroken)
             .withTimeout(1.0)
+        ).andThen(
+            new InstantCommand(
+                ()->{
+                    if(midtakeS.getIsTopBeamBroken()) {
+                        midtakeS.reportArmed();
+                    }
+                }
+            )
         );
     }
 
@@ -117,8 +125,7 @@ public class MidtakeCommandFactory {
     }
 
     public static Command createMidtakeShootOneC(MidtakeS midtakeS) {
-        return createMidtakeFeedOneC(midtakeS)
-        .andThen(createMidtakeArmC(midtakeS));
+            return createMidtakeFeedOneC(midtakeS);
     }
     /**
      * By default, the midtake will perpetually drive slowly towards the top except when the top beam is broken,
@@ -129,7 +136,7 @@ public class MidtakeCommandFactory {
     public static Command createMidtakeIdleC(MidtakeS midtakeS) {
         return new ConditionalCommand(
             new InstantCommand(),
-            createMidtakeCrawlC(midtakeS).withInterrupt(midtakeS::getIsTopBeamBroken),
+            createMidtakeCrawlC(midtakeS).withInterrupt(midtakeS::getIsTopBeamBroken).andThen(new InstantCommand(midtakeS::reportArmed)),
             midtakeS::getIsTopBeamBroken
         );
     }

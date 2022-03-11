@@ -70,7 +70,7 @@ public class RobotContainer {
   private Command runTurretC;
   private Command turretManualC;
   private Command turretAimC;
-  private Command shooterSpinC;
+  private Command shooterVisionSpinC;
   private Command visionSpinAndAimC;
   private Command odometrySpinAndAimC;
   private Command midtakeFeedC;
@@ -91,6 +91,12 @@ public class RobotContainer {
   private Trigger turretReadyTrigger;
   @Log(methodName = "get")
   private Trigger ballReadyTrigger;
+  @Log(methodName = "get")
+  private Trigger drivebaseStoppedTrigger;
+  @Log(methodName = "get")
+  private Trigger shootButtonTrigger;
+  @Log(methodName = "get")
+  private Trigger distanceInRangeTrigger;
 
   @Log(methodName = "get")
   private Trigger shootBallTrigger;
@@ -98,7 +104,6 @@ public class RobotContainer {
   private Trigger dumpWrongBallTrigger;
 
   private Trigger huddleModeTrigger;
-
 
   public RobotContainer() {
     createControllers();
@@ -134,7 +139,8 @@ public class RobotContainer {
     shooterS = new ShooterS();
     climberS = new ClimberS();
     navigationManager = new NavigationManager(drivebaseS::getRobotPose,
-    turretS::getRobotToTurretRotation);
+    turretS::getRobotToTurretRotation,
+    turretS::setTransformVelocity);
     limelightS = new LimelightS(
       navigationManager,
     (list)->{field.getObject("targetRing").setPoses(list);});
@@ -155,18 +161,23 @@ public class RobotContainer {
 
 
     visionSpinAndAimC = MainCommandFactory.createVisionSpinupAndAimC(limelightS, turretS, shooterS);
-    shooterS.setDefaultCommand(
-      MainCommandFactory.createShooterDefaultC(
-        navigationManager, shooterS
-      ));
+
 
     turretAimC = TurretCommandFactory.createTurretVisionC(limelightS, turretS);
     turretManualC = TurretCommandFactory.createTurretManualC(()->-operatorController.getLeftX(), turretS);
     turretS.setDefaultCommand(MainCommandFactory.createTurretDefaultC(navigationManager, turretS)/*turretManualC*/);
+    //turretS.setDefaultCommand(turretManualC);
     
-    shooterSpinC = ShooterCommandFactory.createShooterDistanceSpinupC(limelightS::getFilteredDistance, shooterS);
+    shooterVisionSpinC = ShooterCommandFactory.createShooterDistanceSpinupC(limelightS::getFilteredDistance, shooterS);
     shooterTestC = new ShooterTestC(shooterS);
+    shooterS.setDefaultCommand(
+      MainCommandFactory.createShooterDefaultC(
+        navigationManager, shooterS
+      ));
+    //shooterS.setDefaultCommand(shooterVisionSpinC);
+
     runIntakeC = MainCommandFactory.createIntakeCG(midtakeS, intakeS);
+
     midtakeDefaultC = MidtakeCommandFactory.createMidtakeDefaultC(midtakeS);
     midtakeS.setDefaultCommand(midtakeDefaultC);
     midtakeFeedC = MidtakeCommandFactory.createMidtakeFeedC(midtakeS);
@@ -174,26 +185,28 @@ public class RobotContainer {
   }
 
   public void createTriggers() {
-    turretReadyTrigger = new Trigger(turretS::isAtTarget);
+    turretReadyTrigger = new Trigger(()->turretS.isAtTarget(navigationManager.getRobotToHubDirection()));
     shooterReadyTrigger = new Trigger(shooterS::isAtTarget);
-    ballReadyTrigger = midtakeS.topBeamBreakTrigger.and(new Trigger(midtakeS::getIsStopped));
+    ballReadyTrigger = new Trigger(midtakeS::getIsArmed);
+    drivebaseStoppedTrigger = new Trigger(drivebaseS::getIsStopped);
+    shootButtonTrigger = new Trigger(()->{return (operatorController.getRightTriggerAxis() >= 0.5);});
+    distanceInRangeTrigger = new Trigger(()->{return NavigationManager.getDistanceInRange(navigationManager.getRobotToHubDistance());});
 
     huddleModeTrigger  = driverController.rightStick();
     dumpWrongBallTrigger = 
-    new Trigger(midtakeS::getIsBallColorCorrect).negate();
+    new Trigger(midtakeS::getIsWrongBallDetected);
 
     shootBallTrigger =
-    new Trigger(()->{return (operatorController.getRightTriggerAxis() >= 0.5);})
+      shootButtonTrigger
       .and(turretReadyTrigger.debounce(0.3))
-      .and(shooterReadyTrigger.debounce(0.2, DebounceType.kRising))
-      .and(ballReadyTrigger)
-      .and(
-        dumpWrongBallTrigger
-        .or(
-          huddleModeTrigger
-          .negate()
-        )
-      );
+      .and(shooterReadyTrigger.debounce(0.2))
+      .and(ballReadyTrigger.debounce(0.1))
+      .and(drivebaseStoppedTrigger.debounce(0.2))
+      .and(distanceInRangeTrigger.debounce(0.2))
+      .and(dumpWrongBallTrigger.negate())
+    ;
+
+
     
 
   }
@@ -209,6 +222,8 @@ public class RobotContainer {
   private void configureButtonBindings() {
     driverController.a().toggleWhenActive(runIntakeC);
     huddleModeTrigger.whileActiveContinuous(IntakeCommandFactory.createIntakeStopAndRetractCG(intakeS));
+
+    new Trigger(()->{return (operatorController.getLeftTriggerAxis() >= 0.5);}).whileActiveContinuous(turretAimC);
     // driverController.b().whileActiveOnce(IntakeCommandFactory.createIntakeEjectC(intakeS));
     // driverController.x().whileActiveOnce(
     //   MidtakeCommandFactory.createMidtakeReverseC(midtakeS)
@@ -216,7 +231,24 @@ public class RobotContainer {
 
     // Hold down the right trigger to shoot when ready.
     shootBallTrigger.whenActive(MidtakeCommandFactory.createMidtakeShootOneC(midtakeS));
-    dumpWrongBallTrigger.whileActiveContinuous(ShooterCommandFactory.createShooterIdleC(shooterS));
+    dumpWrongBallTrigger.whileActiveContinuous(MainCommandFactory.createWrongBallC(navigationManager, turretS, shooterS));
+
+    dumpWrongBallTrigger.and(
+      new Trigger(
+          ()->{
+          return (
+            Math.abs(
+              turretS.getError(
+                navigationManager.getRobotToHubDirection()
+              )
+            ) > Math.atan2(
+              Units.feetToMeters(3),
+              navigationManager.getRobotToHubDistance()
+            )
+          );
+        }
+      )
+    ).and(shooterReadyTrigger).and(ballReadyTrigger).whenActive(MidtakeCommandFactory.createMidtakeShootOneC(midtakeS));
 
     operatorController.pov.left()
     .or(operatorController.pov.downLeft())
