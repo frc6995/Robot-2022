@@ -4,6 +4,8 @@
 
 package frc.robot.subsystems;
 
+import java.util.Arrays;
+
 import edu.wpi.first.wpilibj.motorcontrol.Spark;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -11,8 +13,6 @@ import frc.robot.Constants;
 public class LightS extends SubsystemBase {
 
   private Spark spark;
-  private States currentTop;
-
 
   /** Creates a new LedS. */
   public LightS() {
@@ -37,8 +37,9 @@ public class LightS extends SubsystemBase {
     }
   }
 
-  // currentStates = {Disabled, Climbing, EjectingWrongColor, Intaking, Shooting, Default}
-  boolean[] currentStates = {false, false, false, false, false, false};
+  // currentStates = {Disabled, Climbing, EjectingWrongColor, Intaking, Shooting,
+  // Default}
+  boolean[] currentStates = { false, false, false, false, false, false };
 
   /**
    * Requests the current state of the robot, determines whether the requested
@@ -59,8 +60,10 @@ public class LightS extends SubsystemBase {
   public void periodic() {
     // This method will be called once per scheduler run
     int currentTopIndex;
-    for(currentTopIndex = States.Disabled.value; currentTopIndex < States.values().length; currentTopIndex++){
-      if (currentStates[currentTopIndex]){break;}
+    for (currentTopIndex = States.Disabled.value; currentTopIndex < States.values().length; currentTopIndex++) {
+      if (currentStates[currentTopIndex]) {
+        break;
+      }
     }
     switch (States.values()[currentTopIndex]) {
       case Disabled:
@@ -75,10 +78,10 @@ public class LightS extends SubsystemBase {
       case Climbing:
         spark.set(Constants.LED_PARTY_MODE);
         break;
-      case Default:
       default:
         spark.set(Constants.LED_SOLID_GREEN);
         break;
     }
+    Arrays.fill(currentStates, false);
   }
 }
