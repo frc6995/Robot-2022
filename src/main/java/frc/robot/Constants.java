@@ -87,5 +87,6 @@ public final class Constants {
     /** The roboRIO spark value for Rainbow, Party Palette pattern */
     public static final double LED_PARTY_MODE = -0.97;
 
+
 }
 

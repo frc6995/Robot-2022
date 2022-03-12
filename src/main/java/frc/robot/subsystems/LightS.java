@@ -10,8 +10,9 @@ import frc.robot.Constants;
 
 public class LightS extends SubsystemBase {
 
-  public static states currentState;
   private Spark spark;
+  private States currentTop;
+
 
   /** Creates a new LedS. */
   public LightS() {
@@ -21,20 +22,23 @@ public class LightS extends SubsystemBase {
    * Different states of the robot, with an integer that determines the priority
    * of the state (the lower the number, the higher the priority)
    */
-  public enum states {
+  public static enum States {
     Disabled(0),
     Climbing(1),
-    IntakingWrongColor(2),
+    EjectingWrongColor(2),
     Intaking(3),
     Shooting(4),
     Default(5);
 
-    public int value;
+    public final int value;
 
-    private states(int priority) {
+    private States(int priority) {
       value = priority;
     }
   }
+
+  // currentStates = {Disabled, Climbing, EjectingWrongColor, Intaking, Shooting, Default}
+  boolean[] currentStates = {false, false, false, false, false, false};
 
   /**
    * Requests the current state of the robot, determines whether the requested
@@ -43,13 +47,8 @@ public class LightS extends SubsystemBase {
    * 
    * @param state The requested state of the robot when the method is called
    */
-  public void requestState(states state) {
-
-    // if (currentState.value < stat.value) {}
-
-    if (currentState.value >= state.value) {
-      currentState = state;
-    }
+  public void requestState(States state) {
+    currentStates[state.value] = true;
   }
 
   /**
@@ -59,12 +58,12 @@ public class LightS extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-
-    switch (currentState) {
+    int currentTopIndex;
+    for(currentTopIndex = States.Disabled.value; currentTopIndex < States.values().length; currentTopIndex++){
+      if (currentStates[currentTopIndex]){break;}
+    }
+    switch (States.values()[currentTopIndex]) {
       case Disabled:
-        spark.set(Constants.LED_SOLID_GREEN);
-        break;
-      case IntakingWrongColor:
         spark.set(Constants.LED_PATTERN_RED);
         break;
       case Intaking:
@@ -77,6 +76,7 @@ public class LightS extends SubsystemBase {
         spark.set(Constants.LED_PARTY_MODE);
         break;
       case Default:
+      default:
         spark.set(Constants.LED_SOLID_GREEN);
         break;
     }
