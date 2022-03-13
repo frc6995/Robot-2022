@@ -45,7 +45,6 @@ public class MainCommandFactory {
       midtakeS::getIsMidtakeFull
     );
   }
-
   
 
 
@@ -54,7 +53,7 @@ public class MainCommandFactory {
     .alongWith(TurretCommandFactory.createTurretVisionC(limelightS, turretS));
   }
 
-  public static Command createShooterDefaultC(NavigationManager navigationManager, ShooterS shooterS) {
+  public static Command createShooterOdometryC(NavigationManager navigationManager, ShooterS shooterS) {
     return ShooterCommandFactory.createShooterDistanceSpinupC(()->NomadMathUtil.getDistance(navigationManager.getRobotToHubTransform()), shooterS);
   }
 
@@ -63,9 +62,9 @@ public class MainCommandFactory {
       TurretCommandFactory.createTurretWrongBallC(
       navigationManager::getRobotToHubDirection,
       navigationManager::getRobotToHubDistance, turretS)
-      .alongWith(createShooterDefaultC(navigationManager, shooterS)),
+      .alongWith(createShooterOdometryC(navigationManager, shooterS)),
       ShooterCommandFactory.createShooterIdleC(shooterS)
-      .alongWith(createTurretDefaultC(navigationManager, turretS)),
+      .alongWith(createTurretOdometryC(navigationManager, turretS)),
       ()->{
         return turretS.isTargetInRange(
           navigationManager.getRobotToHubDirection()
@@ -73,7 +72,7 @@ public class MainCommandFactory {
       });
   }
 
-  public static Command createTurretDefaultC(NavigationManager navigationManager, TurretS turretS) {
+  public static Command createTurretOdometryC(NavigationManager navigationManager, TurretS turretS) {
     return TurretCommandFactory.createTurretFollowC(
       ()->{
         Rotation2d direction = NomadMathUtil.getDirection(navigationManager.getRobotToHubTransform());

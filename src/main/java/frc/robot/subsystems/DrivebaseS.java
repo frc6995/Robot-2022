@@ -17,6 +17,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
+//import frc.robot.util.pose.DifferentialDriveOdometry;
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.RobotController;
@@ -26,12 +27,14 @@ import edu.wpi.first.wpilibj.drive.DifferentialDrive.WheelSpeeds;
 import edu.wpi.first.wpilibj.simulation.DifferentialDrivetrainSim;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import frc.robot.util.SimEncoder;
 import io.github.oblarg.oblog.Loggable;
 import io.github.oblarg.oblog.annotations.Log;
 
 public class DrivebaseS extends SubsystemBase implements Loggable {
   DifferentialDriveOdometry odometry = new DifferentialDriveOdometry(new Rotation2d());
+  //DifferentialDriveOdometry odometry = new DifferentialDriveOdometry(Constants.DRIVEBASE_TRACKWIDTH);
   private final CANSparkMax frontRight = new CANSparkMax(CAN_ID_FRONT_RIGHT_DRIVE_MOTOR, MotorType.kBrushless);
   private final CANSparkMax frontLeft = new CANSparkMax(CAN_ID_FRONT_LEFT_DRIVE_MOTOR, MotorType.kBrushless);
   private final CANSparkMax backRight = new CANSparkMax(CAN_ID_BACK_RIGHT_DRIVE_MOTOR, MotorType.kBrushless);
@@ -54,8 +57,6 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
   @Log(methodName = "getPosition", name = "getSimLeftPosition")
   private SimEncoder m_leftEncoder = new SimEncoder();
   private Rotation2d m_simHeading = new Rotation2d();
-  private Rotation2d m_gyroSim = new Rotation2d();
-  private Rotation2d m_initialHeading;
 
 
   /** Creates a new DrivebaseS. */
@@ -79,8 +80,9 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
     backRight.follow(frontRight, false);
     backLeft.follow(frontLeft, false);
 
+    SmartDashboard.putBoolean("requestPoseReset", false);
+
     if (RobotBase.isSimulation()) {
-      m_gyroSim = new Rotation2d();
       m_driveSim = new DifferentialDrivetrainSim(
         DRIVEBASE_PLANT,
         DRIVEBASE_GEARBOX,
@@ -88,11 +90,9 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
         DRIVEBASE_TRACKWIDTH,
         1 / 2.0, // wheel radius is half of an encoder position unit.
         DRIVEBASE_SIM_ENCODER_STD_DEV);
-
 		}
-
     resetRobotPose(START_POSE);
-    m_initialHeading = START_POSE.getRotation();
+    
   }
 
   /**
@@ -104,6 +104,7 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
     }
     return value;
   }
+  
 
   @Log(methodName = "getRadians", name = "gyroHeading")
   public Rotation2d getRotation2d() {
@@ -111,7 +112,7 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
       return navX.getRotation2d();
     }
     else {
-      return m_gyroSim;
+      return m_simHeading;
     }
   }
 
@@ -174,16 +175,19 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
   public void periodic() {
     // This method will be called once per scheduler run
     if (RobotBase.isReal()) {
-      odometry.update(navX.getRotation2d(), 
+      odometry.update(getRotation2d(), 
       frontLeft.getEncoder().getPosition(),
       frontRight.getEncoder().getPosition()
       );
     }
     else {
-      odometry.update(m_gyroSim, m_leftEncoder.getPosition(), m_rightEncoder.getPosition());
+      odometry.update(getRotation2d(), m_leftEncoder.getPosition(), m_rightEncoder.getPosition());
     }
+
+
   }
 
+  @Override
   public void simulationPeriodic() {
 		// Set the inputs to the system. Note that we need to convert
 		// the [-1, 1] PWM signal to voltage by multiplying it by the
@@ -201,8 +205,7 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
 		m_rightEncoder.setPosition(m_driveSim.getRightPositionMeters());
 		m_rightEncoder.setVelocity(m_driveSim.getRightVelocityMetersPerSecond());
 
-		m_simHeading = m_driveSim.getHeading();
-    m_gyroSim = m_simHeading.minus(m_initialHeading);
+		m_simHeading = m_driveSim.getHeading().plus(START_POSE.getRotation());
 	}
 
   public DifferentialDriveWheelSpeeds getWheelSpeeds() {
@@ -255,12 +258,19 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
   }
 
   public void resetRobotPose(Pose2d pose) {
-    odometry.resetPosition(pose, getRotation2d());
+    
     if(RobotBase.isSimulation()) {
+      //odometry.resetPosition(pose);
+      odometry.resetPosition(pose, new Rotation2d());
       m_driveSim.setPose(
         odometry.getPoseMeters()
       );
     }
+    else {
+      //odometry.resetPosition(pose);
+      odometry.resetPosition(pose, getRotation2d());
+    }
+
 
     resetEncoders(); 
        

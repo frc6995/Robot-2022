@@ -4,6 +4,7 @@
 
 package frc.robot.util.pose;
 
+import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -29,10 +30,9 @@ public class NavigationManager implements Loggable{
     private Supplier<Rotation2d> m_drivebaseHeadingSupplier;
     private Supplier<Rotation2d> m_robotToTurretSupplier;
     private Consumer<Double> m_turretAngularVelocityConsumer;
+    
 
     private Rotation2d m_lastHeading;
-
-
     private HubTransformEstimator hubTransformEstimator;
     private VisionHubTransformAdjuster visionHubTransformAdjuster;
 
@@ -59,17 +59,22 @@ public class NavigationManager implements Loggable{
 
         m_turretAngularVelocityConsumer.accept(omega);
 
+        m_lastHeading = m_drivebaseHeadingSupplier.get();
 
+
+    }
+
+    public void resetPose(Pose2d pose) {
+        hubTransformEstimator.resetPose(pose);
     }
 
     //Setters
-    @Config
-    public void setVisionEnabled(boolean enabled) {
+    public void setVisionEnabledSupplier(BooleanSupplier enabled) {
         visionHubTransformAdjuster.setVisionEnabled(enabled);
     }
 
-    public void addVisionMeasurement(PhotonTrackedTarget target) {
-        visionHubTransformAdjuster.addVisionMeasurement(target);
+    public void addVisionMeasurement(Rotation2d xOffset, double distanceToCenter) {
+        visionHubTransformAdjuster.addVisionMeasurement(xOffset, distanceToCenter);
     }
     //Transform and pose getters
     
@@ -119,7 +124,8 @@ public class NavigationManager implements Loggable{
     }
 
     public Pose2d getEstimatedRobotPose() {
-        return HUB_CENTER_POSE.plus( // Turn the hub pose to match the robot
+        return HUB_CENTER_POSE
+        .plus( // Turn the hub pose to match the robot
             new Transform2d(
                 new Translation2d(),
                 m_drivebaseHeadingSupplier.get())

@@ -3,6 +3,9 @@ package frc.robot.util.interpolation;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.Map.Entry;
+
+import frc.robot.Constants;
+
 import static java.util.Map.entry;
 
 // Courtesy of 5940
@@ -19,11 +22,11 @@ public class ShooterInterpolatingTable {
     // Interpolating tree map
     private static final TreeMap<Double, ShotParameter> map = new TreeMap<>(
         Map.ofEntries(
-            entry(2.3, new ShotParameter(1300, 2800, 1.0)),
-            entry(2.78, new ShotParameter(1300, 2800, 1.0)),
-            entry(3.3, new ShotParameter(1500, 3000, 1.0)),
-            entry(3.8, new ShotParameter(1700, 3200, 1.0)),
-            entry(5.4, new ShotParameter(2300, 4500, 1.0))
+            entry(2.3 + Constants.CAMERA_CENTER_OFFSET, new ShotParameter(1100, 2600, 1.0)),
+            entry(2.78 + Constants.CAMERA_CENTER_OFFSET, new ShotParameter(1100, 2600, 1.0)),
+            entry(3.3 + Constants.CAMERA_CENTER_OFFSET, new ShotParameter(1300, 2800, 1.0)),
+            entry(3.8 + Constants.CAMERA_CENTER_OFFSET, new ShotParameter(1500, 3000, 1.0)),
+            entry(5.4  + Constants.CAMERA_CENTER_OFFSET, new ShotParameter(2100, 4300, 1.0))
         )
     );
 

@@ -4,7 +4,9 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
+import edu.wpi.first.wpilibj2.command.ProxyScheduleCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
+import frc.robot.Main;
 import frc.robot.commands.IntakeCommandFactory;
 import frc.robot.commands.MainCommandFactory;
 import frc.robot.commands.MidtakeCommandFactory;
@@ -38,43 +40,12 @@ public class AutoCommandFactory {
      */
     public static Command createTwoBallAutoCG(
             ShooterS shooterS, IntakeS intakeS, MidtakeS midtakeS, TurretS turretS, LimelightS limelightS, DrivebaseS drivebaseS) {
-        return new InstantCommand(
-                ()->{
-
-                        drivebaseS.resetRobotPose(drivebaseS.START_POSE);
-                }
-        ).andThen(
-                new ParallelDeadlineGroup(
-                        new ParallelCommandGroup(
-                                // Spins up the front and back shooter motors to the set target speeds
-                                // Drives at 25% speed for 7 seconds or until the color sensor detects a ball
-                                // present
-                                DrivebaseCommandFactory.createTimedDriveC(.3, 2.5, drivebaseS)
-                                        .withInterrupt(midtakeS::getIsMidtakeFull),
-                                new ParallelDeadlineGroup(
-                                        IntakeCommandFactory.createIntakeDeployAndRunCG(intakeS)
-                                        .withInterrupt(midtakeS::getIsMidtakeFull)
-                                        .andThen(IntakeCommandFactory.createIntakeStopAndRetractCG(intakeS))
-                                        .andThen(new WaitCommand(0.5)),
-                                        MidtakeCommandFactory.createMidtakeLowIndexCG(midtakeS)
-                                )                       
-                                // Spins the midtake to feed the shooter
-                                .andThen( new WaitCommand(3)).andThen(
-                                        MidtakeCommandFactory.createMidtakeFeedC(midtakeS))
-                        ),
-                        TurretCommandFactory.createTurretVisionC(limelightS, turretS),
-                        ShooterCommandFactory.createShooterDistanceSpinupC(limelightS::getFilteredDistance, shooterS)
-                )
-                .andThen(
-                        new InstantCommand(
-                                () -> {
-                                        shooterS.stop();
-                                        midtakeS.stop();
-                                },
-                                midtakeS, shooterS
+        return new ParallelCommandGroup(
+                        DrivebaseCommandFactory.createTimedDriveC(.3, 2.5, drivebaseS),
+                        new ProxyScheduleCommand(
+                                MainCommandFactory.createIntakeCG(midtakeS, intakeS)
                         )
-                )
-        )        
+        ).withInterrupt(midtakeS::getIsMidtakeFull)        
         .withName("Two Ball Auto");
     }
 

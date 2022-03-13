@@ -52,7 +52,8 @@ public class LimelightS extends SubsystemBase implements Loggable {
 
   // Sim stuff
   SimCamera limelightSimVisionSystem;
-  Trigger hasSteadyTarget = new Trigger(() -> limelight.getLatestResult().hasTargets()).debounce(0.5);
+  @Log(methodName = "get")
+  public final Trigger hasSteadyTarget = new Trigger(() -> limelight.getLatestResult().hasTargets()).debounce(0.5);
 
   LinearFilter xOffsetFilter = LinearFilter.singlePoleIIR(Constants.LIMELIGHT_FILTER_TIME_CONSTANT, Constants.LIMELIGHT_FILTER_PERIOD_CONSTANT);
   LinearFilter distanceFilter = LinearFilter.singlePoleIIR(Constants.LIMELIGHT_FILTER_TIME_CONSTANT, Constants.LIMELIGHT_FILTER_PERIOD_CONSTANT);
@@ -155,13 +156,16 @@ public class LimelightS extends SubsystemBase implements Loggable {
           Units.degreesToRadians(target.getPitch()),
           Units.degreesToRadians(
             RobotBase.isReal() ? target.getYaw() : 0 // Sim camera doesn't need a perspective transform.
-          )) + Constants.CAMERA_CENTER_OFFSET + Constants.HUB_RADIUS_METERS;
+          )) + Constants.HUB_RADIUS_METERS;
   
         filteredXOffsetRadians = xOffsetFilter.calculate(Units.degreesToRadians(-target.getYaw()));
         filteredDistanceMeters = distanceFilter.calculate(distance);
         lastValidDistance = distance;
 
-        navigationManager.addVisionMeasurement(target);
+        if(hasSteadyTarget.getAsBoolean()) {
+          navigationManager.addVisionMeasurement(new Rotation2d(filteredXOffsetRadians), filteredDistanceMeters);
+        }
+
         
       }
        else {

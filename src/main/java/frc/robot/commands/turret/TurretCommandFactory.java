@@ -140,8 +140,16 @@ public class TurretCommandFactory {
         .withName("TurretFollowC");
     }
 
+    public static Command createTurretClimbLockC(TurretS turretS) {
+        return createTurretFollowC(()->new Rotation2d(Math.PI), turretS);
+    }
+
     public static Command createTurretVisionC(LimelightS limelightS, TurretS turretS) {
-        return new FunctionalCommand(limelightS::ledsOn,
+        return new FunctionalCommand(
+            ()->{
+                limelightS.ledsOn();
+                limelightS.setDriverMode(false);
+             } ,
         ()->{
             if (limelightS.hasTarget()) {
                 double voltage = limelightS.getFilteredXOffset();
@@ -158,6 +166,7 @@ public class TurretCommandFactory {
         },
         (interrupted)->{
             turretS.stopMotor();
+            limelightS.setDriverMode(true);
             //limelightS.ledsOff();
         }, ()->false, turretS);
     }

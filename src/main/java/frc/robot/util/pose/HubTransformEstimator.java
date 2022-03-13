@@ -40,6 +40,7 @@ class HubTransformEstimator {
                     )
                     .rotateBy(delta.inverse().getRotation()),
                 new Rotation2d());
+        //m_robotToHubTranslation = poseSupplier.get().minus(HUB_CENTER_POSE);
         m_lastPose = poseSupplier.get();
     }
 
@@ -50,5 +51,10 @@ class HubTransformEstimator {
     void setCorrectedRobotToHubTransform(Transform2d newTransform){
         m_robotToHubTranslation = new Transform2d(
             newTransform.getTranslation(), new Rotation2d());
+    }
+
+    void resetPose(Pose2d pose) {
+        m_lastPose = pose;
+        m_robotToHubTranslation = new Transform2d(pose, HUB_CENTER_POSE);
     }
 }

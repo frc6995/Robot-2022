@@ -4,6 +4,7 @@
 
 package frc.robot.util.pose;
 
+import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -20,7 +21,7 @@ import static frc.robot.Constants.*;
 /** Add your docs here. */
 class VisionHubTransformAdjuster {
 
-    private boolean isVisionEnabled = false;
+    private BooleanSupplier isVisionEnabled = ()->false;
     private Transform2d m_robotToTurretTrans;
     private Transform2d m_robotToCameraTrans;
     private Supplier<Rotation2d> m_robotToTurretSupplier;
@@ -31,12 +32,12 @@ class VisionHubTransformAdjuster {
         m_correctedRobotToHubConsumer = correctedRobotToHubConsumer;
     }
 
-    void setVisionEnabled(boolean enabled) {
+    void setVisionEnabled(BooleanSupplier enabled) {
         isVisionEnabled = enabled;
     }
 
     boolean getVisionEnabled() {
-        return isVisionEnabled;
+        return isVisionEnabled.getAsBoolean();
     }
 
     void update(){
@@ -62,18 +63,14 @@ class VisionHubTransformAdjuster {
         return m_robotToCameraTrans;
     }
 
-    void addVisionMeasurement(PhotonTrackedTarget target) {
-        double xOffset = target.getYaw();
-        double distance = PhotonUtils.calculateDistanceToTargetMeters(
-        CAMERA_HEIGHT_METERS,
-        TARGET_HEIGHT_METERS,
-        CAMERA_PITCH_RADIANS,
-        Units.degreesToRadians(target.getPitch()));
-        
-        Transform2d cameraToHubTrans = new Transform2d(
-        PhotonUtils.estimateCameraToTargetTranslation(distance, Rotation2d.fromDegrees(-1 * xOffset))
-        .times((distance + HUB_RADIUS_METERS)/distance),
-        new Rotation2d()); //Scale the translation an extra 2 meters to account for the radius of the ring
-        m_correctedRobotToHubConsumer.accept(m_robotToCameraTrans.plus(cameraToHubTrans));
+    void addVisionMeasurement(Rotation2d xOffset, double distance) {
+        if(isVisionEnabled.getAsBoolean()) {
+            Transform2d cameraToHubTrans = new Transform2d(
+            PhotonUtils.estimateCameraToTargetTranslation(distance - HUB_RADIUS_METERS, xOffset)
+            .times((distance + HUB_RADIUS_METERS)/distance),
+            new Rotation2d()); //Scale the translation an extra 2 meters to account for the radius of the ring
+            m_correctedRobotToHubConsumer.accept(m_robotToCameraTrans.plus(cameraToHubTrans));
+        }
+
     }
 }

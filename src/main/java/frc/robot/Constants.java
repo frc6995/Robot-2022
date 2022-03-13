@@ -59,7 +59,7 @@ public final class Constants {
 
 
     /** Slew limit for drivebase forward back motors */
-    public static final double DRIVEBASE_FWD_BACK_SLEW_LIMIT = 2.0; // 0 to 100% in one second.
+    public static final double DRIVEBASE_FWD_BACK_SLEW_LIMIT = 1.5; // 0 to 100% in one second.
 
     /** Drivebase encoder rotations per wheel rotation. */
     public static final double DRIVEBASE_ENCODER_ROTATIONS_PER_WHEEL_ROTATION = (28.0/20.0) * (64.0/12.0);
@@ -126,7 +126,7 @@ public final class Constants {
     /**
      * Standard deviations for noise in simulation encoders.
      */
-    public static final Vector<N7> DRIVEBASE_SIM_ENCODER_STD_DEV = VecBuilder.fill(0, 0, 0, 0, 0, 0, 0);
+    public static final Vector<N7> DRIVEBASE_SIM_ENCODER_STD_DEV = VecBuilder.fill(0, 0, 0.0001, 0.05, 0.05, 0.0001, 0.0001);
 
     /**
      * Trajectory config for auto.
@@ -189,10 +189,10 @@ public final class Constants {
     public static final double TURRET_DEADBAND = 0.02;
 
     /** Feedforward for the turret */
-    public static final double[] TURRET_FF = {0.15/*0.39505*/, 0.56397, 0.030497}; // for velocity in turret radians per second
+    public static final double[] TURRET_FF = {0.1/*0.39505*/, 0.56397, 0.030497}; // for velocity in turret radians per second
 
     /** Proportional term for the turret */
-    public static final double TURRET_P = 51.463;
+    public static final double TURRET_P = 6;//51.463;
 
     /** Derivative term for the turret */
     public static final double TURRET_D = 1.9948;
@@ -365,6 +365,22 @@ public final class Constants {
      * The derivative constant for the back climber
      */
     public static final int BACK_CLIMBER_D_CONSTANT = 0;
+
+    //LED Constants
+
+    /** The roboRIO spark value for solid green LEDs */
+    public static final double LED_SOLID_GREEN = 0.77;
+
+    /** The roboRIO spark value for Light Chase pattern */
+    public static final double LED_PATTERN_GREEN = 0.01;
+
+    /** The roboRIO spark value for Strobe, Red pattern */
+    public static final double LED_PATTERN_RED = -0.11;
+
+    /** The roboRIO spark value for Rainbow, Party Palette pattern */
+    public static final double LED_PARTY_MODE = -0.97;
+
+    public static final int PWM_PORT_LED = 9;
 
     
 

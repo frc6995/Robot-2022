@@ -4,6 +4,9 @@
 
 package frc.robot.commands;
 
+import java.util.function.DoubleSupplier;
+
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
@@ -13,6 +16,7 @@ import edu.wpi.first.wpilibj2.command.RepeatCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
+import frc.robot.Constants;
 import frc.robot.subsystems.MidtakeS;
 import frc.robot.util.command.RunEndCommand;
 
@@ -126,6 +130,16 @@ public class MidtakeCommandFactory {
 
     public static Command createMidtakeShootOneC(MidtakeS midtakeS) {
             return createMidtakeFeedOneC(midtakeS);
+    }
+
+    public static Command createMidtakeManualC(DoubleSupplier joystick, MidtakeS midtakeS) {
+        return new RunEndCommand(
+        ()->{
+            double speed = MathUtil.applyDeadband(joystick.getAsDouble(), 0.03) * Constants.MIDTAKE_CRAWL_SPEED;
+            midtakeS.spin(speed);
+        },
+        midtakeS::stop,
+        midtakeS);
     }
     /**
      * By default, the midtake will perpetually drive slowly towards the top except when the top beam is broken,

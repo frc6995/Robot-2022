@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj.simulation.FlywheelSim;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.subsystems.LightS.States;
 import frc.robot.util.SimEncoder;
 
 import static frc.robot.Constants.*;
@@ -233,6 +234,9 @@ public class ShooterS extends SubsystemBase implements Loggable {
 
   @Override
   public void periodic() {
+    if(getFrontEncoderSpeed() > 100 && getBackEncoderSpeed() > 100) {
+      LightS.getInstance().requestState(States.Shooting);
+    }
   }
 
   @Override

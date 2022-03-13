@@ -3,6 +3,7 @@ package frc.robot.commands.shooter;
 import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.Constants;
 import frc.robot.subsystems.ShooterS;
 import frc.robot.util.interpolation.ShooterInterpolatingTable;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
@@ -14,12 +15,12 @@ public class ShooterCommandFactory {
         return createShooterFollowC(
             ()->{
               return ShooterInterpolatingTable.get(
-                 distance.getAsDouble()
+                 distance.getAsDouble() + Constants.CAMERA_CENTER_OFFSET
               ).frontWheelRpm;
             },
             ()->{
               return ShooterInterpolatingTable.get(
-                distance.getAsDouble()
+                distance.getAsDouble() + Constants.CAMERA_CENTER_OFFSET
               ).backWheelRpm;
             },
             shooterS);

@@ -29,6 +29,7 @@
       "/Shuffleboard/ClimberS/resetBackToExtended": "Command",
       "/Shuffleboard/ClimberS/resetBackToRetracted": "Command",
       "/Shuffleboard/DrivebaseS/navX": "Gyro",
+      "/Shuffleboard/RobotContainer/Spinup Method": "String Chooser",
       "/Shuffleboard/RobotContainer/field": "Field2d",
       "/Shuffleboard/RobotContainer/shooterTestC": "Command",
       "/SmartDashboard/InstantCommand": "Command",
@@ -103,6 +104,9 @@
           "width": 0.2800000011920929
         },
         "top": 45,
+        "turretSetpt": {
+          "length": 15.0
+        },
         "width": 16.459199905395508,
         "window": {
           "visible": true
@@ -112,6 +116,9 @@
   },
   "NetworkTables": {
     "Shuffleboard": {
+      "DrivebaseS": {
+        "open": true
+      },
       "MidtakeS": {
         "open": true
       },
@@ -301,11 +308,20 @@
             }
           ]
         }
-      ]
+      ],
+      "window": {
+        "visible": false
+      }
     },
     "Plot <3>": {
       "plots": [
         {
+          "axis": [
+            {
+              "lockMax": true,
+              "lockMin": true
+            }
+          ],
           "height": 332,
           "series": [
             {
@@ -379,6 +395,15 @@
                 1.0
               ],
               "id": "NT:/Shuffleboard/RobotContainer/dumpWrongBallTrigger"
+            },
+            {
+              "color": [
+                0.8000000715255737,
+                0.7254902124404907,
+                0.4549019932746887,
+                1.0
+              ],
+              "id": "NT:/Shuffleboard/DrivebaseS/gyroHeading"
             }
           ]
         }
