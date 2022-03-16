@@ -5,35 +5,33 @@
 package frc.robot.commands.climber;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.FunctionalCommand;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
-import frc.robot.subsystems.ClimberS;
+import frc.robot.subsystems.climb.SuperClimberS;
 import frc.robot.util.command.RunEndCommand;
 
 /** Add your docs here. */
 public class ClimberCommandFactory {
-    public static Command createClimberBackC(ClimberS climberS) {
-        return new RunEndCommand(climberS::tiltBackward, climberS::tiltStop, climberS);
+    public static Command createClimberBackC(SuperClimberS climberS) {
+        return new RunEndCommand(climberS::tiltBackward, climberS::tiltStop, climberS.tiltClimberS);
     }
 
-    public static Command createClimberForwardC(ClimberS climberS) {
-        return new RunEndCommand(climberS::tiltForward, climberS::tiltStop, climberS);
+    public static Command createClimberForwardC(SuperClimberS climberS) {
+        return new RunEndCommand(climberS::tiltForward, climberS::tiltStop, climberS.tiltClimberS);
     }
 
-    public static Command createClimberExtendFrontC(ClimberS climberS) {
-        return new RunEndCommand(climberS::extendFront, climberS::stopFront, climberS);
+    public static Command createClimberExtendFrontC(SuperClimberS climberS) {
+        return new RunEndCommand(climberS::extendFront, climberS::stopFront, climberS.linearClimberS);
     }
 
-    public static Command createClimberRetractFrontC(ClimberS climberS) {
-        return new RunEndCommand(climberS::retractFront, climberS::stopFront, climberS);
+    public static Command createClimberRetractFrontC(SuperClimberS climberS) {
+        return new RunEndCommand(climberS::retractFront, climberS::stopFront, climberS.linearClimberS);
     }
 
-    public static Command createClimberRetractBackC(ClimberS climberS) {
-        return new RunEndCommand(climberS::retractBack, climberS::stopBack, climberS);
+    public static Command createClimberRetractBackC(SuperClimberS climberS) {
+        return new RunEndCommand(climberS::retractBack, climberS::stopBack, climberS.thriftyClimberS);
     }
 
-    public static Command createClimberExtendBackC(ClimberS climberS) {
-        return new RunEndCommand(climberS::extendBack, climberS::stopBack, climberS);
+    public static Command createClimberExtendBackC(SuperClimberS climberS) {
+        return new RunEndCommand(climberS::extendBack, climberS::stopBack, climberS.thriftyClimberS);
     }
 
 }

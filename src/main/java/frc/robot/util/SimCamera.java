@@ -25,7 +25,6 @@ import static frc.robot.Constants.TARGET_HEIGHT_METERS;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.photonvision.PhotonVersion;
 import org.photonvision.SimPhotonCamera;
 import org.photonvision.targeting.PhotonTrackedTarget;
 import org.photonvision.targeting.TargetCorner;
@@ -33,7 +32,6 @@ import org.photonvision.targeting.TargetCorner;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.networktables.NetworkTableInstance;
 
 public class SimCamera {
     SimPhotonCamera cam;

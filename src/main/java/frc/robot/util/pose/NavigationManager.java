@@ -4,11 +4,12 @@
 
 package frc.robot.util.pose;
 
+import static frc.robot.Constants.HUB_CENTER_POSE;
+import static frc.robot.util.NomadMathUtil.getDistance;
+
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-
-import org.photonvision.targeting.PhotonTrackedTarget;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -17,11 +18,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import frc.robot.util.NomadMathUtil;
 import frc.robot.util.interpolation.ShooterInterpolatingTable;
 import io.github.oblarg.oblog.Loggable;
-import io.github.oblarg.oblog.annotations.Config;
 import io.github.oblarg.oblog.annotations.Log;
-
-import static frc.robot.util.NomadMathUtil.*;
-import static frc.robot.Constants.*;
 
 /** Add your docs here. */
 

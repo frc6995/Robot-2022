@@ -4,19 +4,18 @@
 
 package frc.robot.util.pose;
 
+import static frc.robot.Constants.CAMERA_CENTER_OFFSET;
+import static frc.robot.Constants.HUB_RADIUS_METERS;
+
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import org.photonvision.PhotonUtils;
-import org.photonvision.targeting.PhotonTrackedTarget;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.util.Units;
-
-import static frc.robot.Constants.*;
 
 /** Add your docs here. */
 class VisionHubTransformAdjuster {

@@ -1,18 +1,15 @@
 package frc.robot.commands.auto;
 
+import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
-import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
 import edu.wpi.first.wpilibj2.command.ProxyScheduleCommand;
+import edu.wpi.first.wpilibj2.command.RamseteCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
-import frc.robot.Main;
-import frc.robot.commands.IntakeCommandFactory;
+import frc.robot.Constants;
 import frc.robot.commands.MainCommandFactory;
 import frc.robot.commands.MidtakeCommandFactory;
 import frc.robot.commands.drivebase.DrivebaseCommandFactory;
-import frc.robot.commands.shooter.ShooterCommandFactory;
-import frc.robot.commands.turret.TurretCommandFactory;
 import frc.robot.subsystems.DrivebaseS;
 import frc.robot.subsystems.IntakeS;
 import frc.robot.subsystems.LimelightS;
@@ -41,12 +38,29 @@ public class AutoCommandFactory {
     public static Command createTwoBallAutoCG(
             ShooterS shooterS, IntakeS intakeS, MidtakeS midtakeS, TurretS turretS, LimelightS limelightS, DrivebaseS drivebaseS) {
         return new ParallelCommandGroup(
+            MainCommandFactory.createVisionSpinupAndAimC(limelightS, turretS, shooterS),
+            new ParallelCommandGroup(
                         DrivebaseCommandFactory.createTimedDriveC(.3, 2.5, drivebaseS),
                         new ProxyScheduleCommand(
                                 MainCommandFactory.createIntakeCG(midtakeS, intakeS)
                         )
-        ).withInterrupt(midtakeS::getIsMidtakeFull)        
+            ).withInterrupt(midtakeS::getIsMidtakeFull)
+            .andThen(new WaitCommand(1))
+            .andThen(new WaitCommand(3).withInterrupt(midtakeS::getIsArmed))
+            .andThen(new WaitCommand(1))
+            .andThen(new ProxyScheduleCommand(MidtakeCommandFactory.createMidtakeFeedOneC(midtakeS)))
+            .andThen(new WaitCommand(3).withInterrupt(()->(shooterS.isAtTarget() && midtakeS.getIsArmed())))
+            .andThen(new ProxyScheduleCommand(MidtakeCommandFactory.createMidtakeFeedOneC(midtakeS)))
+        )
         .withName("Two Ball Auto");
+    }
+    
+
+    public static Command createRamseteC(DrivebaseS drivebaseS, Trajectory trajectory) {
+        return new RamseteCommand(trajectory,
+        drivebaseS::getRobotPose,
+        drivebaseS.ramseteController, Constants.DRIVEBASE_KINEMATICS, drivebaseS::tankDriveVelocity, drivebaseS);
+    
     }
 
 }

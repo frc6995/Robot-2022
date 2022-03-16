@@ -67,7 +67,6 @@ public class TurretCommandFactory {
 
             @Override
             public void initialize() {
-                // TODO Auto-generated method stub
                 Command.super.initialize();
                 setpoint = new Rotation2d(turretS.getEncoderCounts() + angle);
             }
@@ -89,7 +88,6 @@ public class TurretCommandFactory {
 
             @Override
             public Set<Subsystem> getRequirements() {
-                // TODO Auto-generated method stub
                 return Set.of(turretS);
             }
 
@@ -154,7 +152,7 @@ public class TurretCommandFactory {
             if (limelightS.hasTarget()) {
                 double voltage = limelightS.getFilteredXOffset();
                 voltage = MathUtil.applyDeadband(voltage, Units.degreesToRadians(1));
-                voltage *= 2;
+                voltage *= 1;
                 voltage += Constants.TURRET_FF[0] * Math.copySign(1, voltage);
                 
                 turretS.setVoltage(voltage);

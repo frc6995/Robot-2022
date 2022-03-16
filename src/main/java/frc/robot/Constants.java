@@ -153,7 +153,7 @@ public final class Constants {
     public static final double SHOOTER_BACK_P = 0.19475;
 
     /** Allowable error to still be on target */
-    public static final double SHOOTER_PID_ERROR = 100; //rpm
+    public static final double SHOOTER_PID_ERROR = 200; //rpm
 
     // Turret Constants
 
@@ -189,7 +189,7 @@ public final class Constants {
     public static final double TURRET_DEADBAND = 0.02;
 
     /** Feedforward for the turret */
-    public static final double[] TURRET_FF = {0.1/*0.39505*/, 0.56397, 0.030497}; // for velocity in turret radians per second
+    public static final double[] TURRET_FF = {0.15, 0.56397, 0.030497}; // for velocity in turret radians per second
 
     /** Proportional term for the turret */
     public static final double TURRET_P = 6;//51.463;
@@ -319,11 +319,11 @@ public final class Constants {
     /**
      * The max amount of rotations extending the climber
      */
-    public static final int CLIMBER_FRONT_SOFT_LIMIT_FORWARD = 5;
+    public static final double CLIMBER_FRONT_SOFT_LIMIT_FORWARD = 280.0;
     /**
      * The maximum a mount of rotations retracting the climber
      */
-    public static final int CLIMBER_FRONT_SOFT_LIMIT_BACK = 0;
+    public static final double CLIMBER_FRONT_SOFT_LIMIT_BACK = 20.0;
 
     /**
      * The current the back motor needs to pull for the climber to detect that it's lifting the robot.
@@ -340,7 +340,7 @@ public final class Constants {
 
     public static final double CLIMBER_BACK_LIFT_POSITION = 120;
 
-    public static final double CLIMBER_BACK_HOLDING_FF = 1;
+    public static final double CLIMBER_BACK_HOLDING_FF = -1;
     /**
      * The port number of the double solenoid when it folds the climber up
      */

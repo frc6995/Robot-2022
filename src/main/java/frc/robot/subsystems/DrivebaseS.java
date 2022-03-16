@@ -1,7 +1,22 @@
 package frc.robot.subsystems;
 
-import static frc.robot.Constants.*;
-
+import static frc.robot.Constants.CAN_ID_BACK_LEFT_DRIVE_MOTOR;
+import static frc.robot.Constants.CAN_ID_BACK_RIGHT_DRIVE_MOTOR;
+import static frc.robot.Constants.CAN_ID_FRONT_LEFT_DRIVE_MOTOR;
+import static frc.robot.Constants.CAN_ID_FRONT_RIGHT_DRIVE_MOTOR;
+import static frc.robot.Constants.DRIVEBASE_DEADBAND;
+import static frc.robot.Constants.DRIVEBASE_ENCODER_ROTATIONS_PER_WHEEL_ROTATION;
+import static frc.robot.Constants.DRIVEBASE_FWD_BACK_SLEW_LIMIT;
+import static frc.robot.Constants.DRIVEBASE_GEARBOX;
+import static frc.robot.Constants.DRIVEBASE_KINEMATICS;
+import static frc.robot.Constants.DRIVEBASE_LINEAR_FF;
+import static frc.robot.Constants.DRIVEBASE_METERS_PER_WHEEL_ROTATION;
+import static frc.robot.Constants.DRIVEBASE_P;
+import static frc.robot.Constants.DRIVEBASE_PLANT;
+import static frc.robot.Constants.DRIVEBASE_SIM_ENCODER_STD_DEV;
+import static frc.robot.Constants.DRIVEBASE_TRACKWIDTH;
+import static frc.robot.Constants.DRIVEBASE_TURN_SLEW_LIMIT;
+import static frc.robot.Constants.HUB_CENTER_POSE;
 
 import com.kauailabs.navx.frc.AHRS;
 import com.revrobotics.CANSparkMax;
@@ -20,14 +35,12 @@ import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
 //import frc.robot.util.pose.DifferentialDriveOdometry;
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds;
 import edu.wpi.first.wpilibj.RobotBase;
-import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.SerialPort.Port;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive.WheelSpeeds;
 import edu.wpi.first.wpilibj.simulation.DifferentialDrivetrainSim;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants;
 import frc.robot.util.SimEncoder;
 import io.github.oblarg.oblog.Loggable;
 import io.github.oblarg.oblog.annotations.Log;
@@ -41,11 +54,11 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
   private final CANSparkMax backLeft = new CANSparkMax(CAN_ID_BACK_LEFT_DRIVE_MOTOR, MotorType.kBrushless);
   private final SlewRateLimiter fwdBackLimiter = new SlewRateLimiter(DRIVEBASE_FWD_BACK_SLEW_LIMIT);
   private final SlewRateLimiter turnLimiter = new SlewRateLimiter(DRIVEBASE_TURN_SLEW_LIMIT);
-  private final SimpleMotorFeedforward leftFF = new SimpleMotorFeedforward(DRIVEBASE_LINEAR_FF[0], DRIVEBASE_LINEAR_FF[1], DRIVEBASE_LINEAR_FF[2]);
-  private final SimpleMotorFeedforward rightFF = new SimpleMotorFeedforward(DRIVEBASE_LINEAR_FF[0], DRIVEBASE_LINEAR_FF[1], DRIVEBASE_LINEAR_FF[2]);
+  public final SimpleMotorFeedforward leftFF = new SimpleMotorFeedforward(DRIVEBASE_LINEAR_FF[0], DRIVEBASE_LINEAR_FF[1], DRIVEBASE_LINEAR_FF[2]);
+  public final SimpleMotorFeedforward rightFF = new SimpleMotorFeedforward(DRIVEBASE_LINEAR_FF[0], DRIVEBASE_LINEAR_FF[1], DRIVEBASE_LINEAR_FF[2]);
 
-  private final PIDController leftPID = new PIDController(DRIVEBASE_P, 0, 0);
-  private final PIDController rightPID = new PIDController(DRIVEBASE_P, 0, 0);
+  public final PIDController leftPID = new PIDController(DRIVEBASE_P, 0, 0);
+  public final PIDController rightPID = new PIDController(DRIVEBASE_P, 0, 0);
   private final AHRS navX = new AHRS(Port.kMXP);
   public final RamseteController ramseteController = new RamseteController();
   public final Pose2d START_POSE = new Pose2d (HUB_CENTER_POSE.getX() - 2, HUB_CENTER_POSE.getY(), Rotation2d.fromDegrees(180));
@@ -80,6 +93,8 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
     backRight.follow(frontRight, false);
     backLeft.follow(frontLeft, false);
 
+
+
     SmartDashboard.putBoolean("requestPoseReset", false);
 
     if (RobotBase.isSimulation()) {
@@ -93,6 +108,13 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
 		}
     resetRobotPose(START_POSE);
     
+  }
+
+  public void burnFlash() {
+    frontRight.burnFlash();
+    frontLeft.burnFlash();
+    backRight.burnFlash();
+    backLeft.burnFlash();
   }
 
   /**
@@ -283,5 +305,10 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
   public void tankDriveVolts(double leftVolts, double rightVolts) {
     frontLeft.setVoltage(leftVolts);
     frontRight.setVoltage(rightVolts);
+  }
+
+  public void setIdleState(IdleMode mode) {
+    frontLeft.setIdleMode(mode);
+    frontRight.setIdleMode(mode);
   }
 }

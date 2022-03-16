@@ -4,7 +4,6 @@
 
 package frc.robot.subsystems;
 
-import java.util.Arrays;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -32,12 +31,12 @@ public class LightS {
    * of the state (the lower the number, the higher the priority)
    */
   public static enum States {
-    Disabled(Constants.LED_PATTERN_RED),
-    Climbing(Constants.LED_PARTY_MODE),
-    ShooterAndDistanceReady(0.5),
-    ShooterReady(0),
-    Shooting(Constants.LED_PATTERN_GREEN),
-    Intaking(Constants.LED_PATTERN_GREEN),
+    Disabled(Constants.LED_PATTERN_RED), // set in robotPeriodic
+    Climbing(Constants.LED_PARTY_MODE), // set through triggers in RobotContainer
+    ShooterAndDistanceReady(0.5), // ditto
+    ShooterReady(0), // ditto
+    Shooting(Constants.LED_PATTERN_GREEN), //ditto
+    Intaking(Constants.LED_PATTERN_GREEN), // set from MainCommandFactory.createIntakeCG`
     Default(Constants.LED_SOLID_GREEN);
 
     public final double lightCode;

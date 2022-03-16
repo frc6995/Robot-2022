@@ -6,9 +6,6 @@ package frc.robot.util.command;
 
 import static edu.wpi.first.wpilibj.util.ErrorMessages.requireNonNullParam;
 
-import java.util.function.BooleanSupplier;
-import java.util.function.Consumer;
-
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 
