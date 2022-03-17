@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -24,6 +25,7 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.IntakeCommandFactory;
 import frc.robot.commands.MainCommandFactory;
@@ -44,6 +46,7 @@ import frc.robot.subsystems.MidtakeS;
 import frc.robot.subsystems.ShooterS;
 import frc.robot.subsystems.TurretS;
 import frc.robot.util.NomadMathUtil;
+import frc.robot.util.command.RunEndCommand;
 import frc.robot.util.pose.NavigationManager;
 import io.github.oblarg.oblog.annotations.Config;
 import io.github.oblarg.oblog.annotations.Log;
@@ -350,27 +353,65 @@ public class RobotContainer {
     //   )
     // ).and(shooterReadyTrigger).and(ballReadyTrigger).whenActive(MidtakeCommandFactory.createMidtakeShootOneC(midtakeS));
 
-    operatorController.a().toggleWhenActive(TurretCommandFactory.createTurretClimbLockC(turretS), false);
+    operatorController.a().toggleWhenActive(new StartEndCommand(climberS::unlock, climberS::lock));
+
+
 
     operatorController.pov.left()
     .or(operatorController.pov.downLeft())
     .or(operatorController.pov.upLeft())
-    .whileActiveContinuous(ClimberCommandFactory.createClimberBackC(climberS));
+    .whileActiveContinuous(
+      new ConditionalCommand(
+        MainCommandFactory.createClimbLockErrorC(),
+        ClimberCommandFactory.createClimberBackC(climberS),
+        climberS.climberLockedTrigger
+      )
+    );
     operatorController.pov.right()
     .or(operatorController.pov.downRight())
     .or(operatorController.pov.upRight())
-    .whileActiveContinuous(ClimberCommandFactory.createClimberForwardC(climberS));
+    .whileActiveContinuous(
+      new ConditionalCommand(
+        MainCommandFactory.createClimbLockErrorC(),
+        ClimberCommandFactory.createClimberForwardC(climberS),
+        climberS.climberLockedTrigger
+      )
+    );
     operatorController.pov.up()
     .or(operatorController.pov.upLeft())
     .or(operatorController.pov.upRight())
-    .whileActiveContinuous(ClimberCommandFactory.createClimberExtendBackC(climberS));
+    .whileActiveContinuous(
+      new ConditionalCommand(
+        MainCommandFactory.createClimbLockErrorC(),
+        ClimberCommandFactory.createClimberExtendBackC(climberS),
+        climberS.climberLockedTrigger
+      )
+    );
     operatorController.pov.down()
     .or(operatorController.pov.downLeft())
     .or(operatorController.pov.downRight())
-    .whileActiveContinuous(ClimberCommandFactory.createClimberRetractBackC(climberS));
+    .whileActiveContinuous(
+      new ConditionalCommand(
+        MainCommandFactory.createClimbLockErrorC(),
+        ClimberCommandFactory.createClimberRetractBackC(climberS),
+        climberS.climberLockedTrigger
+      )
+    );
 
-    operatorController.leftBumper().whileActiveContinuous(ClimberCommandFactory.createClimberExtendFrontC(climberS));
-    operatorController.rightBumper().whileActiveContinuous(ClimberCommandFactory.createClimberRetractFrontC(climberS));
+    operatorController.leftBumper().whileActiveContinuous(
+      new ConditionalCommand(
+        MainCommandFactory.createClimbLockErrorC(),
+        ClimberCommandFactory.createClimberExtendFrontC(climberS),
+        climberS.climberLockedTrigger
+      )
+    );
+    operatorController.rightBumper().whileActiveContinuous(
+      new ConditionalCommand(
+        MainCommandFactory.createClimbLockErrorC(),
+        ClimberCommandFactory.createClimberRetractFrontC(climberS),
+        climberS.climberLockedTrigger
+      )
+    );
   }
 
   public void disableAll() {
@@ -389,13 +430,14 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return AutoCommandFactory.createTwoBallAutoCG(
-        shooterS,
-        intakeS,
-        midtakeS,
-        turretS,
-        limelightS,
-        drivebaseS);
+    return DrivebaseCommandFactory.createPivotC(2.134, drivebaseS);
+    // return AutoCommandFactory.createThreeBallAutoCG(
+    //     shooterS,
+    //     intakeS,
+    //     midtakeS,
+    //     turretS,
+    //     limelightS,
+    //     drivebaseS);
   }
 
   public void disabledInit() {

@@ -32,6 +32,11 @@ public class LinearClimberS extends SubsystemBase implements Loggable {
     frontSparkMax.setSmartCurrentLimit(40, 40, 0);
     frontSparkMax.burnFlash();
   }
+
+  public double getFrontPosition() {
+    return sparkMaxEncoder.getPosition();
+  }
+  
   public void extendFront() {
     frontSparkMax.setVoltage(10);
   }
@@ -49,9 +54,9 @@ public class LinearClimberS extends SubsystemBase implements Loggable {
   }
   @Override
   public void periodic() {
-    // // This method will be called once per scheduler run
-    if(Math.abs(frontSparkMax.getAppliedOutput()) < 0.1 && frontSparkMax.getEncoder().getVelocity() > 10) {
-      holdFront();
-    }
+    // // // This method will be called once per scheduler run
+    // if(Math.abs(frontSparkMax.getAppliedOutput()) < 0.1 && frontSparkMax.getEncoder().getVelocity() > 10) {
+    //   holdFront();
+    // }
   }
 }

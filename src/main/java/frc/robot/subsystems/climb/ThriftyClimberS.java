@@ -34,6 +34,9 @@ public class ThriftyClimberS extends SubsystemBase implements Loggable {
     backSparkMax.burnFlash();
   }
 
+  public double getBackPosition() {
+    return sparkMaxEncoderTwo.getPosition();
+  }
 
   public void extendBack() {
     backSparkMax.setVoltage(10);
@@ -54,8 +57,8 @@ public class ThriftyClimberS extends SubsystemBase implements Loggable {
   @Override
   public void periodic() {
     // // This method will be called once per scheduler run
-    if(Math.abs(backSparkMax.getAppliedOutput()) < 0.1 && backSparkMax.getEncoder().getVelocity() > 10) {
-      holdBack();
-    }
+    // if(Math.abs(backSparkMax.getAppliedOutput()) < 0.1 && backSparkMax.getEncoder().getVelocity() > 10) {
+    //   holdBack();
+    // }
   }
 }

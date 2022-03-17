@@ -169,6 +169,31 @@ public class TurretCommandFactory {
         }, ()->false, turretS);
     }
 
+    
+    public static Command createTurretProfiledVisionC(LimelightS limelightS, TurretS turretS) {
+        return new FunctionalCommand(
+            ()->{
+                limelightS.ledsOn();
+                limelightS.setDriverMode(false);
+             } ,
+        ()->{
+            if (limelightS.hasTarget()) {
+                turretS.setTurretAngle(
+                    turretS.getRobotToTurretRotation()
+                    .plus(new Rotation2d(limelightS.getFilteredXOffset())));
+            }
+            else {
+                turretS.stopMotor();
+            }
+            
+        },
+        (interrupted)->{
+            turretS.stopMotor();
+            limelightS.setDriverMode(true);
+            //limelightS.ledsOff();
+        }, ()->false, turretS);
+    }
+
     /**
      * Creates a TurretManualC, which turns the turret at a speed given by
      * `speedSupplier` [-1..1].

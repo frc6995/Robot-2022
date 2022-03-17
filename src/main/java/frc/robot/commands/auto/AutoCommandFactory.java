@@ -3,9 +3,11 @@ package frc.robot.commands.auto;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
 import edu.wpi.first.wpilibj2.command.ProxyScheduleCommand;
 import edu.wpi.first.wpilibj2.command.RamseteCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
+import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.Constants;
 import frc.robot.commands.MainCommandFactory;
 import frc.robot.commands.MidtakeCommandFactory;
@@ -53,6 +55,34 @@ public class AutoCommandFactory {
             .andThen(new ProxyScheduleCommand(MidtakeCommandFactory.createMidtakeFeedOneC(midtakeS)))
         )
         .withName("Two Ball Auto");
+    }
+
+    public static Command createThreeBallAutoCG(ShooterS shooterS, IntakeS intakeS, MidtakeS midtakeS, TurretS turretS, LimelightS limelightS, DrivebaseS drivebaseS) {
+        return new ParallelCommandGroup(
+            MainCommandFactory.createVisionSpinupAndAimC(limelightS, turretS, shooterS),
+            new ParallelCommandGroup(
+                        DrivebaseCommandFactory.createTimedDriveC(.4, 2.5, drivebaseS),
+                        new ProxyScheduleCommand(
+                                MainCommandFactory.createIntakeCG(midtakeS, intakeS)
+                        )
+            ).withInterrupt(midtakeS::getIsMidtakeFull)
+            .andThen(MidtakeCommandFactory.createMidtakeArmC(midtakeS))
+            .andThen(MidtakeCommandFactory.createMidtakeFeedOneC(midtakeS))
+            .andThen(MidtakeCommandFactory.createMidtakeArmC(midtakeS))
+            .andThen(new WaitUntilCommand(shooterS::isAtTarget))
+            .andThen(MidtakeCommandFactory.createMidtakeFeedOneC(midtakeS))
+            .andThen(new WaitCommand(0.5))
+            .andThen(DrivebaseCommandFactory.createPivotC(2.134, drivebaseS))
+            .andThen(
+                new ParallelDeadlineGroup(
+                    DrivebaseCommandFactory.createTimedDriveC(.4, 5, drivebaseS),
+                    MidtakeCommandFactory.createMidtakeLoadC(midtakeS)
+                ).withInterrupt(midtakeS::getIsTopBeamBroken)
+            )
+            .andThen(MidtakeCommandFactory.createMidtakeArmC(midtakeS))
+            .andThen(MidtakeCommandFactory.createMidtakeFeedOneC(midtakeS))
+        );
+
     }
     
 

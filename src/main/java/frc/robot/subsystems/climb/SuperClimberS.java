@@ -19,9 +19,16 @@ public class SuperClimberS implements Loggable {
   
   /** Creates a new ClimberS. */
   public SuperClimberS() {
+  }
 
+  public void unlock() {
+    locked = false;
+  }
 
-
+  public void lock() {
+    if(thriftyClimberS.getBackPosition() < 10 && linearClimberS.getFrontPosition() < 10) {
+      locked = true;
+    }
   }
 
   public boolean getIsLocked() {

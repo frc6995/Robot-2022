@@ -25,6 +25,7 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.controller.RamseteController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.filter.SlewRateLimiter;
@@ -34,13 +35,19 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
 //import frc.robot.util.pose.DifferentialDriveOdometry;
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds;
+import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.SerialPort.Port;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive.WheelSpeeds;
 import edu.wpi.first.wpilibj.simulation.DifferentialDrivetrainSim;
+import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
+import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
+import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import frc.robot.util.SimEncoder;
 import io.github.oblarg.oblog.Loggable;
 import io.github.oblarg.oblog.annotations.Log;
@@ -56,13 +63,16 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
   private final SlewRateLimiter turnLimiter = new SlewRateLimiter(DRIVEBASE_TURN_SLEW_LIMIT);
   public final SimpleMotorFeedforward leftFF = new SimpleMotorFeedforward(DRIVEBASE_LINEAR_FF[0], DRIVEBASE_LINEAR_FF[1], DRIVEBASE_LINEAR_FF[2]);
   public final SimpleMotorFeedforward rightFF = new SimpleMotorFeedforward(DRIVEBASE_LINEAR_FF[0], DRIVEBASE_LINEAR_FF[1], DRIVEBASE_LINEAR_FF[2]);
-
+  public final ProfiledPIDController angularPID = new ProfiledPIDController(3, 0, 0, new Constraints(3, 3));
   public final PIDController leftPID = new PIDController(DRIVEBASE_P, 0, 0);
   public final PIDController rightPID = new PIDController(DRIVEBASE_P, 0, 0);
   private final AHRS navX = new AHRS(Port.kMXP);
   public final RamseteController ramseteController = new RamseteController();
   public final Pose2d START_POSE = new Pose2d (HUB_CENTER_POSE.getX() - 2, HUB_CENTER_POSE.getY(), Rotation2d.fromDegrees(180));
-
+  @Log
+  public final Mechanism2d drivebaseTilt = new Mechanism2d(36, 36);
+  private final MechanismRoot2d drivebaseTiltRoot = drivebaseTilt.getRoot("drivebaseRoot", 12, 18);
+  private final MechanismLigament2d drivebaseTiltLigament = drivebaseTiltRoot.append(new MechanismLigament2d("drivebase", 25, 0));
   //Sim stuff
   private DifferentialDrivetrainSim m_driveSim;
   @Log(methodName = "getPosition", name = "getSimRightPosition")
@@ -93,6 +103,8 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
     backRight.follow(frontRight, false);
     backLeft.follow(frontLeft, false);
 
+    angularPID.setTolerance(Units.degreesToRadians(5));
+    angularPID.enableContinuousInput(-Math.PI, Math.PI);
 
 
     SmartDashboard.putBoolean("requestPoseReset", false);
@@ -117,6 +129,22 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
     backLeft.burnFlash();
   }
 
+
+
+  public void pivot(double targetAngle) {
+    double omega = angularPID.calculate(getEstimatedHeading().getRadians(), targetAngle);
+    SmartDashboard.putNumber("driveOmega", omega);
+    DifferentialDriveWheelSpeeds speeds = Constants.DRIVEBASE_KINEMATICS.toWheelSpeeds(new ChassisSpeeds(0, 0, omega));
+    SmartDashboard.putNumber("driveRightVelo", speeds.rightMetersPerSecond);
+    double rightVoltage = rightFF.calculate(speeds.rightMetersPerSecond);
+    double leftVoltage = leftFF.calculate(speeds.leftMetersPerSecond);
+    tankDriveVolts(leftVoltage, rightVoltage);
+  }
+
+  public boolean isPivotAtTarget() {
+    return angularPID.atSetpoint();
+  }
+
   /**
    * Creates a deadband for the drivebase joystick
    */
@@ -138,6 +166,7 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
     }
   }
 
+  @Log(methodName = "getRadians")
   public Rotation2d getEstimatedHeading() {
     return odometry.getPoseMeters().getRotation();
   }
@@ -205,6 +234,9 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
     else {
       odometry.update(getRotation2d(), m_leftEncoder.getPosition(), m_rightEncoder.getPosition());
     }
+
+    
+    drivebaseTiltLigament.setAngle(navX.getPitch());
 
 
   }

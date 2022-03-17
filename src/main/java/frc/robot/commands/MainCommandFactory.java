@@ -1,7 +1,9 @@
 package frc.robot.commands;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
@@ -16,6 +18,7 @@ import frc.robot.subsystems.MidtakeS;
 import frc.robot.subsystems.ShooterS;
 import frc.robot.subsystems.TurretS;
 import frc.robot.util.NomadMathUtil;
+import frc.robot.util.command.RunEndCommand;
 import frc.robot.util.pose.NavigationManager;
 
 /** Primary Command Factory. */
@@ -76,6 +79,11 @@ public class MainCommandFactory {
         Rotation2d direction = NomadMathUtil.getDirection(navigationManager.getRobotToHubTransform());
         return direction;
       }, turretS);
+  }
+
+  public static Command createClimbLockErrorC() {
+      return new RunCommand(()->{LightS.getInstance().requestState(States.Error);})
+      .withTimeout(0.5);
   }
 
   /**

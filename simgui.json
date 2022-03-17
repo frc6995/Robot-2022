@@ -28,6 +28,7 @@
       "/FMSInfo": "FMSInfo",
       "/Shuffleboard/ClimberS/resetBackToExtended": "Command",
       "/Shuffleboard/ClimberS/resetBackToRetracted": "Command",
+      "/Shuffleboard/DrivebaseS/drivebaseTilt": "Mechanism2d",
       "/Shuffleboard/DrivebaseS/navX": "Gyro",
       "/Shuffleboard/RobotContainer/Spinup Method": "String Chooser",
       "/Shuffleboard/RobotContainer/field": "Field2d",
@@ -153,11 +154,6 @@
     "Plot <0>": {
       "plots": [
         {
-          "axis": [
-            {
-              "autoFit": true
-            }
-          ],
           "height": 326,
           "series": [
             {
@@ -204,6 +200,33 @@
                 1.0
               ],
               "id": "NT:/Shuffleboard/MidtakeS/getIsTopBeamBroken"
+            },
+            {
+              "color": [
+                0.5764706134796143,
+                0.4705882668495178,
+                0.3764706254005432,
+                1.0
+              ],
+              "id": "NT:/SmartDashboard/pivotTargetAngle"
+            },
+            {
+              "color": [
+                0.8549020290374756,
+                0.545098066329956,
+                0.7647059559822083,
+                1.0
+              ],
+              "id": "NT:/SmartDashboard/pivotInitialAngle"
+            },
+            {
+              "color": [
+                0.5490196347236633,
+                0.5490196347236633,
+                0.5490196347236633,
+                1.0
+              ],
+              "id": "NT:/Shuffleboard/DrivebaseS/getEstimatedHeading"
             }
           ]
         }

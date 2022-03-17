@@ -39,7 +39,7 @@ public class MidtakeS extends SubsystemBase implements Loggable{
   private boolean beamBreakBottomBroken = false;
   @Log
   private boolean lastBeamBreakBottomBroken = getIsBottomBeamBroken();
-  private final PicoColorSensor colorSensor = new PicoColorSensor();
+  //private final PicoColorSensor colorSensor = new PicoColorSensor();
 
   public final Trigger topBeamBreakTrigger = new Trigger(this::getIsTopBeamBroken);
   public final Trigger bottomBeamBreakTrigger = new Trigger(this::getIsBottomBeamBroken);
@@ -185,7 +185,8 @@ public class MidtakeS extends SubsystemBase implements Loggable{
   @Log
   public boolean getColorSensorDetectsBall() {
     if(RobotBase.isReal()) {
-      return colorSensor.getProximity0() > Constants.COLOR_SENSOR_PROXIMITY_THRESHOLD;
+      return true;
+      // return colorSensor.getProximity0() > Constants.COLOR_SENSOR_PROXIMITY_THRESHOLD;
     }
     else{
       return simSensorInput.getRawButton(3);

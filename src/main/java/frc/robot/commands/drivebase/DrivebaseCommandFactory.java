@@ -1,11 +1,15 @@
 package frc.robot.commands.drivebase;
 
+import java.util.Set;
 import java.util.function.DoubleSupplier;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.Trajectory;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.RamseteCommand;
+import edu.wpi.first.wpilibj2.command.Subsystem;
 import frc.robot.Constants;
 import frc.robot.subsystems.DrivebaseS;
 
@@ -65,6 +69,43 @@ public class DrivebaseCommandFactory {
         drivebaseS::tankDriveVelocity,
         drivebaseS
       );
+  }
+
+  public static Command createPivotC(double angleDelta, DrivebaseS drivebaseS) {
+    return new Command() {
+
+      double initialAngle = drivebaseS.getEstimatedHeading().getRadians();
+      double targetAngle = initialAngle + angleDelta;
+
+      @Override
+          public void initialize() {
+              
+              initialAngle = drivebaseS.getEstimatedHeading().getRadians();
+              //drivebaseS.angularPID.reset(initialAngle);
+              SmartDashboard.putNumber("pivotInitialAngle", initialAngle);
+              SmartDashboard.putNumber("pivotTargetAngle", targetAngle);
+          }
+      @Override
+      public void execute() {
+        drivebaseS.pivot(targetAngle);
+      }
+
+      @Override
+      public boolean isFinished() {
+          return drivebaseS.isPivotAtTarget();
+      }
+      
+      public void end(boolean interrupted) {
+        drivebaseS.stopAll();
+      }
+
+      @Override
+      public Set<Subsystem> getRequirements() {
+        // TODO Auto-generated method stub
+        return Set.of(drivebaseS);
+      }
+
+    };
   }
 
 }

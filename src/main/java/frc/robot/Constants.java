@@ -91,7 +91,11 @@ public final class Constants {
     /**
      * The feedforward constants for forward-back driving.
      */
-    public static final double[] DRIVEBASE_LINEAR_FF = {0.22, 1.98, 0.2}; // TODO real numbers
+    public static final double[] DRIVEBASE_LINEAR_FF = {0.22, 
+        1/(473.0) /* volts per NEO RPM*/
+        * 60 /*seconds per minute*/
+        * DRIVEBASE_ENCODER_ROTATIONS_PER_WHEEL_ROTATION
+        , 2.0}; // TODO real numbers
 
     /**
      * The feedforward constants for rotation while driving.
@@ -189,7 +193,7 @@ public final class Constants {
     public static final double TURRET_DEADBAND = 0.02;
 
     /** Feedforward for the turret */
-    public static final double[] TURRET_FF = {0.15, 0.56397, 0.030497}; // for velocity in turret radians per second
+    public static final double[] TURRET_FF = {0.1, 0.56397, 0.030497}; // for velocity in turret radians per second
 
     /** Proportional term for the turret */
     public static final double TURRET_P = 6;//51.463;
@@ -379,6 +383,14 @@ public final class Constants {
 
     /** The roboRIO spark value for Rainbow, Party Palette pattern */
     public static final double LED_PARTY_MODE = -0.97;
+
+    public static final double LED_GOLD_SOLID = 0.67;
+
+    public static final double LED_GREEN_RAINBOW = -0.91;
+
+    public static final double LED_LARSON_SCANNER = -0.01;
+
+    public static final double LED_CONFETTI_MODE = -0.87;
 
     public static final int PWM_PORT_LED = 9;
 

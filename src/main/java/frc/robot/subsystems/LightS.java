@@ -32,9 +32,10 @@ public class LightS {
    */
   public static enum States {
     Disabled(Constants.LED_PATTERN_RED), // set in robotPeriodic
+    Error(Constants.LED_PATTERN_RED),
     Climbing(Constants.LED_PARTY_MODE), // set through triggers in RobotContainer
-    ShooterAndDistanceReady(0.5), // ditto
-    ShooterReady(0), // ditto
+    ShooterAndDistanceReady(Constants.LED_GOLD_SOLID), // ditto
+    ShooterReady(Constants.LED_GREEN_RAINBOW), // ditto
     Shooting(Constants.LED_PATTERN_GREEN), //ditto
     Intaking(Constants.LED_PATTERN_GREEN), // set from MainCommandFactory.createIntakeCG`
     Default(Constants.LED_SOLID_GREEN);
