@@ -63,12 +63,12 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
   private final SlewRateLimiter turnLimiter = new SlewRateLimiter(DRIVEBASE_TURN_SLEW_LIMIT);
   public final SimpleMotorFeedforward leftFF = new SimpleMotorFeedforward(DRIVEBASE_LINEAR_FF[0], DRIVEBASE_LINEAR_FF[1], DRIVEBASE_LINEAR_FF[2]);
   public final SimpleMotorFeedforward rightFF = new SimpleMotorFeedforward(DRIVEBASE_LINEAR_FF[0], DRIVEBASE_LINEAR_FF[1], DRIVEBASE_LINEAR_FF[2]);
-  public final ProfiledPIDController angularPID = new ProfiledPIDController(3, 0, 0, new Constraints(3, 3));
+  public final PIDController angularPID = new PIDController(3, 0, 0);
   public final PIDController leftPID = new PIDController(DRIVEBASE_P, 0, 0);
   public final PIDController rightPID = new PIDController(DRIVEBASE_P, 0, 0);
   private final AHRS navX = new AHRS(Port.kMXP);
   public final RamseteController ramseteController = new RamseteController();
-  public final Pose2d START_POSE = new Pose2d (HUB_CENTER_POSE.getX() - 2, HUB_CENTER_POSE.getY(), Rotation2d.fromDegrees(180));
+  public final Pose2d START_POSE = new Pose2d (7.931953, 2.018646, Rotation2d.fromDegrees(-105.430527));
   @Log
   public final Mechanism2d drivebaseTilt = new Mechanism2d(36, 36);
   private final MechanismRoot2d drivebaseTiltRoot = drivebaseTilt.getRoot("drivebaseRoot", 12, 18);
@@ -342,5 +342,7 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
   public void setIdleState(IdleMode mode) {
     frontLeft.setIdleMode(mode);
     frontRight.setIdleMode(mode);
+    backLeft.setIdleMode(mode);
+    backRight.setIdleMode(mode);
   }
 }

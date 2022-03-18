@@ -31,7 +31,7 @@ public class LightS {
    * of the state (the lower the number, the higher the priority)
    */
   public static enum States {
-    Disabled(Constants.LED_PATTERN_RED), // set in robotPeriodic
+    Disabled(Constants.LED_SOLID_GREEN), // set in robotPeriodic
     Error(Constants.LED_PATTERN_RED),
     Climbing(Constants.LED_PARTY_MODE), // set through triggers in RobotContainer
     ShooterAndDistanceReady(Constants.LED_GOLD_SOLID), // ditto

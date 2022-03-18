@@ -51,6 +51,13 @@ public class SuperClimberS implements Loggable {
     thriftyClimberS.holdBack();
   }
 
+  public void transferBack() {
+    thriftyClimberS.driveBackTransfer();
+  }
+
+  public void transferFront() {
+    linearClimberS.driveFrontTransfer();
+  }
   public void extendFront() {
     linearClimberS.extendFront();
   }

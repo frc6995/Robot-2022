@@ -21,14 +21,16 @@ public class ThriftyClimberS extends SubsystemBase implements Loggable {
   @Log(methodName = "getPosition", name = "backPosition")
   private RelativeEncoder sparkMaxEncoderTwo = backSparkMax.getEncoder();
   
+  private double minimumLimit = Constants.CLIMBER_BACK_SOFT_LIMIT_SHOOTER;
+  private double maximumLimit = Constants.CLIMBER_BACK_SOFT_LIMIT_FORWARD;
   /** Creates a new ClimberS. */
   public ThriftyClimberS() {
 
     backSparkMax.restoreFactoryDefaults();
     backSparkMax.enableSoftLimit(SoftLimitDirection.kForward, true);
     backSparkMax.enableSoftLimit(SoftLimitDirection.kReverse, true);
-    backSparkMax.setSoftLimit(SoftLimitDirection.kForward, (float) Constants.CLIMBER_BACK_SOFT_LIMIT_FORWARD);
-    backSparkMax.setSoftLimit(SoftLimitDirection.kReverse, (float) Constants.CLIMBER_BACK_SOFT_LIMIT_BACK);
+    backSparkMax.setSoftLimit(SoftLimitDirection.kForward, (float) maximumLimit);
+    backSparkMax.setSoftLimit(SoftLimitDirection.kReverse, (float) minimumLimit);
     backSparkMax.setIdleMode(IdleMode.kBrake);
     backSparkMax.setSmartCurrentLimit(40, 40, 0);
     backSparkMax.burnFlash();
@@ -36,6 +38,29 @@ public class ThriftyClimberS extends SubsystemBase implements Loggable {
 
   public double getBackPosition() {
     return sparkMaxEncoderTwo.getPosition();
+  }
+
+  public void driveBack(double voltage) {
+    if(sparkMaxEncoderTwo.getPosition() < minimumLimit) {
+      backSparkMax.setVoltage(0);
+    }
+    else if(sparkMaxEncoderTwo.getPosition() > maximumLimit) {
+      backSparkMax.setVoltage(0);
+    }
+    else {
+      backSparkMax.setVoltage(voltage);
+    }
+  }
+
+  public void driveBackTransfer() {
+    driveBack(Constants.CLIMBER_BACK_TRANSFER_VOLTS);
+  }
+  public void setMinimumLimit(double minimumLimit) {
+    this.minimumLimit = minimumLimit;
+  }
+
+  public void setMaximumLimit(double maximumLimit) {
+    this.maximumLimit = maximumLimit;
   }
 
   public void extendBack() {

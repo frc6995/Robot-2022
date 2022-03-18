@@ -105,6 +105,8 @@ public class RobotContainer {
   @Log(name="Spinup Method")
   private SendableChooser<Character> spinAndAimChooser = new SendableChooser<>();
 
+  private SendableChooser<Command> autoChooser = new SendableChooser<>();
+
   private NavigationManager navigationManager;
 
   @Log(methodName = "get")
@@ -206,6 +208,10 @@ public class RobotContainer {
     spinAndAimChooser.setDefaultOption("Vision", 'V');
     spinAndAimChooser.addOption("Odometry", 'O');
     spinAndAimChooser.addOption("Manual/TarmacLine", 'M');
+
+    autoChooser.setDefaultOption("2 ball", AutoCommandFactory.createTwoBallAutoCG(shooterS, intakeS, midtakeS, turretS, limelightS, drivebaseS));
+    autoChooser.setDefaultOption("3 ball", AutoCommandFactory.createThreeBallAutoCG(shooterS, intakeS, midtakeS, turretS, limelightS, drivebaseS));
+    autoChooser.setDefaultOption("taxi", DrivebaseCommandFactory.createTimedDriveC(0.3, 3, drivebaseS));
     //shooterS.setDefaultCommand(shooterDefaultC);
 
     runIntakeC = MainCommandFactory.createIntakeCG(midtakeS, intakeS);
@@ -353,7 +359,7 @@ public class RobotContainer {
     //   )
     // ).and(shooterReadyTrigger).and(ballReadyTrigger).whenActive(MidtakeCommandFactory.createMidtakeShootOneC(midtakeS));
 
-    operatorController.a().toggleWhenActive(new StartEndCommand(climberS::unlock, climberS::lock));
+    operatorController.back().toggleWhenActive(new StartEndCommand(climberS::unlock, climberS::lock));
 
 
 
@@ -363,7 +369,7 @@ public class RobotContainer {
     .whileActiveContinuous(
       new ConditionalCommand(
         MainCommandFactory.createClimbLockErrorC(),
-        ClimberCommandFactory.createClimberBackC(climberS),
+        ClimberCommandFactory.createClimberLowerC(climberS),
         climberS.climberLockedTrigger
       )
     );
@@ -373,13 +379,13 @@ public class RobotContainer {
     .whileActiveContinuous(
       new ConditionalCommand(
         MainCommandFactory.createClimbLockErrorC(),
-        ClimberCommandFactory.createClimberForwardC(climberS),
+        ClimberCommandFactory.createClimberRaiseC(climberS),
         climberS.climberLockedTrigger
       )
     );
     operatorController.pov.up()
-    .or(operatorController.pov.upLeft())
-    .or(operatorController.pov.upRight())
+    // .or(operatorController.pov.upLeft())
+    // .or(operatorController.pov.upRight())
     .whileActiveContinuous(
       new ConditionalCommand(
         MainCommandFactory.createClimbLockErrorC(),
@@ -388,27 +394,43 @@ public class RobotContainer {
       )
     );
     operatorController.pov.down()
-    .or(operatorController.pov.downLeft())
-    .or(operatorController.pov.downRight())
+    // .or(operatorController.pov.downLeft())
+    // .or(operatorController.pov.downRight())
     .whileActiveContinuous(
       new ConditionalCommand(
         MainCommandFactory.createClimbLockErrorC(),
-        ClimberCommandFactory.createClimberRetractBackC(climberS),
+        ClimberCommandFactory.createClimberRetractFrontC(climberS),
         climberS.climberLockedTrigger
       )
     );
 
-    operatorController.leftBumper().whileActiveContinuous(
+    operatorController.x().whileActiveContinuous(
+      new ConditionalCommand(
+        MainCommandFactory.createClimbLockErrorC(),
+        ClimberCommandFactory.createClimberExtendBothMaxC(climberS),
+        climberS.climberLockedTrigger
+      )
+    );
+    operatorController.y().whileActiveContinuous(
       new ConditionalCommand(
         MainCommandFactory.createClimbLockErrorC(),
         ClimberCommandFactory.createClimberExtendFrontC(climberS),
         climberS.climberLockedTrigger
       )
     );
-    operatorController.rightBumper().whileActiveContinuous(
+
+    operatorController.a().whileActiveContinuous(
       new ConditionalCommand(
         MainCommandFactory.createClimbLockErrorC(),
         ClimberCommandFactory.createClimberRetractFrontC(climberS),
+        climberS.climberLockedTrigger
+      )
+    );
+
+    operatorController.b().whileActiveContinuous(
+      new ConditionalCommand(
+        MainCommandFactory.createClimbLockErrorC(),
+        ClimberCommandFactory.createClimberTransferC(climberS),
         climberS.climberLockedTrigger
       )
     );
@@ -430,18 +452,18 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return DrivebaseCommandFactory.createPivotC(2.134, drivebaseS);
-    // return AutoCommandFactory.createThreeBallAutoCG(
-    //     shooterS,
-    //     intakeS,
-    //     midtakeS,
-    //     turretS,
-    //     limelightS,
-    //     drivebaseS);
+    //return DrivebaseCommandFactory.createPivotC(2.134, drivebaseS);
+    return AutoCommandFactory.createThreeBallAutoCG(
+        shooterS,
+        intakeS,
+        midtakeS,
+        turretS,
+        limelightS,
+        drivebaseS);
   }
 
   public void disabledInit() {
-    drivebaseS.setIdleState(IdleMode.kCoast);
+    drivebaseS.setIdleState(IdleMode.kBrake);
   }
 
   public void enabledInit() {

@@ -184,7 +184,7 @@ public final class Constants {
     public static final double SOFT_LIMIT_REVERSE_RADIAN = Units.degreesToRadians(180-110);
 
     /** Number of degrees of allowable error for turret */
-    public static final double TURRET_PID_ERROR = Units.degreesToRadians(5);
+    public static final double TURRET_PID_ERROR = Units.degreesToRadians(1);
 
     /** Speed at which the turret should go back to home */
     public static final double TURRET_HOMING_SPEED = -0.1;
@@ -193,7 +193,7 @@ public final class Constants {
     public static final double TURRET_DEADBAND = 0.02;
 
     /** Feedforward for the turret */
-    public static final double[] TURRET_FF = {0.1, 0.56397, 0.030497}; // for velocity in turret radians per second
+    public static final double[] TURRET_FF = {0.18, 0.56397, 0.030497}; // for velocity in turret radians per second
 
     /** Proportional term for the turret */
     public static final double TURRET_P = 6;//51.463;
@@ -329,6 +329,12 @@ public final class Constants {
      */
     public static final double CLIMBER_FRONT_SOFT_LIMIT_BACK = 20.0;
 
+    public static final double CLIMBER_FRONT_SOFT_LIMIT_MID = 150;
+
+    public static final double CLIMBER_FRONT_TRANSFER_VOLTS = -5; 
+
+    public static final double CLIMBER_BACK_TRANSFER_VOLTS = 5; 
+
     /**
      * The current the back motor needs to pull for the climber to detect that it's lifting the robot.
      */
@@ -342,7 +348,9 @@ public final class Constants {
      */
     public static final double CLIMBER_BACK_SOFT_LIMIT_BACK = 0.0;
 
-    public static final double CLIMBER_BACK_LIFT_POSITION = 120;
+    public static final double CLIMBER_BACK_SOFT_LIMIT_SHOOTER = 200;
+
+    public static final double CLIMBER_BACK_LIFT_POSITION = 150;
 
     public static final double CLIMBER_BACK_HOLDING_FF = -1;
     /**

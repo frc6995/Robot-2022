@@ -54,7 +54,7 @@ public class TurretS extends SubsystemBase implements Loggable {
   private RelativeEncoder sparkMaxEncoder = sparkMax.getEncoder();
   private DigitalInput limitSwitch = new DigitalInput(TURRET_LIMIT_SWITCH_PORT);
 
-  private ProfiledPIDController turretPID = new ProfiledPIDController(TURRET_P, 0, TURRET_D, new Constraints(Math.PI, 2));
+  private ProfiledPIDController turretPID = new ProfiledPIDController(TURRET_P, 0, TURRET_D, new Constraints(Math.PI, 3));
 
   @Log
   private double omega = 0;

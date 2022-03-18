@@ -1,6 +1,7 @@
 package frc.robot.commands.auto;
 
 import edu.wpi.first.math.trajectory.Trajectory;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
@@ -9,6 +10,7 @@ import edu.wpi.first.wpilibj2.command.RamseteCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.Constants;
+import frc.robot.commands.IntakeCommandFactory;
 import frc.robot.commands.MainCommandFactory;
 import frc.robot.commands.MidtakeCommandFactory;
 import frc.robot.commands.drivebase.DrivebaseCommandFactory;
@@ -61,26 +63,27 @@ public class AutoCommandFactory {
         return new ParallelCommandGroup(
             MainCommandFactory.createVisionSpinupAndAimC(limelightS, turretS, shooterS),
             new ParallelCommandGroup(
-                        DrivebaseCommandFactory.createTimedDriveC(.4, 2.5, drivebaseS),
-                        new ProxyScheduleCommand(
-                                MainCommandFactory.createIntakeCG(midtakeS, intakeS)
-                        )
+                        DrivebaseCommandFactory.createTimedDriveC(.4, 1.75, drivebaseS),
+                        MainCommandFactory.createIntakeCG(midtakeS, intakeS)
             ).withInterrupt(midtakeS::getIsMidtakeFull)
-            .andThen(MidtakeCommandFactory.createMidtakeArmC(midtakeS))
+            .andThen(MidtakeCommandFactory.createMidtakeDefaultC(midtakeS).withInterrupt(midtakeS::getIsArmed))
             .andThen(MidtakeCommandFactory.createMidtakeFeedOneC(midtakeS))
-            .andThen(MidtakeCommandFactory.createMidtakeArmC(midtakeS))
+            .andThen(MidtakeCommandFactory.createMidtakeDefaultC(midtakeS).withInterrupt(midtakeS::getIsArmed))
             .andThen(new WaitUntilCommand(shooterS::isAtTarget))
-            .andThen(MidtakeCommandFactory.createMidtakeFeedOneC(midtakeS))
+            .andThen(MidtakeCommandFactory.createMidtakeFeedC(midtakeS).withInterrupt(midtakeS::getIsTopBeamClear).withTimeout(2))
             .andThen(new WaitCommand(0.5))
-            .andThen(DrivebaseCommandFactory.createPivotC(2.134, drivebaseS))
+            .andThen(DrivebaseCommandFactory.createPivotC(-1.9, drivebaseS))
             .andThen(
-                new ParallelDeadlineGroup(
-                    DrivebaseCommandFactory.createTimedDriveC(.4, 5, drivebaseS),
-                    MidtakeCommandFactory.createMidtakeLoadC(midtakeS)
+                new ParallelCommandGroup(
+                    DrivebaseCommandFactory.createTimedDriveC(.4, 2.5, drivebaseS)
+                        .withInterrupt(midtakeS::getIsTopBeamBroken)
+                        .andThen(DrivebaseCommandFactory.createPivotC(Units.degreesToRadians(-60), drivebaseS)),
+                    MidtakeCommandFactory.createMidtakeDefaultC(midtakeS).withInterrupt(midtakeS::getIsArmed),
+                    IntakeCommandFactory.createIntakeRunC(intakeS)
                 ).withInterrupt(midtakeS::getIsTopBeamBroken)
             )
-            .andThen(MidtakeCommandFactory.createMidtakeArmC(midtakeS))
-            .andThen(MidtakeCommandFactory.createMidtakeFeedOneC(midtakeS))
+            .andThen(MidtakeCommandFactory.createMidtakeDefaultC(midtakeS).withInterrupt(midtakeS::getIsArmed))
+            .andThen(MidtakeCommandFactory.createMidtakeFeedC(midtakeS).withTimeout(2))
         );
 
     }
