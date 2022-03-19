@@ -24,6 +24,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -187,7 +188,7 @@ public class RobotContainer {
     
     shooterVisionSpinC = ShooterCommandFactory.createShooterDistanceSpinupC(limelightS::getFilteredDistance, shooterS);
     shooterTestC = new ShooterTestC(shooterS);
-    shooterTarmacLineC = ShooterCommandFactory.createShooterFollowC(()->1700, ()->1700, shooterS);
+    shooterTarmacLineC = ShooterCommandFactory.createShooterFollowC(()->500, ()->500, shooterS);
     
     visionSpinAndAimC = MainCommandFactory.createVisionSpinupAndAimC(limelightS, turretS, shooterS);
     odometrySpinAndAimC = new ConditionalCommand(
@@ -203,7 +204,7 @@ public class RobotContainer {
     autoChooser.setDefaultOption("2 ball", AutoCommandFactory.createTwoBallAutoCG(shooterS, intakeS, midtakeS, turretS, limelightS, drivebaseS));
     //autoChooser.setDefaultOption("3 ball", AutoCommandFactory.createThreeBallAutoCG(shooterS, intakeS, midtakeS, turretS, limelightS, drivebaseS));
     autoChooser.setDefaultOption("taxi", DrivebaseCommandFactory.createTimedDriveC(0.3, 3, drivebaseS));
-    //shooterS.setDefaultCommand(shooterDefaultC);
+
 
     runIntakeC = MainCommandFactory.createIntakeCG(midtakeS, intakeS);
     manualIntakeCG = IntakeCommandFactory.createIntakeRunC(intakeS);
@@ -218,7 +219,7 @@ public class RobotContainer {
   }
 
   public void createTriggers() {
-    shooterReadyTrigger = new Trigger(shooterS::isAtTarget).and(new Trigger(()->(shooterS.getFrontEncoderSpeed() > 1000)));
+    shooterReadyTrigger = new Trigger(shooterS::isAtTarget).and(new Trigger(()->(shooterS.getFrontEncoderSpeed() > 100)));
     shootButtonTrigger = new Trigger(
       ()->{
         return (operatorController.getRightTriggerAxis() >= 0.5);});
@@ -289,9 +290,7 @@ public class RobotContainer {
       climberS.stopFront();
       climberS.tiltStop();
     }, climberS.linearClimberS, climberS.thriftyClimberS, climberS.tiltClimberS)
-    .alongWith(
-      shooterTarmacLineC
-    ), false);
+    , false);
 
     climberS.climberLockedTrigger.negate().whileActiveContinuous(
       new RunCommand(
@@ -374,6 +373,10 @@ public class RobotContainer {
         climberS.climberLockedTrigger
       )
     );
+
+    shooterS.setDefaultCommand(
+        ShooterCommandFactory.createShooterFollowC(()->800, ()->800, shooterS)
+    );
   }
 
   public void disableAll() {
@@ -393,13 +396,7 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     //return DrivebaseCommandFactory.createPivotC(2.134, drivebaseS);
-    return AutoCommandFactory.createThreeBallAutoCG(
-        shooterS,
-        intakeS,
-        midtakeS,
-        turretS,
-        limelightS,
-        drivebaseS);
+    return autoChooser.getSelected();
   }
 
   public void disabledInit() {

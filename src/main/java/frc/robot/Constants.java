@@ -348,9 +348,9 @@ public final class Constants {
      */
     public static final double CLIMBER_BACK_SOFT_LIMIT_BACK = 0.0;
 
-    public static final double CLIMBER_BACK_SOFT_LIMIT_SHOOTER = 150;
+    public static final double CLIMBER_BACK_SOFT_LIMIT_SHOOTER = 110;
 
-    public static final double CLIMBER_BACK_LIFT_POSITION = 150;
+    public static final double CLIMBER_BACK_LIFT_POSITION = 110;
 
     public static final double CLIMBER_BACK_HOLDING_FF = -1;
     /**

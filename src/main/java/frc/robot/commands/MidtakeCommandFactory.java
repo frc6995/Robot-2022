@@ -83,7 +83,7 @@ public class MidtakeCommandFactory {
     public static Command createMidtakeReadyIntakeCG(MidtakeS midtakeS) {
         return createMidtakeReverseC(midtakeS)
             .withInterrupt(midtakeS::getIsBottomBeamBroken)
-            .withTimeout(1.0);
+            .withTimeout(0.5);
     }
 
     public static Command createMidtakeArmC(MidtakeS midtakeS) {
@@ -95,7 +95,7 @@ public class MidtakeCommandFactory {
         return new ConditionalCommand( // If the top beam is broken
             createMidtakeReverseC(midtakeS) // back up until it's not.
             .withInterrupt(midtakeS::getIsTopBeamClear)
-            .withTimeout(1.0),
+            .withTimeout(0.5),
             new InstantCommand(),
             midtakeS::getIsTopBeamBroken)
         .andThen(
@@ -121,8 +121,8 @@ public class MidtakeCommandFactory {
     public static Command createMidtakeFeedOneC(MidtakeS midtakeS) {
         return createMidtakeFeedC(midtakeS)
             .withInterrupt(midtakeS::getIsTopBeamClear)
-             .withTimeout(0.2);//.andThen(createMidtakeReverseC(midtakeS).withTimeout(0.2));
-    }
+             .withTimeout(0.1).andThen(createMidtakeReverseC(midtakeS).withTimeout(0.1));
+    } 
 
     public static Command createMidtakeShootOneC(MidtakeS midtakeS) {
             return createMidtakeFeedOneC(midtakeS);

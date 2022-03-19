@@ -27,24 +27,11 @@ public class MainCommandFactory {
   // Intake deploy -> midtake prepare - > intake spin...on end, midtake arm, intake stop and retract.
 
   public static Command createIntakeCG(MidtakeS midtakeS, IntakeS intakeS) {
-    return new ConditionalCommand(
-      new InstantCommand(), // if full, do nothing
-      new ConditionalCommand(
+    return
         new ParallelCommandGroup(
-          IntakeCommandFactory.createIntakeDeployC(intakeS),
-          MidtakeCommandFactory.createMidtakeReadyIntakeCG(midtakeS)
-        ),
-        IntakeCommandFactory.createIntakeDeployC(intakeS),
-        ()->{return midtakeS.getBallCount() == 1;}
-      ).andThen(
-        new ParallelCommandGroup(
-          IntakeCommandFactory.createIntakeRunC(intakeS),
-          MidtakeCommandFactory.createMidtakeLowIndexCG(midtakeS),
-          new RunCommand(()->{LightS.getInstance().requestState(States.Intaking);})
-        )
-      ),
-      midtakeS::getIsMidtakeFull
-    );
+          IntakeCommandFactory.createIntakeDeployC(intakeS).andThen(IntakeCommandFactory.createIntakeRunC(intakeS)),
+          MidtakeCommandFactory.createMidtakeReadyIntakeCG(midtakeS).andThen(MidtakeCommandFactory.createMidtakeLowIndexCG(midtakeS))
+      );
   }
   
 
