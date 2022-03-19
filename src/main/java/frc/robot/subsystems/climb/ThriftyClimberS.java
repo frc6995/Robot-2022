@@ -21,7 +21,7 @@ public class ThriftyClimberS extends SubsystemBase implements Loggable {
   @Log(methodName = "getPosition", name = "backPosition")
   private RelativeEncoder sparkMaxEncoderTwo = backSparkMax.getEncoder();
   
-  private double minimumLimit = Constants.CLIMBER_BACK_SOFT_LIMIT_SHOOTER;
+  private double minimumLimit = 0;
   private double maximumLimit = Constants.CLIMBER_BACK_SOFT_LIMIT_FORWARD;
   /** Creates a new ClimberS. */
   public ThriftyClimberS() {
@@ -41,15 +41,7 @@ public class ThriftyClimberS extends SubsystemBase implements Loggable {
   }
 
   public void driveBack(double voltage) {
-    if(sparkMaxEncoderTwo.getPosition() < minimumLimit) {
-      backSparkMax.setVoltage(0);
-    }
-    else if(sparkMaxEncoderTwo.getPosition() > maximumLimit) {
-      backSparkMax.setVoltage(0);
-    }
-    else {
-      backSparkMax.setVoltage(voltage);
-    }
+    backSparkMax.setVoltage(voltage);
   }
 
   public void driveBackTransfer() {

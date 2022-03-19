@@ -137,8 +137,6 @@ public class RobotContainer {
     createTriggers();
     configureButtonBindings();
     navigationManager.setVisionEnabledSupplier(()->true);
-
-
     CameraServer.startAutomaticCapture();
   }
 
@@ -206,11 +204,11 @@ public class RobotContainer {
     
 
     spinAndAimChooser.setDefaultOption("Vision", 'V');
-    spinAndAimChooser.addOption("Odometry", 'O');
+    //spinAndAimChooser.addOption("Odometry", 'O');
     spinAndAimChooser.addOption("Manual/TarmacLine", 'M');
 
     autoChooser.setDefaultOption("2 ball", AutoCommandFactory.createTwoBallAutoCG(shooterS, intakeS, midtakeS, turretS, limelightS, drivebaseS));
-    autoChooser.setDefaultOption("3 ball", AutoCommandFactory.createThreeBallAutoCG(shooterS, intakeS, midtakeS, turretS, limelightS, drivebaseS));
+    //autoChooser.setDefaultOption("3 ball", AutoCommandFactory.createThreeBallAutoCG(shooterS, intakeS, midtakeS, turretS, limelightS, drivebaseS));
     autoChooser.setDefaultOption("taxi", DrivebaseCommandFactory.createTimedDriveC(0.3, 3, drivebaseS));
     //shooterS.setDefaultCommand(shooterDefaultC);
 
@@ -280,19 +278,16 @@ public class RobotContainer {
 
     Supplier<Command> spinAndAimSupplier = 
     ()->{
-      Command selectedCommand;
-      switch(spinAndAimChooser.getSelected()) {
-        case 'M' :
-          selectedCommand = shooterTarmacLineC;
-          break;
-        case 'O' :
-          selectedCommand = odometrySpinAndAimC;
-          break;
-        case 'V' :
-        default:
-          selectedCommand = visionSpinAndAimC;
-          break;
-      }
+      Command selectedCommand = ShooterCommandFactory.createShooterFollowC(()->1700, ()->1700, shooterS).alongWith(TurretCommandFactory.createTurretVisionC(limelightS, turretS));
+      // switch(spinAndAimChooser.getSelected()) {
+      //   case 'M' :
+      //     selectedCommand = shooterTarmacLineC;
+      //     break;
+      //   case 'V' :
+      //   default:
+      //     selectedCommand = visionSpinAndAimC;
+      //     break;
+      // }
       return selectedCommand;
     };
     spinAndAimTrigger.whileActiveContinuous(
@@ -340,26 +335,8 @@ public class RobotContainer {
     shootBallTrigger.whileActiveContinuous(
       MidtakeCommandFactory.createMidtakeShootOneC(midtakeS)
     );
-    // dumpWrongBallTrigger.whileActiveContinuous(MainCommandFactory.createWrongBallC(navigationManager, turretS, shooterS));
 
-    // dumpWrongBallTrigger.and(
-    //   new Trigger(
-    //       ()->{
-    //       return (
-    //         Math.abs(
-    //           turretS.getError(
-    //             navigationManager.getRobotToHubDirection()
-    //           )
-    //         ) > Math.atan2(
-    //           Units.feetToMeters(3),
-    //           navigationManager.getRobotToHubDistance()
-    //         )
-    //       );
-    //     }
-    //   )
-    // ).and(shooterReadyTrigger).and(ballReadyTrigger).whenActive(MidtakeCommandFactory.createMidtakeShootOneC(midtakeS));
-
-    operatorController.back().toggleWhenActive(new StartEndCommand(climberS::unlock, climberS::lock));
+    operatorController.start().toggleWhenActive(new StartEndCommand(climberS::unlock, climberS::lock));
 
 
 
@@ -399,7 +376,7 @@ public class RobotContainer {
     .whileActiveContinuous(
       new ConditionalCommand(
         MainCommandFactory.createClimbLockErrorC(),
-        ClimberCommandFactory.createClimberRetractFrontC(climberS),
+        ClimberCommandFactory.createClimberRetractBackC(climberS),
         climberS.climberLockedTrigger
       )
     );
@@ -476,9 +453,9 @@ public class RobotContainer {
   }
 
   public void robotPeriodic() {
-    if(spinAndAimChooser.getSelected() == 'M') {
-      limelightS.setDriverMode(true);
-    }
+    // if(spinAndAimChooser.getSelected() == 'M') {
+    //   limelightS.setDriverMode(true);
+    // }
     // if(midtakeManualOverrideTrigger.get()) {
     //   midtakeS.setDefaultCommand(midtakeManualC);
     // }
