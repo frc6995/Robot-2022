@@ -121,7 +121,7 @@ public class MidtakeCommandFactory {
     public static Command createMidtakeFeedOneC(MidtakeS midtakeS) {
         return createMidtakeFeedC(midtakeS)
             .withInterrupt(midtakeS::getIsTopBeamClear)
-            .withTimeout(0.1).andThen(createMidtakeReverseC(midtakeS).withTimeout(0.2));
+             .withTimeout(0.2);//.andThen(createMidtakeReverseC(midtakeS).withTimeout(0.2));
     }
 
     public static Command createMidtakeShootOneC(MidtakeS midtakeS) {

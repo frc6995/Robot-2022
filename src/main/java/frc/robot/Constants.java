@@ -193,7 +193,7 @@ public final class Constants {
     public static final double TURRET_DEADBAND = 0.02;
 
     /** Feedforward for the turret */
-    public static final double[] TURRET_FF = {0.18, 0.56397, 0.030497}; // for velocity in turret radians per second
+    public static final double[] TURRET_FF = {0.17, 0.56397, 0.030497}; // for velocity in turret radians per second
 
     /** Proportional term for the turret */
     public static final double TURRET_P = 6;//51.463;
@@ -331,7 +331,7 @@ public final class Constants {
 
     public static final double CLIMBER_FRONT_SOFT_LIMIT_MID = 150;
 
-    public static final double CLIMBER_FRONT_TRANSFER_VOLTS = -5; 
+    public static final double CLIMBER_FRONT_TRANSFER_VOLTS = -3; 
 
     public static final double CLIMBER_BACK_TRANSFER_VOLTS = 5; 
 
@@ -348,7 +348,7 @@ public final class Constants {
      */
     public static final double CLIMBER_BACK_SOFT_LIMIT_BACK = 0.0;
 
-    public static final double CLIMBER_BACK_SOFT_LIMIT_SHOOTER = 200;
+    public static final double CLIMBER_BACK_SOFT_LIMIT_SHOOTER = 150;
 
     public static final double CLIMBER_BACK_LIFT_POSITION = 150;
 

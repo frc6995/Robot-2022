@@ -102,9 +102,9 @@ public class RobotContainer {
   private Command shooterTestC;
 
   private NetworkTable spinAndAimChooserTable = NetworkTableInstance.getDefault().getTable("Shuffleboard").getSubTable("RobotContainer/Spinup Method");
-  @Log(name="Spinup Method")
   private SendableChooser<Character> spinAndAimChooser = new SendableChooser<>();
 
+  @Log
   private SendableChooser<Command> autoChooser = new SendableChooser<>();
 
   private NavigationManager navigationManager;
@@ -139,8 +139,6 @@ public class RobotContainer {
     navigationManager.setVisionEnabledSupplier(()->true);
     CameraServer.startAutomaticCapture();
   }
-
-
 
   /**
    * Instantiate the driver and operator controllers
@@ -189,7 +187,7 @@ public class RobotContainer {
     
     shooterVisionSpinC = ShooterCommandFactory.createShooterDistanceSpinupC(limelightS::getFilteredDistance, shooterS);
     shooterTestC = new ShooterTestC(shooterS);
-    shooterTarmacLineC = ShooterCommandFactory.createShooterDistanceSpinupC(()->3.0, shooterS);
+    shooterTarmacLineC = ShooterCommandFactory.createShooterFollowC(()->1700, ()->1700, shooterS);
     
     visionSpinAndAimC = MainCommandFactory.createVisionSpinupAndAimC(limelightS, turretS, shooterS);
     odometrySpinAndAimC = new ConditionalCommand(
@@ -201,11 +199,6 @@ public class RobotContainer {
         )
       ),
       limelightS.hasSteadyTarget);
-    
-
-    spinAndAimChooser.setDefaultOption("Vision", 'V');
-    //spinAndAimChooser.addOption("Odometry", 'O');
-    spinAndAimChooser.addOption("Manual/TarmacLine", 'M');
 
     autoChooser.setDefaultOption("2 ball", AutoCommandFactory.createTwoBallAutoCG(shooterS, intakeS, midtakeS, turretS, limelightS, drivebaseS));
     //autoChooser.setDefaultOption("3 ball", AutoCommandFactory.createThreeBallAutoCG(shooterS, intakeS, midtakeS, turretS, limelightS, drivebaseS));
@@ -225,29 +218,17 @@ public class RobotContainer {
   }
 
   public void createTriggers() {
-    //turretReadyTrigger = new Trigger(()->turretS.isAtTarget(navigationManager.getRobotToHubDirection()));
-    //turretReadyTrigger = new Trigger(()->Math.abs(limelightS.getFilteredXOffset()) < Units.degreesToRadians(5));
     shooterReadyTrigger = new Trigger(shooterS::isAtTarget).and(new Trigger(()->(shooterS.getFrontEncoderSpeed() > 1000)));
-    //ballReadyTrigger = new Trigger(midtakeS::getIsArmed);
-    //drivebaseStoppedTrigger = new Trigger(drivebaseS::getIsStopped);
     shootButtonTrigger = new Trigger(
       ()->{
         return (operatorController.getRightTriggerAxis() >= 0.5);});
-    //distanceInRangeTrigger = new Trigger(
-      // ()->{
-      //     return NavigationManager.getDistanceInRange(navigationManager.getRobotToHubDistance());});
     distanceInRangeTrigger = new Trigger(()->{return NavigationManager.getDistanceInRange(limelightS.getFilteredDistance());});
 
     spinAndAimTrigger = new Trigger(()->{return (operatorController.getLeftTriggerAxis() >= 0.5);});
 
     shootBallTrigger =
       shootButtonTrigger
-      //.and(turretReadyTrigger.debounce(0.3))
       .and(shooterReadyTrigger.debounce(0.2))
-      //.and(ballReadyTrigger.debounce(0.1))
-      //.and(drivebaseStoppedTrigger.debounce(0.2))
-      //.and(distanceInRangeTrigger.debounce(0.2))
-      //.and(dumpWrongBallTrigger.negate())
     ; 
 
   }
@@ -276,22 +257,9 @@ public class RobotContainer {
       IntakeCommandFactory.createIntakeEjectC(intakeS)
     );
 
-    Supplier<Command> spinAndAimSupplier = 
-    ()->{
-      Command selectedCommand = ShooterCommandFactory.createShooterFollowC(()->1700, ()->1700, shooterS).alongWith(TurretCommandFactory.createTurretVisionC(limelightS, turretS));
-      // switch(spinAndAimChooser.getSelected()) {
-      //   case 'M' :
-      //     selectedCommand = shooterTarmacLineC;
-      //     break;
-      //   case 'V' :
-      //   default:
-      //     selectedCommand = visionSpinAndAimC;
-      //     break;
-      // }
-      return selectedCommand;
-    };
     spinAndAimTrigger.whileActiveContinuous(
-      spinAndAimSupplier.get().alongWith(
+      TurretCommandFactory.createTurretProfiledVisionC(limelightS, turretS)
+      .alongWith(
         new RunCommand(
           ()->{
             LightS.getInstance().requestState(States.Shooting);
@@ -320,7 +288,10 @@ public class RobotContainer {
       climberS.stopBack();
       climberS.stopFront();
       climberS.tiltStop();
-    }), false);
+    }, climberS.linearClimberS, climberS.thriftyClimberS, climberS.tiltClimberS)
+    .alongWith(
+      shooterTarmacLineC
+    ), false);
 
     climberS.climberLockedTrigger.negate().whileActiveContinuous(
       new RunCommand(
@@ -340,9 +311,7 @@ public class RobotContainer {
 
 
 
-    operatorController.pov.left()
-    .or(operatorController.pov.downLeft())
-    .or(operatorController.pov.upLeft())
+    driverController.pov.left()
     .whileActiveContinuous(
       new ConditionalCommand(
         MainCommandFactory.createClimbLockErrorC(),
@@ -350,9 +319,7 @@ public class RobotContainer {
         climberS.climberLockedTrigger
       )
     );
-    operatorController.pov.right()
-    .or(operatorController.pov.downRight())
-    .or(operatorController.pov.upRight())
+    driverController.pov.right()
     .whileActiveContinuous(
       new ConditionalCommand(
         MainCommandFactory.createClimbLockErrorC(),
@@ -361,8 +328,6 @@ public class RobotContainer {
       )
     );
     operatorController.pov.up()
-    // .or(operatorController.pov.upLeft())
-    // .or(operatorController.pov.upRight())
     .whileActiveContinuous(
       new ConditionalCommand(
         MainCommandFactory.createClimbLockErrorC(),
@@ -371,8 +336,6 @@ public class RobotContainer {
       )
     );
     operatorController.pov.down()
-    // .or(operatorController.pov.downLeft())
-    // .or(operatorController.pov.downRight())
     .whileActiveContinuous(
       new ConditionalCommand(
         MainCommandFactory.createClimbLockErrorC(),

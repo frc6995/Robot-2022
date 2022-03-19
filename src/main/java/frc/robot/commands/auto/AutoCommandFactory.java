@@ -14,6 +14,7 @@ import frc.robot.commands.IntakeCommandFactory;
 import frc.robot.commands.MainCommandFactory;
 import frc.robot.commands.MidtakeCommandFactory;
 import frc.robot.commands.drivebase.DrivebaseCommandFactory;
+import frc.robot.commands.shooter.ShooterCommandFactory;
 import frc.robot.subsystems.DrivebaseS;
 import frc.robot.subsystems.IntakeS;
 import frc.robot.subsystems.LimelightS;
@@ -42,7 +43,7 @@ public class AutoCommandFactory {
     public static Command createTwoBallAutoCG(
             ShooterS shooterS, IntakeS intakeS, MidtakeS midtakeS, TurretS turretS, LimelightS limelightS, DrivebaseS drivebaseS) {
         return new ParallelCommandGroup(
-            MainCommandFactory.createVisionSpinupAndAimC(limelightS, turretS, shooterS),
+            ShooterCommandFactory.createShooterFollowC(()->(1750), ()->(1750), shooterS),
             new ParallelCommandGroup(
                         DrivebaseCommandFactory.createTimedDriveC(.3, 2.5, drivebaseS),
                         new ProxyScheduleCommand(
@@ -50,18 +51,18 @@ public class AutoCommandFactory {
                         )
             ).withInterrupt(midtakeS::getIsMidtakeFull)
             .andThen(new WaitCommand(1))
-            .andThen(new WaitCommand(3).withInterrupt(midtakeS::getIsArmed))
-            .andThen(new WaitCommand(1))
+            .andThen(new WaitCommand(2).withInterrupt(midtakeS::getIsArmed))
+            .andThen(new WaitCommand(0.5))
             .andThen(new ProxyScheduleCommand(MidtakeCommandFactory.createMidtakeFeedOneC(midtakeS)))
-            .andThen(new WaitCommand(3).withInterrupt(()->(shooterS.isAtTarget() && midtakeS.getIsArmed())))
-            .andThen(new ProxyScheduleCommand(MidtakeCommandFactory.createMidtakeFeedOneC(midtakeS)))
+            .andThen(new WaitCommand(2).withInterrupt(()->(shooterS.isAtTarget() && midtakeS.getIsArmed())))
+            .andThen(new ProxyScheduleCommand(MidtakeCommandFactory.createMidtakeFeedC(midtakeS).withTimeout(2)))
         )
         .withName("Two Ball Auto");
     }
 
     public static Command createThreeBallAutoCG(ShooterS shooterS, IntakeS intakeS, MidtakeS midtakeS, TurretS turretS, LimelightS limelightS, DrivebaseS drivebaseS) {
         return new ParallelCommandGroup(
-            MainCommandFactory.createVisionSpinupAndAimC(limelightS, turretS, shooterS),
+            ShooterCommandFactory.createShooterFollowC(()->(1750), ()->(1750), shooterS),
             new ParallelCommandGroup(
                         DrivebaseCommandFactory.createTimedDriveC(.4, 1.75, drivebaseS),
                         MainCommandFactory.createIntakeCG(midtakeS, intakeS)

@@ -26,9 +26,7 @@ public class SuperClimberS implements Loggable {
   }
 
   public void lock() {
-    if(thriftyClimberS.getBackPosition() < 10 && linearClimberS.getFrontPosition() < 10) {
-      locked = true;
-    }
+    locked = true;
   }
 
   public boolean getIsLocked() {

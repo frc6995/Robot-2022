@@ -43,8 +43,6 @@ public class ClimberCommandFactory {
         return new RunEndCommand(climberS::transferFront, climberS::stopFront, climberS.linearClimberS);
     }
 
-
-
     public static Command createClimberRaiseC(SuperClimberS climberS) {
         return new RunEndCommand(climberS::tiltBackward, climberS::tiltStop, climberS.tiltClimberS);
     }

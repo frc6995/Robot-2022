@@ -20,7 +20,7 @@ public class LinearClimberS extends SubsystemBase implements Loggable {
   @Log(methodName = "getPosition", name = "frontPosition")
   private RelativeEncoder sparkMaxEncoder = frontSparkMax.getEncoder();
   
-  private double minimumLimit = Constants.CLIMBER_FRONT_SOFT_LIMIT_MID;
+  private double minimumLimit = Constants.CLIMBER_FRONT_SOFT_LIMIT_BACK;
   private double maximumLimit = Constants.CLIMBER_FRONT_SOFT_LIMIT_FORWARD;
   /** Creates a new ClimberS. */
   public LinearClimberS() {
@@ -64,9 +64,5 @@ public class LinearClimberS extends SubsystemBase implements Loggable {
   }
   @Override
   public void periodic() {
-    // // This method will be called once per scheduler run
-    // if(Math.abs(frontSparkMax.getAppliedOutput()) < 0.1 && frontSparkMax.getEncoder().getVelocity() > 10) {
-    //   holdFront();
-    // }
   }
 }
