@@ -198,8 +198,8 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
   public void tankDrive(double left, double right) {
     SmartDashboard.putNumber("leftSpeed", left);
     SmartDashboard.putNumber("rightSpeed", right);
-    frontLeft.setVoltage(left * 7);
-    frontRight.setVoltage(right * 7);
+    frontLeft.setVoltage(left * 6.5);
+    frontRight.setVoltage(right * 6.5);
   }
 
   public void tankDriveVelocity(double leftVelocityMPS, double rightVelocityMPS) {

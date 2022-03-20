@@ -259,13 +259,16 @@ public class RobotContainer {
     );
 
     spinAndAimTrigger.whileActiveContinuous(
-      TurretCommandFactory.createTurretProfiledVisionC(limelightS, turretS)
+      new InstantCommand()//TurretCommandFactory.createTurretProfiledVisionC(limelightS, turretS)
       .alongWith(
         new RunCommand(
           ()->{
             LightS.getInstance().requestState(States.Shooting);
           }
         )
+      )
+      .alongWith(
+        ShooterCommandFactory.createShooterFollowC(()->1750, ()->1750, shooterS)
       )
     );
 
@@ -307,6 +310,8 @@ public class RobotContainer {
     );
 
     operatorController.start().toggleWhenActive(new StartEndCommand(climberS::unlock, climberS::lock));
+
+    operatorController.back().whileActiveContinuous(TurretCommandFactory.createTurretProfiledVisionC(limelightS, turretS));
 
 
 
