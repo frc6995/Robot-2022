@@ -193,7 +193,7 @@ public final class Constants {
     public static final double TURRET_DEADBAND = 0.02;
 
     /** Feedforward for the turret */
-    public static final double[] TURRET_FF = {0.17, 0.56397, 0.030497}; // for velocity in turret radians per second
+    public static final double[] TURRET_FF = {0.16, 0.56397, 0.030497}; // for velocity in turret radians per second
 
     /** Proportional term for the turret */
     public static final double TURRET_P = 6;//51.463;
