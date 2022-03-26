@@ -41,33 +41,6 @@ public class MainCommandFactory {
     .alongWith(TurretCommandFactory.createTurretVisionC(limelightS, turretS));
   }
 
-  public static Command createShooterOdometryC(NavigationManager navigationManager, ShooterS shooterS) {
-    return ShooterCommandFactory.createShooterDistanceSpinupC(()->NomadMathUtil.getDistance(navigationManager.getRobotToHubTransform()), shooterS);
-  }
-
-  public static Command createWrongBallC(NavigationManager navigationManager, TurretS turretS, ShooterS shooterS) {
-    return new ConditionalCommand(
-      TurretCommandFactory.createTurretWrongBallC(
-      navigationManager::getRobotToHubDirection,
-      navigationManager::getRobotToHubDistance, turretS)
-      .alongWith(createShooterOdometryC(navigationManager, shooterS)),
-      ShooterCommandFactory.createShooterIdleC(shooterS)
-      .alongWith(createTurretOdometryC(navigationManager, turretS)),
-      ()->{
-        return turretS.isTargetInRange(
-          navigationManager.getRobotToHubDirection()
-        );
-      });
-  }
-
-  public static Command createTurretOdometryC(NavigationManager navigationManager, TurretS turretS) {
-    return TurretCommandFactory.createTurretFollowC(
-      ()->{
-        Rotation2d direction = NomadMathUtil.getDirection(navigationManager.getRobotToHubTransform());
-        return direction;
-      }, turretS);
-  }
-
   public static Command createClimbLockErrorC() {
       return new RunCommand(()->{LightS.getInstance().requestState(States.Error);})
       .withTimeout(0.5);

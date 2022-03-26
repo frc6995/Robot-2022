@@ -93,29 +93,27 @@ public final class Constants {
     /**
      * The feedforward constants for forward-back driving.
      */
-    public static final double[] DRIVEBASE_LINEAR_FF = { 0.22,
-            1 / (473.0) /* volts per NEO RPM */
-                    * 60 /* seconds per minute */
-                    * DRIVEBASE_ENCODER_ROTATIONS_PER_WHEEL_ROTATION,
-            2.0 }; // TODO real numbers
+    public static final double[] DRIVEBASE_LINEAR_FF_MPS = { 0.034258,
+        2.0657,
+        0.60947}; // TODO real numbers
 
     /**
      * The feedforward constants for rotation while driving.
      */
-    public static final double[] DRIVEBASE_ANGULAR_FF = { 0.22, 1.5 / DRIVEBASE_TRACKWIDTH * 0.6995,
+    public static final double[] DRIVEBASE_ANGULAR_FF = { 0.034258, 1.5 / DRIVEBASE_TRACKWIDTH * 0.6995,
             0.3 / DRIVEBASE_TRACKWIDTH * 0.6995 }; // TODO real numbers
 
     /**
      * The proportional constant for the drivebase wheel.
      */
-    public static final double DRIVEBASE_P = 0.294; // TODO real numbers
+    public static final double DRIVEBASE_P = 0.72534;//9.5653; // TODO real numbers
 
     /**
      * The system modeling plant for the drivebase.
      */
     public static final LinearSystem<N2, N2, N2> DRIVEBASE_PLANT = LinearSystemId.identifyDrivetrainSystem(
-            DRIVEBASE_LINEAR_FF[1],
-            DRIVEBASE_LINEAR_FF[2],
+            DRIVEBASE_LINEAR_FF_MPS[1],
+            DRIVEBASE_LINEAR_FF_MPS[2],
             DRIVEBASE_ANGULAR_FF[1],
             DRIVEBASE_ANGULAR_FF[2],
             DRIVEBASE_TRACKWIDTH);
@@ -132,13 +130,12 @@ public final class Constants {
     /**
      * Standard deviations for noise in simulation encoders.
      */
-    public static final Vector<N7> DRIVEBASE_SIM_ENCODER_STD_DEV = VecBuilder.fill(0, 0, 0.0001, 0.05, 0.05, 0.0001,
-            0.0001);
+    public static final Vector<N7> DRIVEBASE_SIM_ENCODER_STD_DEV = VecBuilder.fill(0, 0, 0, 0, 0, 0, 0);
 
     /**
      * Trajectory config for auto.
      */
-    public static final TrajectoryConfig TRAJECTORY_CONFIG = new TrajectoryConfig(3, 2).setEndVelocity(0);
+    public static final TrajectoryConfig TRAJECTORY_CONFIG = new TrajectoryConfig(2, 2).setEndVelocity(0);
 
     // Shooter Constants
     /** Can ids for front shooter motor */

@@ -15,6 +15,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import frc.robot.Constants;
 import frc.robot.util.NomadMathUtil;
 import frc.robot.util.interpolation.ShooterInterpolatingTable;
 import io.github.oblarg.oblog.Loggable;
@@ -26,12 +27,9 @@ public class NavigationManager implements Loggable{
     private Supplier<Pose2d> m_poseSupplier;
     private Supplier<Rotation2d> m_drivebaseHeadingSupplier;
     private Supplier<Rotation2d> m_robotToTurretSupplier;
-    private Consumer<Double> m_turretAngularVelocityConsumer;
     
 
     private Rotation2d m_lastHeading;
-    private HubTransformEstimator hubTransformEstimator;
-    private VisionHubTransformAdjuster visionHubTransformAdjuster;
 
 
     public NavigationManager(Supplier<Pose2d> poseSupplier,
@@ -42,38 +40,10 @@ public class NavigationManager implements Loggable{
         m_drivebaseHeadingSupplier = ()->poseSupplier.get().getRotation();
         m_robotToTurretSupplier = robotToTurretSupplier;
         m_lastHeading = m_drivebaseHeadingSupplier.get();
-        m_turretAngularVelocityConsumer = turretAngularVelocityConsumer;
-
-        hubTransformEstimator = new HubTransformEstimator(m_poseSupplier);
-        visionHubTransformAdjuster = new VisionHubTransformAdjuster(m_robotToTurretSupplier, hubTransformEstimator::setCorrectedRobotToHubTransform);
     }
 
     public void update() {
-        hubTransformEstimator.update();
-        
-        visionHubTransformAdjuster.update();
-        double omega = (m_drivebaseHeadingSupplier.get().getRadians() - m_lastHeading.getRadians()) / 0.02;
-
-        m_turretAngularVelocityConsumer.accept(omega);
-
-        m_lastHeading = m_drivebaseHeadingSupplier.get();
-
-
     }
-
-    public void resetPose(Pose2d pose) {
-        hubTransformEstimator.resetPose(pose);
-    }
-
-    //Setters
-    public void setVisionEnabledSupplier(BooleanSupplier enabled) {
-        visionHubTransformAdjuster.setVisionEnabled(enabled);
-    }
-
-    public void addVisionMeasurement(Rotation2d xOffset, double distanceToCenter) {
-        visionHubTransformAdjuster.addVisionMeasurement(xOffset, distanceToCenter);
-    }
-    //Transform and pose getters
     
     
     public static boolean getDistanceInRange(double distance) {
@@ -83,52 +53,31 @@ public class NavigationManager implements Loggable{
         );
     }
 
-    @Log
-    public boolean getTargetDistanceInRange() {
-        return getDistanceInRange(getDistance(getRobotToHubTransform()));
-    } 
-
     public Pose2d getCurrentRobotPose() {
         return m_poseSupplier.get();
     }
 
-    public Transform2d getRobotToHubTransform() {
-        return hubTransformEstimator.getRobotToHubTransform();
-    }
-
-    @Log(methodName = "getRadians")
-    public Rotation2d getRobotToHubDirection() {
-        return NomadMathUtil.getDirection(getRobotToHubTransform());
-    }
-
-    @Log()
-    public double getRobotToHubDistance() {
-        return NomadMathUtil.getDistance(getRobotToHubTransform());
-    }
-
     public Transform2d getRobotToCameraTransform() {
-        return visionHubTransformAdjuster.getRobotToCamera();
+        return new Transform2d(
+            new Translation2d(
+                Constants.CAMERA_CENTER_OFFSET,0
+            ).rotateBy(
+                m_robotToTurretSupplier.get()
+            ),
+            m_robotToTurretSupplier.get());
     }
     
     public Transform2d getRobotToTurretTransform() {
-        return visionHubTransformAdjuster.getRobotToTurret();
+        return new Transform2d(
+            new Translation2d(),
+            m_robotToTurretSupplier.get()
+          );
     }
 
     // for logging only
     //@Log(methodName = "getRadians")
     public Rotation2d getRobotToTurretRotation() {
-        return getRobotToTurretTransform().getRotation();
-    }
-
-    public Pose2d getEstimatedRobotPose() {
-        return HUB_CENTER_POSE
-        .plus( // Turn the hub pose to match the robot
-            new Transform2d(
-                new Translation2d(),
-                m_drivebaseHeadingSupplier.get())
-            )
-            .plus(
-                getRobotToHubTransform().inverse());
+        return m_robotToTurretSupplier.get();
     }
 
 }
