@@ -1,5 +1,6 @@
 package frc.robot;
 
+import java.util.List;
 import java.util.function.Supplier;
 
 import com.revrobotics.CANSparkMax.IdleMode;
@@ -7,8 +8,10 @@ import com.revrobotics.CANSparkMax.IdleMode;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -27,7 +30,9 @@ import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.auto.Trajectories;
 import frc.robot.commands.IntakeCommandFactory;
 import frc.robot.commands.MainCommandFactory;
 import frc.robot.commands.MidtakeCommandFactory;
@@ -138,7 +143,6 @@ public class RobotContainer {
     createCommands();
     createTriggers();
     configureButtonBindings();
-    navigationManager.setVisionEnabledSupplier(() -> true);
     CameraServer.startAutomaticCapture();
   }
 
@@ -194,19 +198,32 @@ public class RobotContainer {
     shooterTarmacLineC = ShooterCommandFactory.createShooterFollowC(() -> 500, () -> 500, shooterS);
 
     visionSpinAndAimC = MainCommandFactory.createVisionSpinupAndAimC(limelightS, turretS, shooterS);
-    odometrySpinAndAimC = new ConditionalCommand(
-        MainCommandFactory.createVisionSpinupAndAimC(limelightS, turretS, shooterS),
-        MainCommandFactory.createTurretOdometryC(navigationManager, turretS)
-            .alongWith(
-                MainCommandFactory.createShooterOdometryC(
-                    navigationManager, shooterS)),
-        limelightS.hasSteadyTarget);
 
     autoChooser.addOption("taxi", DrivebaseCommandFactory.createTimedDriveC(0.3, 3, drivebaseS));
     autoChooser.addOption("4 Ball Auto",
         AutoCommandFactory.createFourBallAuto(shooterS, intakeS, midtakeS, turretS, limelightS, drivebaseS));
     autoChooser.setDefaultOption("2 ball",
         AutoCommandFactory.createTwoBallAutoCG(shooterS, intakeS, midtakeS, turretS, limelightS, drivebaseS));
+    autoChooser.addOption("straight 2m", 
+    
+    new InstantCommand(
+      ()->{drivebaseS.resetRobotPose(Trajectories.MID_BALL_START_POSE);}
+    )
+      .andThen(
+        DrivebaseCommandFactory.createRamseteC(
+        Trajectories.MID_START_TO_MID_RING
+        , drivebaseS))
+      .andThen(new WaitCommand(2))
+      .andThen(
+        DrivebaseCommandFactory.createRamseteC(
+        Trajectories.MID_RING_TO_TERMINAL
+        , drivebaseS))
+      .andThen(new WaitCommand(2))
+      .andThen(
+        DrivebaseCommandFactory.createRamseteC(
+        Trajectories.TERMINAL_TO_MID_RING
+        , drivebaseS))
+      );
     // autoChooser.setDefaultOption("3 ball",
     // AutoCommandFactory.createThreeBallAutoCG(shooterS, intakeS, midtakeS,
     // turretS, limelightS, drivebaseS));
@@ -392,7 +409,6 @@ public class RobotContainer {
 
   public void resetPose(Pose2d pose) {
     drivebaseS.resetRobotPose(pose);
-    navigationManager.resetPose(pose);
   }
 
   public void robotPeriodic() {
@@ -416,6 +432,8 @@ public class RobotContainer {
 
     navigationManager.update();
 
+    field.getObject("Trajectory").setTrajectory(Trajectories.MID_RING_TO_TERMINAL);
+
     /* Field2d setup */
     if (RobotBase.isSimulation()) {
       field.setRobotPose(new Pose2d(
@@ -428,15 +446,5 @@ public class RobotContainer {
 
     field.getObject("Turret").setPose(field.getRobotPose().transformBy(
         new Transform2d(new Translation2d(), turretS.getRobotToTurretRotation())));
-
-    field.getObject("estRobot").setPose(navigationManager.getEstimatedRobotPose());
-
-    field.getObject("estTurret").setPose(navigationManager.getEstimatedRobotPose().transformBy(
-        new Transform2d(new Translation2d(), turretS.getRobotToTurretRotation())));
-    SmartDashboard.putNumber("estDist", NomadMathUtil.getDistance(navigationManager.getRobotToHubTransform()));
-
-    field.getObject("turretSetpt").setPose(navigationManager.getEstimatedRobotPose().transformBy(
-        new Transform2d(new Translation2d(), navigationManager.getRobotToHubDirection())));
-
   }
 }

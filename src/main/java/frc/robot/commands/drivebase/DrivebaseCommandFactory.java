@@ -68,7 +68,7 @@ public class DrivebaseCommandFactory {
         Constants.DRIVEBASE_KINEMATICS,
         drivebaseS::tankDriveVelocity,
         drivebaseS
-      );
+      ).andThen(()->drivebaseS.tankDrive(0, 0), drivebaseS);
   }
 
   public static Command createPivotC(double angleDelta, DrivebaseS drivebaseS) {

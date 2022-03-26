@@ -161,10 +161,6 @@ public class LimelightS extends SubsystemBase implements Loggable {
         filteredDistanceMeters = distanceFilter.calculate(distance);
         lastValidDistance = distance;
 
-        if(hasSteadyTarget.getAsBoolean()) {
-          navigationManager.addVisionMeasurement(new Rotation2d(filteredXOffsetRadians), filteredDistanceMeters);
-        }
-
         
       }
        else {

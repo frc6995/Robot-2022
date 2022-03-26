@@ -9,7 +9,7 @@ import static frc.robot.Constants.DRIVEBASE_ENCODER_ROTATIONS_PER_WHEEL_ROTATION
 import static frc.robot.Constants.DRIVEBASE_FWD_BACK_SLEW_LIMIT;
 import static frc.robot.Constants.DRIVEBASE_GEARBOX;
 import static frc.robot.Constants.DRIVEBASE_KINEMATICS;
-import static frc.robot.Constants.DRIVEBASE_LINEAR_FF;
+import static frc.robot.Constants.DRIVEBASE_LINEAR_FF_MPS;
 import static frc.robot.Constants.DRIVEBASE_METERS_PER_WHEEL_ROTATION;
 import static frc.robot.Constants.DRIVEBASE_P;
 import static frc.robot.Constants.DRIVEBASE_PLANT;
@@ -61,14 +61,14 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
   private final CANSparkMax backLeft = new CANSparkMax(CAN_ID_BACK_LEFT_DRIVE_MOTOR, MotorType.kBrushless);
   private final SlewRateLimiter fwdBackLimiter = new SlewRateLimiter(DRIVEBASE_FWD_BACK_SLEW_LIMIT);
   private final SlewRateLimiter turnLimiter = new SlewRateLimiter(DRIVEBASE_TURN_SLEW_LIMIT);
-  public final SimpleMotorFeedforward leftFF = new SimpleMotorFeedforward(DRIVEBASE_LINEAR_FF[0], DRIVEBASE_LINEAR_FF[1], DRIVEBASE_LINEAR_FF[2]);
-  public final SimpleMotorFeedforward rightFF = new SimpleMotorFeedforward(DRIVEBASE_LINEAR_FF[0], DRIVEBASE_LINEAR_FF[1], DRIVEBASE_LINEAR_FF[2]);
+  public final SimpleMotorFeedforward leftFF = new SimpleMotorFeedforward(DRIVEBASE_LINEAR_FF_MPS[0], DRIVEBASE_LINEAR_FF_MPS[1], DRIVEBASE_LINEAR_FF_MPS[2]);
+  public final SimpleMotorFeedforward rightFF = new SimpleMotorFeedforward(DRIVEBASE_LINEAR_FF_MPS[0], DRIVEBASE_LINEAR_FF_MPS[1], DRIVEBASE_LINEAR_FF_MPS[2]);
   public final PIDController angularPID = new PIDController(3, 0, 0);
   public final PIDController leftPID = new PIDController(DRIVEBASE_P, 0, 0);
   public final PIDController rightPID = new PIDController(DRIVEBASE_P, 0, 0);
   private final AHRS navX = new AHRS(Port.kMXP);
   public final RamseteController ramseteController = new RamseteController();
-  public final Pose2d START_POSE = new Pose2d (7.931953, 2.018646, Rotation2d.fromDegrees(-105.430527));
+  public final Pose2d START_POSE = new Pose2d (6.67436, 2.651410, Rotation2d.fromDegrees(-155.055217));
   @Log
   public final Mechanism2d drivebaseTilt = new Mechanism2d(36, 36);
   private final MechanismRoot2d drivebaseTiltRoot = drivebaseTilt.getRoot("drivebaseRoot", 12, 18);
@@ -207,7 +207,7 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
     SmartDashboard.putNumber("rightVelo", rightVelocityMPS);
     tankDriveVolts(
       leftFF.calculate(leftVelocityMPS) + leftPID.calculate(getLeftVelocity(), leftVelocityMPS),
-      rightFF.calculate(rightVelocityMPS) + rightPID.calculate(getLeftVelocity(), rightVelocityMPS));
+      rightFF.calculate(rightVelocityMPS) + rightPID.calculate(getRightVelocity(), rightVelocityMPS));
   }
 
   /**
@@ -259,7 +259,7 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
 		m_rightEncoder.setPosition(m_driveSim.getRightPositionMeters());
 		m_rightEncoder.setVelocity(m_driveSim.getRightVelocityMetersPerSecond());
 
-		m_simHeading = m_driveSim.getHeading().plus(START_POSE.getRotation());
+		m_simHeading = m_driveSim.getHeading();
 	}
 
   public DifferentialDriveWheelSpeeds getWheelSpeeds() {
@@ -315,10 +315,7 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
     
     if(RobotBase.isSimulation()) {
       //odometry.resetPosition(pose);
-      odometry.resetPosition(pose, new Rotation2d());
-      m_driveSim.setPose(
-        odometry.getPoseMeters()
-      );
+      odometry.resetPosition(pose, getRotation2d());
     }
     else {
       //odometry.resetPosition(pose);
@@ -335,6 +332,14 @@ public class DrivebaseS extends SubsystemBase implements Loggable {
   }
 
   public void tankDriveVolts(double leftVolts, double rightVolts) {
+    if(RobotBase.isSimulation()) {
+      if(Math.abs(leftVolts) > Constants.DRIVEBASE_LINEAR_FF_MPS[0]) {
+        leftVolts -= Math.copySign(Constants.DRIVEBASE_LINEAR_FF_MPS[0], leftVolts);
+      }
+      if(Math.abs(rightVolts) > Constants.DRIVEBASE_LINEAR_FF_MPS[0]) {
+        rightVolts -= Math.copySign(Constants.DRIVEBASE_LINEAR_FF_MPS[0], rightVolts);
+      }
+    }
     frontLeft.setVoltage(leftVolts);
     frontRight.setVoltage(rightVolts);
   }
