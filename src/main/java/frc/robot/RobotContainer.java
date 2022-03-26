@@ -323,8 +323,7 @@ public class RobotContainer {
 
     operatorController.start().toggleWhenActive(new StartEndCommand(climberS::unlock, climberS::lock));
 
-    operatorController.back()
-        .whileActiveContinuous(TurretCommandFactory.createTurretProfiledVisionC(limelightS, turretS));
+    operatorController.back().whileActiveOnce(new ShooterTestC(shooterS));
 
     driverController.pov.left()
         .whileActiveContinuous(

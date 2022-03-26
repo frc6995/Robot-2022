@@ -10,9 +10,9 @@ public class ShooterTestC extends CommandBase implements Loggable {
   /** Creates a new ShooterC. */
   private ShooterS shooter;
   @Config
-  private double frontTargetRPM = 2300;
+  private double frontTargetRPM = 1650;
   @Config
-  private double backTargetRPM = 4500;
+  private double backTargetRPM = 1650;
 
   public ShooterTestC(ShooterS shooter) {
     this.shooter = shooter;
@@ -34,8 +34,8 @@ public class ShooterTestC extends CommandBase implements Loggable {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    //shooter.setBackSpeed(0.5);
-    //shooter.setFrontSpeed(0.5);
+    // shooter.setBackSpeed(0.5);
+    // shooter.setFrontSpeed(0.5);
     shooter.pidFrontSpeed(frontTargetRPM);
     shooter.pidBackSpeed(backTargetRPM);
   }

@@ -159,12 +159,13 @@ public class AutoCommandFactory {
 
                                                                 // Turn a little bit
                                                                 .andThen(DrivebaseCommandFactory.createPivotC(
-                                                                                Units.degreesToRadians(-26.5),
-                                                                                drivebaseS)
+                                                                                Units.degreesToRadians(-26.75),
+                                                                                drivebaseS).withTimeout(1.75)
                                                                                 .alongWith(TurretCommandFactory
                                                                                                 .createTurretFollowC(
                                                                                                                 () -> new Rotation2d(
-                                                                                                                                3.573),
+                                                                                                                                Units.degreesToRadians(
+                                                                                                                                                198)),
                                                                                                                 turretS)
                                                                                                 .withTimeout(1.5)))
 
@@ -172,23 +173,25 @@ public class AutoCommandFactory {
                                                                 .andThen(new ParallelCommandGroup(
                                                                                 DrivebaseCommandFactory
                                                                                                 .createTimedDriveC(.4,
-                                                                                                                3.5,
+                                                                                                                2.9,
                                                                                                                 drivebaseS),
                                                                                 MainCommandFactory.createIntakeCG(
-                                                                                                midtakeS, intakeS))
-                                                                                                                .withTimeout(5)
-                                                                                                                .withInterrupt(midtakeS::getIsBottomBeamBroken))
+                                                                                                midtakeS, intakeS)
+                                                                                                .withInterrupt(midtakeS::getIsBottomBeamBroken))
+                                                                                                                .withTimeout(3.4))
 
                                                                 // Intake Second Ball
                                                                 .andThen(MainCommandFactory
                                                                                 .createIntakeCG(midtakeS, intakeS)
-                                                                                .withTimeout(3))
+                                                                                .withTimeout(2.9)
 
-                                                                // Drive Back
-                                                                .andThen(DrivebaseCommandFactory.createTimedDriveC(-0.4,
-                                                                                3.5, drivebaseS))
-                                                                .andThen(new WaitCommand(1))
-
+                                                                                // Drive Back
+                                                                                .alongWith(DrivebaseCommandFactory
+                                                                                                .createTimedDriveC(-0.4,
+                                                                                                                2.9,
+                                                                                                                drivebaseS))
+                                                                // .andThen(new WaitCommand(1))
+                                                                )
                                                                 // Shoot two
                                                                 .andThen(MidtakeCommandFactory
                                                                                 .createMidtakeDefaultC(midtakeS)
@@ -199,6 +202,7 @@ public class AutoCommandFactory {
                                                                                 .createMidtakeDefaultC(midtakeS)
                                                                                 .withInterrupt(midtakeS::getIsArmed))
                                                                 .andThen(new WaitUntilCommand(shooterS::isAtTarget))
+                                                                // .andThen(new WaitCommand(.5))
                                                                 .andThen(MidtakeCommandFactory
                                                                                 .createMidtakeFeedC(midtakeS)
                                                                                 .withInterrupt(midtakeS::getIsTopBeamClear)
@@ -206,6 +210,6 @@ public class AutoCommandFactory {
                                                                 .andThen(new WaitCommand(0.5))
 
                 )
-                                .withName("Two Ball Auto");
+                                .withName("Four Ball Auto");
         }
 }
