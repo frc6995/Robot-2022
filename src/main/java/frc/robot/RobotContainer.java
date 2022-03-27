@@ -204,26 +204,27 @@ public class RobotContainer {
         AutoCommandFactory.createFourBallAuto(shooterS, intakeS, midtakeS, turretS, limelightS, drivebaseS));
     autoChooser.setDefaultOption("2 ball",
         AutoCommandFactory.createTwoBallAutoCG(shooterS, intakeS, midtakeS, turretS, limelightS, drivebaseS));
-    autoChooser.addOption("straight 2m", 
-    
-    new InstantCommand(
-      ()->{drivebaseS.resetRobotPose(Trajectories.MID_BALL_START_POSE);}
-    )
-      .andThen(
-        DrivebaseCommandFactory.createRamseteC(
-        Trajectories.MID_START_TO_MID_RING
-        , drivebaseS))
-      .andThen(new WaitCommand(2))
-      .andThen(
-        DrivebaseCommandFactory.createRamseteC(
-        Trajectories.MID_RING_TO_TERMINAL
-        , drivebaseS))
-      .andThen(new WaitCommand(2))
-      .andThen(
-        DrivebaseCommandFactory.createRamseteC(
-        Trajectories.TERMINAL_TO_MID_RING
-        , drivebaseS))
-      );
+    autoChooser.addOption("4 Ball Auto Trajectory",
+        AutoCommandFactory.createFourBallAutoTrajectory(shooterS, intakeS, midtakeS, turretS, limelightS, drivebaseS));
+    autoChooser.addOption("straight 2m",
+
+        new InstantCommand(
+            () -> {
+              drivebaseS.resetRobotPose(Trajectories.MID_BALL_START_POSE);
+            })
+                .andThen(
+                    DrivebaseCommandFactory.createRamseteC(
+                        Trajectories.MID_START_TO_MID_RING, drivebaseS))
+                .andThen(new WaitCommand(2))
+                .andThen(
+                    DrivebaseCommandFactory.createRamseteC(
+                        Trajectories.MID_RING_TO_TERMINAL, drivebaseS))
+                .andThen(new WaitCommand(2))
+    // .andThen(
+    // DrivebaseCommandFactory.createRamseteC(
+    // Trajectories.TERMINAL_TO_MID_RING
+    // , drivebaseS))
+    );
     // autoChooser.setDefaultOption("3 ball",
     // AutoCommandFactory.createThreeBallAutoCG(shooterS, intakeS, midtakeS,
     // turretS, limelightS, drivebaseS));
