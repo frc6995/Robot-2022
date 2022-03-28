@@ -218,7 +218,7 @@ public class RobotContainer {
                 .andThen(new WaitCommand(2))
                 .andThen(
                     DrivebaseCommandFactory.createRamseteC(
-                        Trajectories.MID_RING_TO_TERMINAL, drivebaseS))
+                        Trajectories.MID_RING_TO_TERMINAL_PICKUP, drivebaseS))
                 .andThen(new WaitCommand(2))
     // .andThen(
     // DrivebaseCommandFactory.createRamseteC(
@@ -432,7 +432,7 @@ public class RobotContainer {
 
     navigationManager.update();
 
-    field.getObject("Trajectory").setTrajectory(Trajectories.MID_RING_TO_TERMINAL);
+    field.getObject("Trajectory").setTrajectory(Trajectories.MID_RING_TO_TERMINAL_PICKUP);
 
     /* Field2d setup */
     if (RobotBase.isSimulation()) {

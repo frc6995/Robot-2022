@@ -35,7 +35,7 @@ public class Trajectories {
                 4))
         .addConstraint(
             new CentripetalAccelerationConstraint(
-                4));
+                2));
 
   }
 
@@ -54,9 +54,11 @@ public class Trajectories {
       getDirection(
           new Transform2d(
               HUB_CENTER_POSE, CARGO_RING_MID_OWN_BALL)),
-      Units.inchesToMeters(-5));
-  public static final Pose2d TERMINAL_BALL_PICKUP = pickup(TERMINAL_OWN_BALL, Rotation2d.fromDegrees(180),
       Units.inchesToMeters(5));
+  public static final Pose2d TERMINAL_BALL_PICKUP = pickup(TERMINAL_OWN_BALL, Rotation2d.fromDegrees(225),
+      Units.inchesToMeters(8));
+      public static final Pose2d TERMINAL_BALL_RECEIVE = pickup(TERMINAL_OWN_BALL, Rotation2d.fromDegrees(225),
+      Units.inchesToMeters(12));
 
   public static Pose2d pickup(Pose2d target, Rotation2d heading, double stopDistanceMeters) {
     return target.transformBy(
@@ -72,14 +74,14 @@ public class Trajectories {
       MID_BALL_HUB_SIDE_PICKUP,
       getConfig());
 
-  public static final Trajectory MID_RING_TO_TERMINAL = TrajectoryGenerator.generateTrajectory(
+  public static final Trajectory MID_RING_TO_TERMINAL_PICKUP = TrajectoryGenerator.generateTrajectory(
       MID_BALL_HUB_SIDE_PICKUP,
       List.of(),
       TERMINAL_BALL_PICKUP,
       getConfig());
 
-  public static final Trajectory TERMINAL_TO_MID_RING = TrajectoryGenerator.generateTrajectory(
-      TERMINAL_BALL_PICKUP,
+  public static final Trajectory TERMINAL_RECEIVE_TO_MID_RING = TrajectoryGenerator.generateTrajectory(
+      TERMINAL_BALL_RECEIVE,
       List.of(),
       MID_BALL_HUB_SIDE_PICKUP,
       getConfig().setReversed(true));

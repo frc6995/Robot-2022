@@ -101,8 +101,8 @@ public final class Constants {
   /**
    * The feedforward constants for rotation while driving.
    */
-  public static final double[] DRIVEBASE_ANGULAR_FF = { 0.034258, 1.5 / DRIVEBASE_TRACKWIDTH * 0.6995,
-      0.3 / DRIVEBASE_TRACKWIDTH * 0.6995 }; // TODO real numbers
+  public static final double[] DRIVEBASE_ANGULAR_FF = { 0.034258, 2.0657,
+      0.2605 }; // TODO real numbers
 
   /**
    * The proportional constant for the drivebase wheel.
@@ -111,6 +111,7 @@ public final class Constants {
 
   /**
    * The system modeling plant for the drivebase.
+   * 
    */
   public static final LinearSystem<N2, N2, N2> DRIVEBASE_PLANT = LinearSystemId.identifyDrivetrainSystem(
       DRIVEBASE_LINEAR_FF_MPS[1],
@@ -327,13 +328,13 @@ public final class Constants {
   /**
    * The max amount of rotations extending the climber
    */
-  public static final double CLIMBER_FRONT_SOFT_LIMIT_FORWARD = 280.0;
+  public static final double CLIMBER_FRONT_SOFT_LIMIT_FORWARD = 280.0 / 49.0 * 35.0;
   /**
    * The maximum a mount of rotations retracting the climber
    */
-  public static final double CLIMBER_FRONT_SOFT_LIMIT_BACK = 20.0;
+  public static final double CLIMBER_FRONT_SOFT_LIMIT_BACK = 20.0 / 49.0 * 35.0;
 
-  public static final double CLIMBER_FRONT_SOFT_LIMIT_MID = 150;
+  public static final double CLIMBER_FRONT_SOFT_LIMIT_MID = 150 / 49.0 * 35.0;
 
   public static final double CLIMBER_FRONT_TRANSFER_VOLTS = -3;
 
@@ -347,15 +348,15 @@ public final class Constants {
   /**
    * The max amount of rotations extending the climber
    */
-  public static final double CLIMBER_BACK_SOFT_LIMIT_FORWARD = 370.0;
+  public static final double CLIMBER_BACK_SOFT_LIMIT_FORWARD = 370.0 /40.0*28.0;
   /**
    * The maximum a mount of rotations retracting the climber
    */
   public static final double CLIMBER_BACK_SOFT_LIMIT_BACK = 0.0;
 
-  public static final double CLIMBER_BACK_SOFT_LIMIT_SHOOTER = 110;
+  public static final double CLIMBER_BACK_SOFT_LIMIT_SHOOTER = 110 /40.0*28.0;
 
-  public static final double CLIMBER_BACK_LIFT_POSITION = 110;
+  public static final double CLIMBER_BACK_LIFT_POSITION = 110 /40.0*28.0;
 
   public static final double CLIMBER_BACK_HOLDING_FF = -1;
   /**
