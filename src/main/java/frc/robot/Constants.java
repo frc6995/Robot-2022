@@ -186,7 +186,7 @@ public final class Constants {
   public static final double SOFT_LIMIT_REVERSE_RADIAN = Units.degreesToRadians(180 - 110);
 
   /** Number of degrees of allowable error for turret */
-  public static final double TURRET_PID_ERROR = Units.degreesToRadians(1);
+  public static final double TURRET_PID_ERROR = Units.degreesToRadians(0);
 
   /** Speed at which the turret should go back to home */
   public static final double TURRET_HOMING_SPEED = -0.1;
@@ -195,7 +195,7 @@ public final class Constants {
   public static final double TURRET_DEADBAND = 0.02;
 
   /** Feedforward for the turret */
-  public static final double[] TURRET_FF = { 0.16, 0.56397, 0.030497 }; // for velocity in turret radians per
+  public static final double[] TURRET_FF = { 0.165, 0.56397, 0.030497 }; // for velocity in turret radians per
                                                                         // second
 
   /** Proportional term for the turret */
@@ -336,9 +336,9 @@ public final class Constants {
 
   public static final double CLIMBER_FRONT_SOFT_LIMIT_MID = 150 / 49.0 * 35.0;
 
-  public static final double CLIMBER_FRONT_TRANSFER_VOLTS = -3;
+  public static final double CLIMBER_FRONT_TRANSFER_VOLTS = -2;
 
-  public static final double CLIMBER_BACK_TRANSFER_VOLTS = 5;
+  public static final double CLIMBER_BACK_TRANSFER_VOLTS = 3;
 
   /**
    * The current the back motor needs to pull for the climber to detect that it's
@@ -346,7 +346,7 @@ public final class Constants {
    */
   public static final double CLIMBER_BACK_PULLING_CURRENT = 10;
   /**
-   * The max amount of rotations extending the climber
+   * The max amount of rotations extending\ the climber
    */
   public static final double CLIMBER_BACK_SOFT_LIMIT_FORWARD = 370.0 /40.0*28.0;
   /**

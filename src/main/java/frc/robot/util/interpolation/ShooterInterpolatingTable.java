@@ -27,7 +27,11 @@ public class ShooterInterpolatingTable {
       entry(2.5 + Constants.CAMERA_CENTER_OFFSET, new ShotParameter(1550, 1550, 1.0)),
       entry(2.65 + Constants.CAMERA_CENTER_OFFSET, new ShotParameter(1550, 1550, 1.0)),
       entry(2.9 + Constants.CAMERA_CENTER_OFFSET, new ShotParameter(1600, 1600, 1.0)),
-      entry(3.52 + Constants.CAMERA_CENTER_OFFSET, new ShotParameter(1900, 1650, 1.0))));
+      entry(3.52 + Constants.CAMERA_CENTER_OFFSET, new ShotParameter(1700, 1700, 1.0)),
+      entry(4.00 + Constants.CAMERA_CENTER_OFFSET, new ShotParameter(1800, 1800, 1.0)),
+      entry(4.6 + Constants.CAMERA_CENTER_OFFSET, new ShotParameter(1900, 1900, 1.0))
+  ));
+      
   // entry(5.4 + Constants.CAMERA_CENTER_OFFSET, new ShotParameter(1900, 1900,
   // 1.0))));
 
