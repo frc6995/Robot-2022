@@ -49,6 +49,9 @@ public class Trajectories {
   public static final Pose2d CARGO_RING_HANGAR_OWN_BALL = new Pose2d(4.960425, 6.217642, new Rotation2d());
   public static final Pose2d TERMINAL_OWN_BALL = new Pose2d(1.085474, 1.129107, new Rotation2d());
   public static final Pose2d MID_BALL_START_POSE = new Pose2d(6.67436, 2.651410, Rotation2d.fromDegrees(-155.055217));
+
+  public static final Pose2d FIVE_BALL_TARMAC_REVERSAL = new Pose2d(6.813, 2.715, Rotation2d.fromDegrees(-113));
+  public static final Pose2d CARGO_RING_WALL_PICKUP = pickup(CARGO_RING_WALL_OWN_BALL, Rotation2d.fromDegrees(-62), Units.inchesToMeters(12));
   public static final Pose2d MID_BALL_HUB_SIDE_PICKUP = pickup(
       CARGO_RING_MID_OWN_BALL,
       getDirection(
@@ -67,6 +70,17 @@ public class Trajectories {
                 .rotateBy(heading),
             heading));
   }
+
+  public static final Trajectory MID_RING_TO_TARMAC_REVERSAL = TrajectoryGenerator.generateTrajectory(
+    MID_BALL_HUB_SIDE_PICKUP,
+    List.of(),
+    FIVE_BALL_TARMAC_REVERSAL,
+    getConfig().setReversed(true));
+  public static final Trajectory TARMAC_REVERSAL_TO_WALL_PICKUP = TrajectoryGenerator.generateTrajectory(
+    FIVE_BALL_TARMAC_REVERSAL,
+    List.of(),
+    CARGO_RING_WALL_PICKUP,
+    getConfig());
 
   public static final Trajectory MID_START_TO_MID_RING = TrajectoryGenerator.generateTrajectory(
       MID_BALL_START_POSE,

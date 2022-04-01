@@ -200,8 +200,8 @@ public class RobotContainer {
     visionSpinAndAimC = MainCommandFactory.createVisionSpinupAndAimC(limelightS, turretS, shooterS);
 
     autoChooser.addOption("taxi", DrivebaseCommandFactory.createTimedDriveC(0.3, 3, drivebaseS));
-    autoChooser.addOption("4 Ball Auto",
-        AutoCommandFactory.createFourBallAuto(shooterS, intakeS, midtakeS, turretS, limelightS, drivebaseS));
+    autoChooser.addOption("5 Ball Auto",
+        AutoCommandFactory.createFiveBallAuto(shooterS, intakeS, midtakeS, turretS, limelightS, drivebaseS));
     autoChooser.setDefaultOption("2 ball",
         AutoCommandFactory.createTwoBallAutoCG(shooterS, intakeS, midtakeS, turretS, limelightS, drivebaseS));
     autoChooser.addOption("4 Ball Auto Trajectory",
@@ -433,6 +433,8 @@ public class RobotContainer {
     navigationManager.update();
 
     field.getObject("Trajectory").setTrajectory(Trajectories.MID_RING_TO_TERMINAL_PICKUP);
+    field.getObject("5balladd1").setTrajectory(Trajectories.MID_RING_TO_TARMAC_REVERSAL);
+    field.getObject("5balladd2").setTrajectory(Trajectories.TARMAC_REVERSAL_TO_WALL_PICKUP);
 
     /* Field2d setup */
     if (RobotBase.isSimulation()) {

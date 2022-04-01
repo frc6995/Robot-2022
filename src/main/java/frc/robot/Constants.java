@@ -186,7 +186,7 @@ public final class Constants {
   public static final double SOFT_LIMIT_REVERSE_RADIAN = Units.degreesToRadians(180 - 110);
 
   /** Number of degrees of allowable error for turret */
-  public static final double TURRET_PID_ERROR = Units.degreesToRadians(0);
+  public static final double TURRET_PID_ERROR = Units.degreesToRadians(0.5);
 
   /** Speed at which the turret should go back to home */
   public static final double TURRET_HOMING_SPEED = -0.1;

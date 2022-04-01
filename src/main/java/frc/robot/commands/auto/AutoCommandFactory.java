@@ -219,6 +219,98 @@ public class AutoCommandFactory {
     );
   }
 
+  public static Command createFiveBallAuto(ShooterS shooterS, IntakeS intakeS, MidtakeS midtakeS, TurretS turretS,
+  LimelightS limelightS, DrivebaseS drivebaseS) {
+        return new InstantCommand(() -> {
+                drivebaseS.resetRobotPose(Trajectories.MID_BALL_START_POSE);
+              })
+          .andThen(
+              new ParallelCommandGroup(
+                  /*
+                   * ShooterCommandFactory.createShooterDistanceSpinupC(() -> {
+                   * return NomadMathUtil
+                   * .getDistance(new Transform2d(drivebaseS.getRobotPose(),
+                   * Trajectories.HUB_CENTER_POSE))
+                   * - Constants.HUB_RADIUS_METERS;
+                   * }, shooterS),
+                   */
+                  ShooterCommandFactory.createShooterFollowC(() -> (1700), () -> (1700), shooterS),
+                  TurretCommandFactory.createTurretVisionC(limelightS, turretS),
+                  new ParallelDeadlineGroup(
+                      DrivebaseCommandFactory.createRamseteC(
+                          Trajectories.MID_START_TO_MID_RING, drivebaseS),
+                      MainCommandFactory.createIntakeCG(midtakeS, intakeS).withInterrupt(midtakeS::getIsMidtakeFull)
+                      .andThen(MidtakeCommandFactory.createMidtakeArmC(midtakeS))
+                          
+      
+                  )
+                   // DANGER
+                  .andThen(MidtakeCommandFactory
+                      .createMidtakeDefaultC(midtakeS)
+                      .withInterrupt(midtakeS::getIsArmed))
+                  .andThen(new WaitUntilCommand(shooterS::isAtTarget))
+                  .andThen(MidtakeCommandFactory
+                      .createMidtakeFeedOneC(midtakeS))
+                  .andThen(MidtakeCommandFactory
+                      .createMidtakeDefaultC(midtakeS)
+                      .withInterrupt(midtakeS::getIsArmed))
+                  .andThen(new WaitUntilCommand(shooterS::isAtTarget))
+                  .andThen(MidtakeCommandFactory
+                      .createMidtakeFeedC(midtakeS)
+                      .withTimeout(0.25))
+                              // End Two Ball Auto
+      
+                              // Turn a little bit
+                  .andThen(
+                      new ParallelDeadlineGroup(
+                      (
+                          DrivebaseCommandFactory.createRamseteC(
+                          Trajectories.MID_RING_TO_TERMINAL_PICKUP, drivebaseS)
+                          .andThen(DrivebaseCommandFactory.createTimedDriveC(-0.4, 0.25, drivebaseS))
+                          .andThen(new WaitCommand(0.25))
+                          .andThen(DrivebaseCommandFactory.createRamseteC(Trajectories.TERMINAL_RECEIVE_TO_MID_RING, drivebaseS))
+                      ),
+                      MainCommandFactory.createIntakeCG(midtakeS, intakeS)
+                  )
+                  )
+                              // Intake Second Ball
+                  //.andThen(MidtakeCommandFactory.createMidtakeArmC(midtakeS))
+      
+                      //
+                  // .andThen(new WaitCommand(1))
+                  // Shoot two
+                  .andThen(MidtakeCommandFactory
+                      .createMidtakeDefaultC(midtakeS)
+                      .withInterrupt(midtakeS::getIsArmed))
+                  .andThen(MidtakeCommandFactory
+                      .createMidtakeFeedOneC(midtakeS))
+                  .andThen(MidtakeCommandFactory
+                      .createMidtakeDefaultC(midtakeS)
+                      .withInterrupt(midtakeS::getIsArmed))
+                  .andThen(new WaitUntilCommand(shooterS::isAtTarget))
+                  // .andThen(new WaitCommand(.5))
+                  .andThen(MidtakeCommandFactory
+                      .createMidtakeFeedC(midtakeS)
+                      .withInterrupt(midtakeS::getIsTopBeamClear)
+                      .withTimeout(0.25))
+                // Drive, reverse, and pick up wall-side cargo
+                .andThen(
+                        new ParallelDeadlineGroup(
+                        (
+                            DrivebaseCommandFactory.createRamseteC(
+                            Trajectories.MID_RING_TO_TARMAC_REVERSAL, drivebaseS)
+                            .andThen(new WaitCommand(0.25))
+                            .andThen(DrivebaseCommandFactory.createRamseteC(Trajectories.TARMAC_REVERSAL_TO_WALL_PICKUP, drivebaseS))
+                        ),
+                        MainCommandFactory.createIntakeCG(midtakeS, intakeS)
+                    )
+                )
+                .andThen(MidtakeCommandFactory.createMidtakeFeedC(midtakeS).withTimeout(2))
+          )
+        );
+
+  }
+
     public static Command createFourBallAuto(ShooterS shooterS, IntakeS intakeS, MidtakeS midtakeS, TurretS turretS,
             LimelightS limelightS, DrivebaseS drivebaseS) {
         return new ParallelCommandGroup(

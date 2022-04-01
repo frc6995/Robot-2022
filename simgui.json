@@ -60,6 +60,14 @@
     },
     "windows": {
       "/Shuffleboard/RobotContainer/field": {
+        "5balladd1": {
+          "arrowSize": 8,
+          "style": "Line"
+        },
+        "5balladd2": {
+          "arrowSize": 10,
+          "style": "Line"
+        },
         "Robot": {
           "length": 0.7900000214576721,
           "width": 0.7900000214576721

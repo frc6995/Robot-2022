@@ -52,7 +52,7 @@ public class LinearClimberS extends SubsystemBase implements Loggable {
   }
 
   public void retractFront() {
-    driveFront(-10);
+    driveFront(-7.5);
   }
 
   public void stopFront() {

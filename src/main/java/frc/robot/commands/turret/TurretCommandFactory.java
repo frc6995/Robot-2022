@@ -152,7 +152,7 @@ public class TurretCommandFactory {
             if (limelightS.hasTarget()) {
                 double voltage = limelightS.getFilteredXOffset();
                 voltage = MathUtil.applyDeadband(voltage, Units.degreesToRadians(1));
-                voltage *= 1;
+                voltage *= 2;
                 voltage += Constants.TURRET_FF[0] * Math.copySign(1, voltage);
                 
                 turretS.setVoltage(voltage);
