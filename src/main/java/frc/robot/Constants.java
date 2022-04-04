@@ -334,7 +334,7 @@ public final class Constants {
    */
   public static final double CLIMBER_FRONT_SOFT_LIMIT_BACK = 20.0 / 49.0 * 35.0;
 
-  public static final double CLIMBER_FRONT_SOFT_LIMIT_MID = 150 / 49.0 * 35.0;
+  public static final double CLIMBER_FRONT_SOFT_LIMIT_MID = 75.0 / 49.0 * 35.0;
 
   public static final double CLIMBER_FRONT_TRANSFER_VOLTS = -2;
 
